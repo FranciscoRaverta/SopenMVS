@@ -374,7 +374,6 @@ struct Interface
 	typedef cv::Matx<double,3,3> Mat33d;
 	typedef cv::Matx<double,4,4> Mat44d;
 	typedef cv::Point3_<uint8_t> Col3; // x=B, y=G, z=R
-	typedef cv::Point3_<uint8_t> Col3; // x=B, y=G, z=R
 	typedef cv::ParamType<uint8_t> Segm; 
 	/*----------------------------------------------------------------*/
 
