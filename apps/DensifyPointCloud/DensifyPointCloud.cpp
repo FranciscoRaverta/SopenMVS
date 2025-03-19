@@ -57,6 +57,7 @@ String strImportROIFileName;
 String strDenseConfigFileName;
 String strExportDepthMapsName;
 String strMaskPath;
+String strSegmentationPath;
 float fMaxSubsceneArea;
 float fSampleMesh;
 float fBorderROI;
@@ -125,6 +126,7 @@ bool Initialize(size_t argc, LPCTSTR* argv)
 	unsigned nEstimationGeometricIters;
 	unsigned nEstimateColors;
 	unsigned nEstimateNormals;
+	unsigned nEstimateSegmentations;
 	unsigned nOptimize;
 	int nIgnoreMaskLabel;
 	bool bRemoveDmaps;
@@ -143,10 +145,12 @@ bool Initialize(size_t argc, LPCTSTR* argv)
 		("number-views-fuse", boost::program_options::value(&nMinViewsFuse)->default_value(3), "minimum number of images that agrees with an estimate during fusion in order to consider it inlier (<2 - only merge depth-maps)")
 		("ignore-mask-label", boost::program_options::value(&nIgnoreMaskLabel)->default_value(-1), "label value to ignore in the image mask, stored in the MVS scene or next to each image with '.mask.png' extension (<0 - disabled)")
 		("mask-path", boost::program_options::value<std::string>(&OPT::strMaskPath), "path to folder containing mask images with '.mask.png' extension")
+		("segmentation-path", boost::program_options::value<std::string>(&OPT::strSegmentationPath), "path to folder containing segmentation images with '.png.png' extension")
 		("iters", boost::program_options::value(&nEstimationIters)->default_value(numIters), "number of patch-match iterations")
 		("geometric-iters", boost::program_options::value(&nEstimationGeometricIters)->default_value(2), "number of geometric consistent patch-match iterations (0 - disabled)")
 		("estimate-colors", boost::program_options::value(&nEstimateColors)->default_value(2), "estimate the colors for the dense point-cloud (0 - disabled, 1 - final, 2 - estimate)")
 		("estimate-normals", boost::program_options::value(&nEstimateNormals)->default_value(2), "estimate the normals for the dense point-cloud (0 - disabled, 1 - final, 2 - estimate)")
+		("estimate-segmentations", boost::program_options::value(&nEstimateSegmentations)->default_value(2), "estimate the segmentations for the dense point-cloud (0 - disabled, 1 - final, 2 - estimate)")
 		("estimate-scale", boost::program_options::value(&OPT::fEstimateScale)->default_value(0.f), "estimate the point-scale for the dense point-cloud (scale multiplier, 0 - disabled)")
 		("sub-scene-area", boost::program_options::value(&OPT::fMaxSubsceneArea)->default_value(0.f), "split the scene in sub-scenes such that each sub-scene surface does not exceed the given maximum sampling area (0 - disabled)")
 		("sample-mesh", boost::program_options::value(&OPT::fSampleMesh)->default_value(0.f), "uniformly samples points on a mesh (0 - disabled, <0 - number of points, >0 - sample density per square unit)")
@@ -242,6 +246,7 @@ bool Initialize(size_t argc, LPCTSTR* argv)
 	OPTDENSE::nEstimationGeometricIters = nEstimationGeometricIters;
 	OPTDENSE::nEstimateColors = nEstimateColors;
 	OPTDENSE::nEstimateNormals = nEstimateNormals;
+	OPTDENSE::nEstimateSegmentations = nEstimateSegmentations;
 	OPTDENSE::nOptimize = nOptimize;
 	OPTDENSE::nIgnoreMaskLabel = nIgnoreMaskLabel;
 	OPTDENSE::bRemoveDmaps = bRemoveDmaps;
@@ -327,6 +332,21 @@ int main(int argc, LPCTSTR* argv)
 			}
 		}
 	}
+	if (!OPT::strSegmentationPath.empty()) {
+		Util::ensureValidFolderPath(OPT::strSegmentationPath);
+		for (Image& image : scene.images) {
+			if (!image.segmentationName.empty()) {
+				VERBOSE("error: Image %s has non-empty segmentationName %s", image.name.c_str(), image.segmentationName.c_str());
+				return EXIT_FAILURE;
+			}
+			image.segmentationName = OPT::strSegmentationPath + Util::getFileName(image.name) + ".segmentation.png";
+			if (!File::access(image.segmentationName)) {
+				VERBOSE("error: Mask image %s not found", image.segmentationName.c_str());
+				return EXIT_FAILURE;
+			}
+		}
+	}
+
 	if (!OPT::strImportROIFileName.empty()) {
 		std::ifstream fs(MAKE_PATH_SAFE(OPT::strImportROIFileName));
 		if (!fs)

@@ -124,6 +124,7 @@ extern int nIgnoreMaskLabel;
 extern unsigned nOptimize;
 extern unsigned nEstimateColors;
 extern unsigned nEstimateNormals;
+extern unsigned nEstimateSegmentations;
 extern float fNCCThresholdKeep;
 extern unsigned nEstimationIters;
 extern unsigned nEstimationGeometricIters;
@@ -160,6 +161,8 @@ struct MVS_API DepthData {
 		Camera camera; // camera matrix corresponding to this image
 		Image32F image; // image float intensities
 		Image* pImageData; // image data
+		Image* pSegmentedImageData; // segmented image data
+		Image8U segmentedImage; // image int intensities 
 
 		Matrix3x3 Hl; //
 		Vec3 Hm;      // constants during per-pixel loops
@@ -224,6 +227,7 @@ struct MVS_API DepthData {
 		for (ViewData& image: images) {
 			image.image.release();
 			image.depthMap.release();
+			image.segmentedImage.release();
 		}
 	}
 	inline void Release() {
@@ -489,6 +493,7 @@ MATH_API unsigned EstimatePlaneTh(const Point3fArr&, Planef&, double maxThreshol
 MATH_API unsigned EstimatePlaneThLockFirstPoint(const Point3fArr&, Planef&, double maxThreshold, bool arrInliers[]=NULL, size_t maxIters=0);
 
 MVS_API void EstimatePointColors(const ImageArr& images, PointCloud& pointcloud);
+MVS_API void EstimatePointSegmentations(const ImageArr& images, PointCloud& pointcloud);
 MVS_API void EstimatePointNormals(const ImageArr& images, PointCloud& pointcloud, int numNeighbors=16/*K-nearest neighbors*/);
 
 MVS_API bool EstimateNormalMap(const Matrix3x3f& K, const DepthMap&, NormalMap&);

@@ -61,9 +61,11 @@ public:
 	uint32_t ID; // global ID of the image (the ID given outside the current scene - ex. the index in the full list of image files)
 	String name; // image file name (relative path)
 	String maskName; // segmentation file name (optional)
+	String segmentationName; // segmentation file name (optional)
 	Camera camera; // view's pose
 	uint32_t width, height; // image size
 	Image8U3 image; // image color pixels
+	Image8U segmentedImage; // image color pixels
 	ViewScoreArr neighbors; // scored neighbor images
 	float scale; // image scale relative to the original size
 	float avgDepth; // average depth of the points seen by this camera
@@ -79,7 +81,9 @@ public:
 	static IMAGEPTR OpenImage(const String& fileName);
 	static IMAGEPTR ReadImageHeader(const String& fileName);
 	static IMAGEPTR ReadImage(const String& fileName, Image8U3& image);
+	static IMAGEPTR ReadSegmentedImage(const String& fileName, Image8U& segmentedImage);
 	static bool ReadImage(IMAGEPTR pImage, Image8U3& image);
+	static bool ReadSegmentedImage(IMAGEPTR pSegmentedImage, Image8U& segmentedImage);
 	bool LoadImage(const String& fileName, unsigned nMaxResolution=0);
 	bool ReloadImage(unsigned nMaxResolution=0, bool bLoadPixels=true);
 	void ReleaseImage();
@@ -117,6 +121,8 @@ public:
 		ar & relName;
 		const String relMaskName(maskName.empty() ? String() : MAKE_PATH_REL(WORKING_FOLDER_FULL, maskName));
 		ar & relMaskName;
+		const String relSegmentationName(segmentationName.empty() ? String() : MAKE_PATH_REL(WORKING_FOLDER_FULL, segmentationName));
+		ar & relSegmentationName;
 		ar & width & height;
 		ar & neighbors;
 		ar & avgDepth;
@@ -131,6 +137,8 @@ public:
 		name = MAKE_PATH_FULL(WORKING_FOLDER_FULL, name);
 		ar & maskName;
 		maskName = maskName.empty() ? String() : MAKE_PATH_FULL(WORKING_FOLDER_FULL, maskName);
+		ar & segmentationName;
+		segmentationName = segmentationName.empty() ? String() : MAKE_PATH_FULL(WORKING_FOLDER_FULL, segmentationName);
 		ar & width & height;
 		ar & neighbors;
 		ar & avgDepth;

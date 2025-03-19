@@ -134,6 +134,11 @@ bool Scene::LoadInterface(const String & fileName)
 			Util::ensureUnifySlash(imageData.maskName);
 			imageData.maskName = MAKE_PATH_FULL(WORKING_FOLDER_FULL, imageData.maskName);
 		}
+		if (!image.segmentationName.empty()) {
+			imageData.segmentationName = image.segmentationName;
+			Util::ensureUnifySlash(imageData.segmentationName);
+			imageData.segmentationName = MAKE_PATH_FULL(WORKING_FOLDER_FULL, imageData.segmentationName);
+		}
 		imageData.poseID = image.poseID;
 		if (imageData.poseID == NO_ID) {
 			DEBUG_EXTRA("warning: uncalibrated image '%s'", image.name.c_str());
@@ -251,6 +256,8 @@ bool Scene::SaveInterface(const String & fileName, int version) const
 		image.name = MAKE_PATH_REL(WORKING_FOLDER_FULL, imageData.name);
 		if (!imageData.maskName.empty())
 			image.maskName = MAKE_PATH_REL(WORKING_FOLDER_FULL, imageData.maskName);
+		if (!imageData.segmentationName.empty())
+			image.segmentationName = MAKE_PATH_REL(WORKING_FOLDER_FULL, imageData.segmentationName);
 		image.poseID = imageData.poseID;
 		image.platformID = imageData.platformID;
 		image.cameraID = imageData.cameraID;
@@ -2047,6 +2054,7 @@ void Scene::InitTowerScene(const int towerMode)
 		bool bHasNormal(pointcloud.normals.size() == pointcloud.GetSize());
 		bool bHasColor(pointcloud.colors.size() == pointcloud.GetSize());
 		bool bHasWeights(pointcloud.pointWeights.size() == pointcloud.GetSize());
+		bool bHasSegmentations(pointcloud.segmentations.size() == pointcloud.GetSize());
 		FOREACH(idxPoint, towerPC.points) {
 			pointcloud.points.emplace_back(towerPC.points[idxPoint]);
 			pointcloud.pointViews.emplace_back(towerPC.pointViews[idxPoint]);
@@ -2054,6 +2062,8 @@ void Scene::InitTowerScene(const int towerMode)
 				pointcloud.normals.emplace_back(towerPC.normals[idxPoint]);
 			if (bHasColor)
 				pointcloud.colors.emplace_back(towerPC.colors[idxPoint]);
+			if (bHasSegmentations)
+				pointcloud.segmentations.emplace_back(towerPC.segmentations[idxPoint]);
 			if (bHasWeights)
 				pointcloud.pointWeights.emplace_back(towerPC.pointWeights[idxPoint]);
 		}
@@ -2072,6 +2082,7 @@ void Scene::InitTowerScene(const int towerMode)
 		bool bHasNormal(pointcloud.normals.size() == pointcloud.GetSize());
 		bool bHasColor(pointcloud.colors.size() == pointcloud.GetSize());
 		bool bHasWeights(pointcloud.pointWeights.size() == pointcloud.GetSize());
+		bool bHasSegmentations(pointcloud.segmentations.size() == pointcloud.GetSize());
 		FOREACH(idxPoint, towerPC.points) {
 			pointcloud.points.emplace_back(towerPC.points[idxPoint]);
 			pointcloud.pointViews.emplace_back(towerPC.pointViews[idxPoint]);
@@ -2079,6 +2090,8 @@ void Scene::InitTowerScene(const int towerMode)
 				pointcloud.normals.emplace_back(towerPC.normals[idxPoint]);
 			if (bHasColor)
 				pointcloud.colors.emplace_back(towerPC.colors[idxPoint]);
+			if (bHasSegmentations)
+				pointcloud.segmentations.emplace_back(towerPC.segmentations[idxPoint]);
 			if (bHasWeights)
 				pointcloud.pointWeights.emplace_back(towerPC.pointWeights[idxPoint]);
 		}

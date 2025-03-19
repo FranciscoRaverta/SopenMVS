@@ -1302,7 +1302,7 @@ bool DepthMapsData::FilterDepthMap(DepthData& depthDataRef, const IIndexArr& idx
 
 // fuse all depth-maps by simply projecting them in a 3D point cloud
 // in the world coordinate space
-void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, bool bEstimateNormal)
+void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, bool bEstimateNormal, bool bEstimateSegmentation)
 {
 	TD_TIMER_STARTD();
 
@@ -1320,6 +1320,8 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 		pointcloud.colors.reserve(nPointsEstimate);
 	if (bEstimateNormal)
 		pointcloud.normals.reserve(nPointsEstimate);
+	if (bEstimateSegmentation)
+		pointcloud.segmentations.reserve(nPointsEstimate);
 	Util::Progress progress(_T("Merged depth-maps"), arrDepthData.size());
 	GET_LOGCONSOLE().Pause();
 	FOREACH(idxImage, arrDepthData) {
@@ -1346,6 +1348,8 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 				pointcloud.pointViews.emplace_back().push_back(idxImage);
 				if (bEstimateColor)
 					pointcloud.colors.emplace_back(image.pImageData->image(x));
+				if (bEstimateSegmentation)
+					pointcloud.segmentations.emplace_back(image.pSegmentedImageData->image(x)); // Chequear que esté bien - FRAN
 				if (bEstimateNormal)
 					depthData.GetNormal(x, pointcloud.normals.emplace_back());
 				++nDepths;
@@ -1369,7 +1373,7 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 // fuse all valid depth-maps in the same 3D point cloud;
 // join points very likely to represent the same 3D point and
 // filter out points blocking the view
-void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, bool bEstimateNormal)
+void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, bool bEstimateNormal, bool bEstimateSegmentation)
 {
 	TD_TIMER_STARTD();
 
@@ -1424,6 +1428,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 	pointcloud.pointWeights.Reserve(nPointsEstimate);
 	if (bEstimateColor)
 		pointcloud.colors.Reserve(nPointsEstimate);
+	if (bEstimateSegmentation)
+		pointcloud.segmentation.Reserve(nPointsEstimate);
 	if (bEstimateNormal)
 		pointcloud.normals.Reserve(nPointsEstimate);
 	Util::Progress progress(_T("Fused depth-maps"), connections.GetSize());
@@ -1479,6 +1485,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				// check the projection in the neighbor depth-maps
 				Point3 X(point*confidence);
 				Pixel32F C(Cast<float>(imageData.image(x))*confidence);
+				std::unordered_map<uint8_t, int> segmentationFrequency;
 				PointCloud::Normal N(normal*confidence);
 				invalidDepths.Empty();
 				for (const ViewScore& neighbor: depthData.neighbors) {
@@ -1515,6 +1522,10 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							X += imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB))*REAL(confidenceB);
 							if (bEstimateColor)
 								C += Cast<float>(imageDataB.image(xB))*confidenceB;
+							if (bEstimateSegmentation)
+								//C += Cast<float>(imageDataB.image(xB))*confidenceB; // Chequear si quedó bien - FRAN
+								uint32_t segmentationColor = Cast<uint32_t>(imageDataB.segmentedImage(xB)); // Convert to a 32-bit packed color
+								segmentationFrequency[segmentationColor]++;
 							if (bEstimateNormal)
 								N += normalB*confidenceB;
 							confidence += confidenceB;
@@ -1524,6 +1535,14 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					if (pt.z < depthB) {
 						// discard depth
 						invalidDepths.Insert(&depthB);
+					}
+				}
+				uint32_t modeColor = 0;
+				int maxCount = 0;
+				for (const auto& [color, count] : segmentationFrequency) {
+					if (count > maxCount) {
+						maxCount = count;
+						modeColor = color;
 					}
 				}
 				if (views.size() < nMinViewsFuse) {
@@ -1545,6 +1564,9 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					ASSERT(ISFINITE(point));
 					if (bEstimateColor)
 						pointcloud.colors.emplace_back((C*(float)nrm).cast<uint8_t>());
+					if (bEstimateSegmentation)
+						//pointcloud.colors.emplace_back((C*(float)nrm).cast<uint8_t>()); // Chequear si esto quedó bien - FRAN
+						pointcloud.segmentations.emplace_back(modeColor);
 					if (bEstimateNormal)
 						pointcloud.normals.emplace_back(normalized(N*(float)nrm));
 					// invalidate all neighbor depths that do not agree with it
@@ -1645,10 +1667,10 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 	pointcloud.Release();
 	if (OPTDENSE::nMinViewsFuse < 2) {
 		// merge depth-maps
-		data.depthMaps.MergeDepthMaps(pointcloud, OPTDENSE::nEstimateColors == 2, OPTDENSE::nEstimateNormals == 2);
+		data.depthMaps.MergeDepthMaps(pointcloud, OPTDENSE::nEstimateColors == 2, OPTDENSE::nEstimateNormals == 2, OPTDENSE::nEstimateSegmentations == 2);
 	} else {
 		// fuse depth-maps
-		data.depthMaps.FuseDepthMaps(pointcloud, OPTDENSE::nEstimateColors == 2, OPTDENSE::nEstimateNormals == 2);
+		data.depthMaps.FuseDepthMaps(pointcloud, OPTDENSE::nEstimateColors == 2, OPTDENSE::nEstimateNormals == 2, OPTDENSE::nEstimateSegmentations == 2);
 	}
 	#if TD_VERBOSE != TD_VERBOSE_OFF
 	if (g_nVerbosityLevel > 2) {
@@ -1685,6 +1707,8 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 			EstimatePointColors(images, pointcloud);
 		if (pointcloud.normals.IsEmpty() && OPTDENSE::nEstimateNormals == 1)
 			EstimatePointNormals(images, pointcloud);
+		if (pointcloud.segmentations.IsEmpty() && OPTDENSE::nEstimateSegmentations == 1)
+			EstimatePointSegmentations(images, pointcloud);										// Crear esta función - FRAN
 	}
 
 	if (OPTDENSE::bRemoveDmaps) {
