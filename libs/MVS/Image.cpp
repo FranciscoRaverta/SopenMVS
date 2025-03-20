@@ -90,21 +90,21 @@ bool Image::ReadImage(IMAGEPTR pImage, Image8U3& image)
 
 IMAGEPTR Image::ReadSegmentedImage(const String& fileName, Image8U& image)
 {
-	IMAGEPTR pImage(OpenImage(fileName));
-	if (pImage != NULL && !ReadSegmentedImage(pImage, image))
-		pImage.Release();
-	return pImage;
+	IMAGEPTR pSegmentedImage(OpenImage(fileName));
+	if (pSegmentedImage != NULL && !ReadSegmentedImage(pSegmentedImage, image))
+		pSegmentedImage.Release();
+	return pSegmentedImage;
 } // ReadImage
 /*----------------------------------------------------------------*/
 
-bool Image::ReadSegmentedImage(IMAGEPTR pImage, Image8U& image)
+bool Image::ReadSegmentedImage(IMAGEPTR pSegmentedImage, Image8U& image)
 {
-	if (FAILED(pImage->ReadHeader())) {
+	if (FAILED(pSegmentedImage->ReadHeader())) {
 		LOG("error: failed loading image header");
 		return false;
 	}
-	image.create(pImage->GetHeight(), pImage->GetWidth());
-	if (FAILED(pImage->ReadData(image.data, PF_GRAY8, 3, (CImage::Size)image.step))) {
+	image.create(pSegmentedImage->GetHeight(), pSegmentedImage->GetWidth());
+	if (FAILED(pSegmentedImage->ReadData(image.data, PF_GRAY8, 3, (CImage::Size)image.step))) {
 		LOG("error: failed loading image data");
 		return false;
 	}
@@ -137,7 +137,7 @@ bool Image::LoadImage(const String& fileName, unsigned nMaxResolution)
 bool Image::ReloadImage(unsigned nMaxResolution, bool bLoadPixels)
 {
 	IMAGEPTR pImage(bLoadPixels ? ReadImage(name, image) : ReadImageHeader(name));
-	IMAGEPTR pImage(bLoadPixels ? ReadSegmentedImage(segmentationName, segmentedImage) : ReadImageHeader(name));
+	IMAGEPTR pSegmentedImage(bLoadPixels ? ReadSegmentedImage(segmentationName, segmentedImage) : ReadImageHeader(name));
 	if (pImage == NULL) {
 		LOG("error: failed reloading image '%s'", name.c_str());
 		return false;

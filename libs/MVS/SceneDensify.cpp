@@ -1524,7 +1524,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								C += Cast<float>(imageDataB.image(xB))*confidenceB;
 							if (bEstimateSegmentation)
 								//C += Cast<float>(imageDataB.image(xB))*confidenceB; // Chequear si quedó bien - FRAN
-								uint32_t segmentationColor = Cast<uint32_t>(imageDataB.segmentedImage(xB)); // Convert to a 32-bit packed color
+								uint8_t segmentationColor = Cast<uint8_t>(imageDataB.segmentedImage(xB)); // Convert to a 32-bit packed color
 								segmentationFrequency[segmentationColor]++;
 							if (bEstimateNormal)
 								N += normalB*confidenceB;
