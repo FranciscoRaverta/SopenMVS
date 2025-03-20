@@ -450,7 +450,7 @@ bool PointCloud::SaveNViews(const String& fileName, uint32_t minViews, bool bLeg
 			// export the vertex position and color
 			vertex.p = points[i];
 			vertex.c = colors.empty() ? Pixel8U::WHITE : colors[i];
-			vertex.res = segmentations[i];
+			vertex.seg = segmentations[i];
 			ply.put_element(&vertex);
 		}
 	} else {
@@ -465,7 +465,7 @@ bool PointCloud::SaveNViews(const String& fileName, uint32_t minViews, bool bLeg
 			vertex.p = points[i];
 			vertex.n = normals[i];
 			vertex.c = colors.empty() ? Pixel8U::WHITE : colors[i];
-			vertex.res = segmentations[i];
+			vertex.seg = segmentations[i];
 			vertex.views.num = pointViews[i].size();
 			ply.put_element(&vertex);
 		}

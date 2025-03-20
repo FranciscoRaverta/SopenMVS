@@ -1498,7 +1498,7 @@ void MVS::EstimatePointSegmentations(const ImageArr& images, PointCloud& pointcl
 		} else {
 			// get image color
 			const Point2f proj(pImageData->camera.ProjectPointP(point));
-			segmentation = (pImageData->image.isInsideWithBorder<float,1>(proj) ? pImageData->segmentedImage.sample(proj) : Pixel8U::WHITE);
+			segmentation = (pImageData->image.isInsideWithBorder<float,1>(proj) ? pImageData->segmentedImage.sample(proj) : NULL);
 		}
 	}
 
