@@ -375,7 +375,7 @@ struct Interface
 	typedef cv::Matx<double,4,4> Mat44d;
 	typedef cv::Point3_<uint8_t> Col3; // x=B, y=G, z=R
 	// typedef cv::ParamType<uint8_t> Segm; 
-	typedef uint8_t Segm; 
+	// typedef uint8_t Segm; 
 	/*----------------------------------------------------------------*/
 
 	// structure describing a mobile platform with cameras attached to it
@@ -666,7 +666,8 @@ struct Interface
 
 	// structure describing a 3D point's segmentation (optional)
 	struct Segmentation {
-		Segm seg; // 3D feature segnebtatuib
+		//Segm seg; // 3D feature segnebtatuib
+		uint8_t seg;
 
 		template <class Archive>
 		void serialize(Archive& ar, const unsigned int /*version*/) {
