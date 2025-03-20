@@ -91,7 +91,7 @@ bool Image::ReadImage(IMAGEPTR pImage, Image8U3& image)
 IMAGEPTR Image::ReadSegmentedImage(const String& fileName, Image8U& image)
 {
 	IMAGEPTR pImage(OpenImage(fileName));
-	if (pImage != NULL && !ReadImage(pImage, image))
+	if (pImage != NULL && !ReadSegmentedImage(pImage, image))
 		pImage.Release();
 	return pImage;
 } // ReadImage

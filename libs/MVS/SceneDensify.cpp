@@ -1429,7 +1429,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 	if (bEstimateColor)
 		pointcloud.colors.Reserve(nPointsEstimate);
 	if (bEstimateSegmentation)
-		pointcloud.segmentation.Reserve(nPointsEstimate);
+		pointcloud.segmentations.Reserve(nPointsEstimate);
 	if (bEstimateNormal)
 		pointcloud.normals.Reserve(nPointsEstimate);
 	Util::Progress progress(_T("Fused depth-maps"), connections.GetSize());
