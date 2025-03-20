@@ -66,7 +66,7 @@ public:
 
 	bool FilterDepthMap(DepthData& depthData, const IIndexArr& idxNeighbors, bool bAdjust=true);
 	void MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, bool bEstimateNormal, bool bEstimateSegmentation);
-	void FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, bool bEstimateNormal);
+	void FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, bool bEstimateNormal, bool bEstimateSegmentation);
 
 	static DepthData ScaleDepthData(const DepthData& inputDeptData, float scale);
 
