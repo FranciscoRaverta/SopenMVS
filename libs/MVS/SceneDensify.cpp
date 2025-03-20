@@ -1349,7 +1349,7 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 				if (bEstimateColor)
 					pointcloud.colors.emplace_back(image.pImageData->image(x));
 				if (bEstimateSegmentation)
-					pointcloud.segmentations.emplace_back(image.pSegmentedImageData->image(x)); // Chequear que esté bien - FRAN
+					pointcloud.segmentations.emplace_back(image.pSegmentedImageData->segmentedImage(x)); // Chequear que esté bien - FRAN
 				if (bEstimateNormal)
 					depthData.GetNormal(x, pointcloud.normals.emplace_back());
 				++nDepths;
