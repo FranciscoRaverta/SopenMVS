@@ -68,7 +68,10 @@ public:
 	typedef CLISTDEF0IDX(Normal,Index) NormalArr;
 
 	typedef Pixel8U Color;
-	typedef CLISTDEF0IDX(Color,Index) ColorArr;
+	typedef CLISTDEFIDX(Color,Index) ColorArr;
+
+	typedef uint32_t Segmentation;
+	typedef CLISTDEF0IDX(Segmentation,Index) SegmentationArr;
 
 	typedef AABB3f Box;
 
@@ -80,6 +83,7 @@ public:
 	PointWeightArr pointWeights;
 	NormalArr normals;
 	ColorArr colors;
+	SegmentationArr segmentations;
 
 public:
 	PointCloud& Swap(PointCloud&);
