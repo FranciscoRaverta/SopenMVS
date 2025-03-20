@@ -1494,7 +1494,7 @@ void MVS::EstimatePointSegmentations(const ImageArr& images, PointCloud& pointcl
 		}
 		if (pImageData == NULL) {
 			// set a dummy color
-			segmentation = Pixel8U::WHITE;
+			segmentation = NULL//uint32_t::WHITE;
 		} else {
 			// get image color
 			const Point2f proj(pImageData->camera.ProjectPointP(point));
