@@ -266,6 +266,7 @@ bool Initialize(size_t argc, LPCTSTR* argv)
 	#endif
 
 	Util::Init();
+	VERBOSE("About to finilize initialization - FRAN");
 	return true;
 }
 
@@ -286,6 +287,7 @@ void Finalize()
 
 int main(int argc, LPCTSTR* argv)
 {
+	VERBOSE("Start main function of DensifyPointCloud - FRAN");
 	#ifdef _DEBUGINFO
 	// set _crtBreakAlloc index to stop in <dbgheap.c> at allocation
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);// | _CRTDBG_CHECK_ALWAYS_DF);
@@ -310,6 +312,7 @@ int main(int argc, LPCTSTR* argv)
 		Finalize();
 		return EXIT_SUCCESS;
 	}
+	VERBOSE("Load Point-cloud - FRAN");
 	// load and estimate a dense point-cloud
 	const Scene::SCENE_TYPE sceneType(scene.Load(MAKE_PATH_SAFE(OPT::strInputFileName)));
 	if (sceneType == Scene::SCENE_NA)
@@ -332,6 +335,7 @@ int main(int argc, LPCTSTR* argv)
 			}
 		}
 	}
+	VERBOSE("About to check segmentation path - FRAN");
 	if (!OPT::strSegmentationPath.empty()) {
 		VERBOSE("Segmentation path detected");
 		Util::ensureValidFolderPath(OPT::strSegmentationPath);
@@ -348,6 +352,8 @@ int main(int argc, LPCTSTR* argv)
 			}
 		}
 	}
+
+	VERBOSE("About to import ROI - FRAN");
 
 	if (!OPT::strImportROIFileName.empty()) {
 		std::ifstream fs(MAKE_PATH_SAFE(OPT::strImportROIFileName));
@@ -382,6 +388,7 @@ int main(int argc, LPCTSTR* argv)
 		scene.SaveViewNeighbors(MAKE_PATH_SAFE(OPT::strOutputViewNeighborsFileName));
 		return EXIT_SUCCESS;
 	}
+	VERBOSE("About to export DepthMaps ROI - FRAN");
 	if (!OPT::strExportDepthMapsName.empty() && !scene.mesh.IsEmpty()) {
 		// project mesh onto each image and save the resulted depth-maps
 		TD_TIMER_START();
@@ -399,6 +406,7 @@ int main(int argc, LPCTSTR* argv)
 		Finalize();
 		return EXIT_SUCCESS;
 	}
+	VERBOSE("About to filter Pointcloud - FRAN");
 	if (OPT::thFilterPointCloud < 0) {
 		// filter point-cloud based on camera-point visibility intersections
 		scene.PointCloudFilter(OPT::thFilterPointCloud);
@@ -408,6 +416,7 @@ int main(int argc, LPCTSTR* argv)
 		Finalize();
 		return EXIT_SUCCESS;
 	}
+	VERBOSE("About to save nviews - FRAN");
 	if (OPT::nExportNumViews && scene.pointcloud.IsValid()) {
 		// export point-cloud containing only points with N+ views
 		const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName))+
@@ -438,6 +447,7 @@ int main(int argc, LPCTSTR* argv)
 		Finalize();
 		return EXIT_SUCCESS;
 	}
+	VERBOSE("About to sparse pointcloud - FRAN");
 	PointCloud sparsePointCloud;
 	if (OPT::nArchiveType != ARCHIVE_MVS || sceneType == Scene::SCENE_INTERFACE) {
 		#if TD_VERBOSE != TD_VERBOSE_OFF
@@ -456,7 +466,7 @@ int main(int argc, LPCTSTR* argv)
 		}
 		VERBOSE("Densifying point-cloud completed: %u points (%s)", scene.pointcloud.GetSize(), TD_TIMER_GET_FMT().c_str());
 	}
-
+	VERBOSE("About to save final pointcloud - FRAN");
 	// save the final point-cloud
 	const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName)));
 	scene.pointcloud.Save(baseFileName+_T(".ply"), OPT::nArchiveType==ARCHIVE_MVS);
