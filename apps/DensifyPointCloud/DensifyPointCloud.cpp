@@ -333,7 +333,7 @@ int main(int argc, LPCTSTR* argv)
 		}
 	}
 	if (!OPT::strSegmentationPath.empty()) {
-		VERBOSE("Segmentation path detected")
+		VERBOSE("Segmentation path detected");
 		Util::ensureValidFolderPath(OPT::strSegmentationPath);
 		for (Image& image : scene.images) {
 			VERBOSE("Image segmentation path: %s", image.segmentationName.c_str());
