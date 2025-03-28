@@ -238,18 +238,22 @@ bool SerializeSave(const _Tp& obj, const std::string& fileName, uint32_t version
 }
 template<typename _Tp>
 bool SerializeLoad(_Tp& obj, const std::string& fileName, uint32_t* pVersion=NULL) {
+	LOG("SceneSerialize0 - FRAN");
 	// open the input stream
 	std::ifstream stream(fileName, std::ifstream::binary);
 	if (!stream.is_open())
 		return false;
 	// read header
+	LOG("SceneSerialize1 - FRAN");
 	uint32_t version(0);
 	// load project header ID
 	char szHeader[4];
 	stream.read(szHeader, 4);
 	if (!stream)
 		return false;
+	LOG("SceneSerialize2 - FRAN");
 	if (strncmp(szHeader, MVSI_PROJECT_ID, 4) != 0) {
+		LOG("SceneSerialize2a - FRAN");
 		// try to load as the first version that didn't have a header
 		const size_t size(fileName.size());
 		if (size <= 4)
@@ -260,6 +264,7 @@ bool SerializeLoad(_Tp& obj, const std::string& fileName, uint32_t* pVersion=NUL
 			return false;
 		stream.seekg(0, std::ifstream::beg);
 	} else {
+		LOG("SceneSerialize2b - FRAN");
 		// load project version
 		stream.read((char*)&version, sizeof(uint32_t));
 		if (!stream || version > MVSI_PROJECT_VER)
@@ -268,11 +273,14 @@ bool SerializeLoad(_Tp& obj, const std::string& fileName, uint32_t* pVersion=NUL
 		uint32_t reserved;
 		stream.read((char*)&reserved, sizeof(uint32_t));
 	}
+	LOG("SceneSerialize3 - FRAN");
 	// serialize in the current state
 	ARCHIVE::ArchiveLoad serializer(stream, version);
+	LOG("SceneSerialize4 - FRAN");
 	serializer & obj;
 	if (pVersion)
 		*pVersion = version;
+	LOG("SceneSerialize5 - FRAN");
 	return true;
 }
 
