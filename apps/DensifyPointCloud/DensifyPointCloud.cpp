@@ -315,12 +315,15 @@ int main(int argc, LPCTSTR* argv)
 	VERBOSE("Load Point-cloud - FRAN");
 	// load and estimate a dense point-cloud
 	const Scene::SCENE_TYPE sceneType(scene.Load(MAKE_PATH_SAFE(OPT::strInputFileName)));
+	VERBOSE("Load Point-cloud1 - FRAN");
 	if (sceneType == Scene::SCENE_NA)
 		return EXIT_FAILURE;
+		VERBOSE("Load Point-cloud2 - FRAN");
 	if (!OPT::strPointCloudFileName.empty() && !scene.pointcloud.Load(MAKE_PATH_SAFE(OPT::strPointCloudFileName))) {
 		VERBOSE("error: cannot load point-cloud file");
 		return EXIT_FAILURE;
 	}
+	VERBOSE("Load Point-cloud3 - FRAN");
 	if (!OPT::strMaskPath.empty()) {
 		Util::ensureValidFolderPath(OPT::strMaskPath);
 		for (Image& image : scene.images) {
