@@ -559,6 +559,7 @@ Scene::SCENE_TYPE Scene::Load(const String& fileName, bool bImport)
 		fs.close();
 		if (bImport && Import(fileName))
 			return SCENE_IMPORT;
+		LOG("FLAG before LoadInterface 1 - FRAN");
 		if (LoadInterface(fileName))
 			return SCENE_INTERFACE;
 		VERBOSE("error: invalid project");
@@ -601,6 +602,7 @@ Scene::SCENE_TYPE Scene::Load(const String& fileName, bool bImport)
 	#else
 	if (bImport && Import(fileName))
 		return SCENE_IMPORT;
+	LOG("FLAG before LoadInterface 2 - FRAN");
 	if (LoadInterface(fileName))
 		return SCENE_INTERFACE;
 	return SCENE_NA;
