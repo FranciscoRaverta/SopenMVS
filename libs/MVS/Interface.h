@@ -278,9 +278,9 @@ bool SerializeLoad(_Tp& obj, const std::string& fileName, uint32_t* pVersion=NUL
 	ARCHIVE::ArchiveLoad serializer(stream, version);
 	LOG("SceneSerialize4 - FRAN");
 	serializer & obj;
-	LOG("SceneSerialize3.1 - FRAN: version=%u", version);
-	LOG("SceneSerialize3.2 - FRAN: fileName=%s", fileName.c_str());
-	LOG("SceneSerialize4 - FRAN");
+	LOG("SceneSerialize4.1 - FRAN: version=%u", version);
+	LOG("SceneSerialize4.2 - FRAN: fileName=%s", fileName.c_str());
+	LOG("SceneSerialize5 - FRAN");
 	if (pVersion)
 		LOG("SceneSerialize5.1 - Assigning version to pVersion");
 		*pVersion = version;
