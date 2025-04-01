@@ -771,7 +771,7 @@ struct Interface
 		ar & vertices;
 		ar & verticesNormal;
 		ar & verticesColor;
-		//ar & verticesSegmentation;
+		ar & verticesSegmentation;
 		if (version > 0) {
 			ar & lines;
 			ar & linesNormal;
