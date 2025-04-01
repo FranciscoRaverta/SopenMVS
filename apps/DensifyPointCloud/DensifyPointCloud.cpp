@@ -312,18 +312,14 @@ int main(int argc, LPCTSTR* argv)
 		Finalize();
 		return EXIT_SUCCESS;
 	}
-	LOG("Load Point-cloud - FRAN");
 	// load and estimate a dense point-cloud
 	const Scene::SCENE_TYPE sceneType(scene.Load(MAKE_PATH_SAFE(OPT::strInputFileName)));
-	LOG("Load Point-cloud1 - FRAN");
 	if (sceneType == Scene::SCENE_NA)
 		return EXIT_FAILURE;
-		LOG("Load Point-cloud2 - FRAN");
 	if (!OPT::strPointCloudFileName.empty() && !scene.pointcloud.Load(MAKE_PATH_SAFE(OPT::strPointCloudFileName))) {
 		VERBOSE("error: cannot load point-cloud file");
 		return EXIT_FAILURE;
 	}
-	LOG("Load Point-cloud3 - FRAN");
 	if (!OPT::strMaskPath.empty()) {
 		Util::ensureValidFolderPath(OPT::strMaskPath);
 		for (Image& image : scene.images) {
@@ -355,8 +351,6 @@ int main(int argc, LPCTSTR* argv)
 			}
 		}
 	}
-
-	LOG("About to import ROI - FRAN");
 
 	if (!OPT::strImportROIFileName.empty()) {
 		std::ifstream fs(MAKE_PATH_SAFE(OPT::strImportROIFileName));
@@ -391,7 +385,6 @@ int main(int argc, LPCTSTR* argv)
 		scene.SaveViewNeighbors(MAKE_PATH_SAFE(OPT::strOutputViewNeighborsFileName));
 		return EXIT_SUCCESS;
 	}
-	LOG("About to export DepthMaps ROI - FRAN");
 	if (!OPT::strExportDepthMapsName.empty() && !scene.mesh.IsEmpty()) {
 		// project mesh onto each image and save the resulted depth-maps
 		TD_TIMER_START();
@@ -409,7 +402,6 @@ int main(int argc, LPCTSTR* argv)
 		Finalize();
 		return EXIT_SUCCESS;
 	}
-	LOG("About to filter Pointcloud - FRAN");
 	if (OPT::thFilterPointCloud < 0) {
 		// filter point-cloud based on camera-point visibility intersections
 		scene.PointCloudFilter(OPT::thFilterPointCloud);
@@ -419,7 +411,6 @@ int main(int argc, LPCTSTR* argv)
 		Finalize();
 		return EXIT_SUCCESS;
 	}
-	LOG("About to save nviews - FRAN");
 	if (OPT::nExportNumViews && scene.pointcloud.IsValid()) {
 		// export point-cloud containing only points with N+ views
 		const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName))+
@@ -452,23 +443,33 @@ int main(int argc, LPCTSTR* argv)
 	}
 	LOG("About to sparse pointcloud - FRAN");
 	PointCloud sparsePointCloud;
+	LOG("About to sparse pointcloud1 - FRAN");
 	if (OPT::nArchiveType != ARCHIVE_MVS || sceneType == Scene::SCENE_INTERFACE) {
+		LOG("About to sparse pointcloud2 - FRAN");
 		#if TD_VERBOSE != TD_VERBOSE_OFF
 		if (VERBOSITY_LEVEL > 1 && !scene.pointcloud.IsEmpty())
 			scene.pointcloud.PrintStatistics(scene.images.data(), &scene.obb);
 		#endif
+		LOG("About to sparse pointcloud3 - FRAN");
 		if (OPT::nArchiveType == ARCHIVE_MVS)
 			sparsePointCloud = scene.pointcloud;
+		LOG("About to sparse pointcloud4 - FRAN");
 		TD_TIMER_START();
 		if (!scene.DenseReconstruction(OPT::nFusionMode, OPT::bCrop2ROI, OPT::fBorderROI)) {
+			LOG("About to sparse pointcloud5 - FRAN");
 			if (ABS(OPT::nFusionMode) != 1)
 				return EXIT_FAILURE;
+			LOG("About to sparse pointcloud6 - FRAN");
 			VERBOSE("Depth-maps estimated (%s)", TD_TIMER_GET_FMT().c_str());
+			LOG("About to sparse pointcloud7 - FRAN");
 			Finalize();
+			LOG("About to sparse pointcloud8 - FRAN");
 			return EXIT_SUCCESS;
 		}
+		LOG("About to sparse pointcloud9 - FRAN");
 		VERBOSE("Densifying point-cloud completed: %u points (%s)", scene.pointcloud.GetSize(), TD_TIMER_GET_FMT().c_str());
 	}
+	LOG("About to sparse pointcloud10 - FRAN");
 	LOG("About to save final pointcloud - FRAN");
 	// save the final point-cloud
 	const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName)));

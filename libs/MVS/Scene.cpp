@@ -80,13 +80,11 @@ bool Scene::LoadInterface(const String & fileName)
 {
 	TD_TIMER_STARTD();
 	Interface obj;
-	LOG("Scene0 - FRAN");
 	// serialize in the current state
 	if (!ARCHIVE::SerializeLoad(obj, fileName))
 		return false;
 
 	// import platforms and cameras
-	LOG("Scene1 - FRAN");
 	ASSERT(!obj.platforms.empty());
 	platforms.reserve((uint32_t)obj.platforms.size());
 	for (const Interface::Platform& itPlatform: obj.platforms) {
@@ -114,7 +112,6 @@ bool Scene::LoadInterface(const String & fileName)
 		}
 		ASSERT(platform.poses.size() == itPlatform.poses.size());
 	}
-	LOG("Scene2 - FRAN");
 	ASSERT(platforms.size() == obj.platforms.size());
 	if (platforms.empty())
 		return false;
@@ -124,7 +121,6 @@ bool Scene::LoadInterface(const String & fileName)
 	size_t nTotalPixels(0);
 	ASSERT(!obj.images.empty());
 	images.reserve((uint32_t)obj.images.size());
-	LOG("Scene3 - FRAN");
 	for (const Interface::Image& image: obj.images) {
 		const uint32_t ID(images.size());
 		Image& imageData = images.emplace_back();
@@ -137,13 +133,11 @@ bool Scene::LoadInterface(const String & fileName)
 			Util::ensureUnifySlash(imageData.maskName);
 			imageData.maskName = MAKE_PATH_FULL(WORKING_FOLDER_FULL, imageData.maskName);
 		}
-		LOG("Scene4 - FRAN");
 		if (!image.segmentationName.empty()) {
 			imageData.segmentationName = image.segmentationName;
 			Util::ensureUnifySlash(imageData.segmentationName);
 			imageData.segmentationName = MAKE_PATH_FULL(WORKING_FOLDER_FULL, imageData.segmentationName);
 		}
-		LOG("Scene5 - FRAN");
 		imageData.poseID = image.poseID;
 		if (imageData.poseID == NO_ID) {
 			DEBUG_EXTRA("warning: uncalibrated image '%s'", image.name.c_str());
@@ -171,10 +165,8 @@ bool Scene::LoadInterface(const String & fileName)
 		nTotalPixels += imageData.width * imageData.height;
 		DEBUG_ULTIMATE("Image loaded %3u: %s", ID, Util::getFileNameExt(imageData.name).c_str());
 	}
-	LOG("Scene6 - FRAN");
 	if (images.size() < 2)
 		return false;
-	LOG("Scene7 - FRAN");
 	// import 3D points
 	if (!obj.vertices.empty()) {
 		bool bValidWeights(false);
@@ -182,7 +174,6 @@ bool Scene::LoadInterface(const String & fileName)
 		pointcloud.pointViews.resize(obj.vertices.size());
 		pointcloud.pointWeights.resize(obj.vertices.size());
 		FOREACH(i, pointcloud.points) {
-			LOG("Scene8 - FRAN");
 			const Interface::Vertex& vertex = obj.vertices[i];
 			PointCloud::Point& point = pointcloud.points[i];
 			point = vertex.X;
@@ -195,7 +186,6 @@ bool Scene::LoadInterface(const String & fileName)
 			std::sort(indices.begin(), indices.end(), [&](IndexArr::Type i0, IndexArr::Type i1) -> bool {
 				return vertex.views[i0].imageID < vertex.views[i1].imageID;
 			});
-			LOG("Scene9 - FRAN");
 			ASSERT(vertex.views.size() >= 2);
 			views.ForEach([&](PointCloud::ViewArr::IDX v) {
 				const Interface::Vertex::View& view = vertex.views[indices[v]];
@@ -205,20 +195,16 @@ bool Scene::LoadInterface(const String & fileName)
 					bValidWeights = true;
 			});
 		}
-		LOG("Scene10 - FRAN");
 		if (!bValidWeights)
 			pointcloud.pointWeights.Release();
-		LOG("Scene11 - FRAN");
 		if (!obj.verticesNormal.empty()) {
 			ASSERT(obj.vertices.size() == obj.verticesNormal.size());
 			pointcloud.normals.CopyOf((const Point3f*)&obj.verticesNormal[0].n, obj.vertices.size());
 		}
-		LOG("Scene12 - FRAN");
 		if (!obj.verticesColor.empty()) {
 			ASSERT(obj.vertices.size() == obj.verticesColor.size());
 			pointcloud.colors.CopyOf((const Pixel8U*)&obj.verticesColor[0].c, obj.vertices.size());
 		}
-		LOG("Scene13 - FRAN");
 	}
 
 	// import region of interest
