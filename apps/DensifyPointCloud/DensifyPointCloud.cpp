@@ -455,6 +455,7 @@ int main(int argc, LPCTSTR* argv)
 			sparsePointCloud = scene.pointcloud;
 		LOG("About to sparse pointcloud4 - FRAN");
 		TD_TIMER_START();
+		LOG("About to sparse pointcloud4.1 - FRAN");
 		if (!scene.DenseReconstruction(OPT::nFusionMode, OPT::bCrop2ROI, OPT::fBorderROI)) {
 			LOG("About to sparse pointcloud5 - FRAN");
 			if (ABS(OPT::nFusionMode) != 1)
