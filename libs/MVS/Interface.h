@@ -239,7 +239,6 @@ bool SerializeSave(const _Tp& obj, const std::string& fileName, uint32_t version
 template<typename _Tp>
 bool SerializeLoad(_Tp& obj, const std::string& fileName, uint32_t* pVersion=NULL) {
 	LOG("SceneSerialize0 - FRAN");
-	int sizeHeader = 5;
 	// open the input stream
 	std::ifstream stream(fileName, std::ifstream::binary);
 	if (!stream.is_open())
@@ -248,8 +247,8 @@ bool SerializeLoad(_Tp& obj, const std::string& fileName, uint32_t* pVersion=NUL
 	LOG("SceneSerialize1 - FRAN");
 	uint32_t version(0);
 	// load project header ID
-	char szHeader[sizeHeader];
-	stream.read(szHeader, sizeHeader);
+	char szHeader[4];
+	stream.read(szHeader, 4);
 	if (!stream)
 		return false;
 	LOG("SceneSerialize2 - FRAN");
@@ -257,9 +256,9 @@ bool SerializeLoad(_Tp& obj, const std::string& fileName, uint32_t* pVersion=NUL
 		LOG("SceneSerialize2a - FRAN");
 		// try to load as the first version that didn't have a header
 		const size_t size(fileName.size());
-		if (size <= sizeHeader)
+		if (size <= 4)
 			return false;
-		std::string ext(fileName.substr(size-sizeHeader));
+		std::string ext(fileName.substr(size-4));
 		std::transform(ext.begin(), ext.end(), ext.begin(), [](char c) { return (char)std::tolower(c); });
 		if (ext != ".mvs")
 			return false;
@@ -772,7 +771,7 @@ struct Interface
 		ar & vertices;
 		ar & verticesNormal;
 		ar & verticesColor;
-		ar & verticesSegmentation;
+		//ar & verticesSegmentation;
 		if (version > 0) {
 			ar & lines;
 			ar & linesNormal;
