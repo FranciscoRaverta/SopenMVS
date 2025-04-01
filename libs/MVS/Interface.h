@@ -281,6 +281,8 @@ bool SerializeLoad(_Tp& obj, const std::string& fileName, uint32_t* pVersion=NUL
 	LOG("SceneSerialize4.2 - FRAN: fileName=%s", fileName.c_str());
 	serializer & obj;
 	LOG("SceneSerialize5 - FRAN");
+	LOG("SceneSerialize5.1 - FRAN: version=%u", pVersion);
+	LOG("SceneSerialize5.2 - FRAN");
 	if (pVersion)
 		LOG("SceneSerialize5.1 FRAN - Assigning version to pVersion");
 		*pVersion = version;
