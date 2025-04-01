@@ -1662,6 +1662,7 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 	// estimate depth-maps
 	if (!ComputeDepthMaps(data))
 		return false;
+	LOG("DenseRecons2.5 - FRAN");
 	if (ABS(nFusionMode) == 1)
 		return true;
 	LOG("DenseRecons3 - FRAN");
@@ -1739,18 +1740,19 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 // results are saved to "data"
 bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 {
+	LOG("ComputeDepth1 - FRAN");
 	// compute point-cloud from the existing mesh
 	if (!mesh.IsEmpty() && !ImagesHaveNeighbors()) {
 		SampleMeshWithVisibility();
 		mesh.Release();
 	}
-	
+	LOG("ComputeDepth2 - FRAN");
 	// compute point-cloud from the existing mesh
 	if (IsEmpty() && !ImagesHaveNeighbors()) {
 		VERBOSE("warning: empty point-cloud, rough neighbor views selection based on image pairs baseline");
 		EstimateNeighborViewsPointCloud();
 	}
-
+	LOG("ComputeDepth3 - FRAN");
 	{
 	// maps global view indices to our list of views to be processed
 	IIndexArr imagesMap;
@@ -1758,6 +1760,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 	// prepare images for dense reconstruction (load if needed)
 	{
 		TD_TIMER_START();
+		LOG("ComputeDepth4 - FRAN");
 		data.images.Reserve(images.GetSize());
 		imagesMap.Resize(images.GetSize());
 		#ifdef DENSE_USE_OPENMP
@@ -1772,6 +1775,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		FOREACH(idxImage, images) {
 		#endif
 			// skip invalid, uncalibrated or discarded images
+			LOG("ComputeDepth5 - FRAN");
 			Image& imageData = images[idxImage];
 			if (!imageData.IsValid()) {
 				#ifdef DENSE_USE_OPENMP
@@ -1806,6 +1810,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 			DEBUG_LEVEL(3, "R%d = \n%s", idxImage, cvMat2String(imageData.camera.R).c_str());
 			DEBUG_LEVEL(3, "C%d = \n%s", idxImage, cvMat2String(imageData.camera.C).c_str());
 		}
+		LOG("ComputeDepth6 - FRAN");
 		#ifdef DENSE_USE_OPENMP
 		if (bAbort || data.images.IsEmpty()) {
 		#else
@@ -1814,9 +1819,10 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 			VERBOSE("error: preparing images for dense reconstruction failed (errors loading images)");
 			return false;
 		}
+		LOG("ComputeDepth7 - FRAN");
 		VERBOSE("Preparing images for dense reconstruction completed: %d images (%s)", images.GetSize(), TD_TIMER_GET_FMT().c_str());
 	}
-
+	LOG("ComputeDepth8 - FRAN");
 	// select images to be used for dense reconstruction
 	{
 		TD_TIMER_START();
@@ -1854,7 +1860,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		VERBOSE("Selecting images for dense reconstruction completed: %d images (%s)", data.images.GetSize(), TD_TIMER_GET_FMT().c_str());
 	}
 	}
-
+	LOG("ComputeDepth9 - FRAN");
 	#ifdef _USE_CUDA
 	// initialize CUDA
 	if (CUDA::desiredDeviceID >= -1 && data.nFusionMode >= 0) {
@@ -1865,7 +1871,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 			data.depthMaps.pmCUDA->Init(false);
 	}
 	#endif // _USE_CUDA
-
+	LOG("ComputeDepth10 - FRAN");
 	// initialize the queue of images to be processed
 	const int nOptimize(OPTDENSE::nOptimize);
 	if (OPTDENSE::nEstimationGeometricIters && data.nFusionMode >= 0)
@@ -1887,11 +1893,12 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		// single-thread execution
 		DenseReconstructionEstimate((void*)&data);
 	}
+	LOG("ComputeDepth11 - FRAN");
 	GET_LOGCONSOLE().Play();
 	if (!data.events.IsEmpty())
 		return false;
 	data.progress.Release();
-
+	LOG("ComputeDepth12 - FRAN");
 	if (data.nFusionMode >= 0) {
 		#ifdef _USE_CUDA
 		// initialize CUDA
@@ -1937,7 +1944,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		}
 		data.nEstimationGeometricIter = -1;
 	}
-
+	LOG("ComputeDepth13 - FRAN");
 	if ((OPTDENSE::nOptimize & OPTDENSE::ADJUST_FILTER) != 0) {
 		// initialize the queue of depth-maps to be filtered
 		data.sem.Clear();
@@ -1964,6 +1971,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 			return false;
 		data.progress.Release();
 	}
+	LOG("ComputeDepth14 - FRAN");
 	return true;
 } // ComputeDepthMaps
 /*----------------------------------------------------------------*/
