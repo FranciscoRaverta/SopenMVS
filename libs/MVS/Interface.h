@@ -239,6 +239,7 @@ bool SerializeSave(const _Tp& obj, const std::string& fileName, uint32_t version
 template<typename _Tp>
 bool SerializeLoad(_Tp& obj, const std::string& fileName, uint32_t* pVersion=NULL) {
 	LOG("SceneSerialize0 - FRAN");
+	int sizeHeader = 5;
 	// open the input stream
 	std::ifstream stream(fileName, std::ifstream::binary);
 	if (!stream.is_open())
@@ -247,18 +248,18 @@ bool SerializeLoad(_Tp& obj, const std::string& fileName, uint32_t* pVersion=NUL
 	LOG("SceneSerialize1 - FRAN");
 	uint32_t version(0);
 	// load project header ID
-	char szHeader[4];
-	stream.read(szHeader, 4);
+	char szHeader[sizeHeader];
+	stream.read(szHeader, sizeHeader);
 	if (!stream)
 		return false;
 	LOG("SceneSerialize2 - FRAN");
-	if (strncmp(szHeader, MVSI_PROJECT_ID, 4) != 0) {
+	if (strncmp(szHeader, MVSI_PROJECT_ID, sizeHeader) != 0) {
 		LOG("SceneSerialize2a - FRAN");
 		// try to load as the first version that didn't have a header
 		const size_t size(fileName.size());
-		if (size <= 4)
+		if (size <= sizeHeader)
 			return false;
-		std::string ext(fileName.substr(size-4));
+		std::string ext(fileName.substr(size-sizeHeader));
 		std::transform(ext.begin(), ext.end(), ext.begin(), [](char c) { return (char)std::tolower(c); });
 		if (ext != ".mvs")
 			return false;
