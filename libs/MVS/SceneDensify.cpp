@@ -1761,7 +1761,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 	{
 		TD_TIMER_START();
 		LOG("ComputeDepth4 - FRAN");
-		data.images.Reserve(images.GetSize());
+		data.images.Reserve(2*images.GetSize());
 		imagesMap.Resize(images.GetSize());
 		#ifdef DENSE_USE_OPENMP
 		bool bAbort(false);
@@ -1774,8 +1774,9 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		#else
 		FOREACH(idxImage, images) {
 		#endif
+			LOG("ComputeDepth5 - FRAN image: %u", idxImage);
 			// skip invalid, uncalibrated or discarded images
-			LOG("ComputeDepth5 - FRAN");
+			LOG("ComputeDepth5.0 - FRAN");
 			Image& imageData = images[idxImage];
 			LOG("ComputeDepth5.1 - FRAN");
 			if (!imageData.IsValid()) {
