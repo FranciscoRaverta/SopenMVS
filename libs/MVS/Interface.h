@@ -253,7 +253,7 @@ bool SerializeLoad(_Tp& obj, const std::string& fileName, uint32_t* pVersion=NUL
 	if (!stream)
 		return false;
 	LOG("SceneSerialize2 - FRAN");
-	if (strncmp(szHeader, MVSI_PROJECT_ID, sizeHeader) != 0) {
+	if (strncmp(szHeader, MVSI_PROJECT_ID, 4) != 0) {
 		LOG("SceneSerialize2a - FRAN");
 		// try to load as the first version that didn't have a header
 		const size_t size(fileName.size());
