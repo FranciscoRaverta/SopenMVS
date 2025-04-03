@@ -104,7 +104,7 @@ bool Image::ReadSegmentedImage(IMAGEPTR pSegmentedImage, Image8U& image)
 		return false;
 	}
 	image.create(pSegmentedImage->GetHeight(), pSegmentedImage->GetWidth());
-	if (FAILED(pSegmentedImage->ReadData(image.data, PF_GRAY8, 3, (CImage::Size)image.step))) {
+	if (FAILED(pSegmentedImage->ReadData(image.data, PF_GRAY8, 1, (CImage::Size)image.step))) {
 		LOG("error: failed loading image data");
 		return false;
 	}
