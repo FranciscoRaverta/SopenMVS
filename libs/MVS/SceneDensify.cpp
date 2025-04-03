@@ -1778,9 +1778,9 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		#endif
 			LOG("ComputeDepth5 - FRAN image: %u", idxImage);
 			// skip invalid, uncalibrated or discarded images
-			LOG("ComputeDepth5.0 - FRAN");
+			LOG("ComputeDepth5.0 - FRAN - %u", idxImage);
 			Image& imageData = images[idxImage];
-			LOG("ComputeDepth5.1 - FRAN");
+			LOG("ComputeDepth5.1 - FRAN - %u", idxImage);
 			if (!imageData.IsValid()) {
 				#ifdef DENSE_USE_OPENMP
 				#pragma omp critical
@@ -1788,21 +1788,21 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 				imagesMap[idxImage] = NO_ID;
 				continue;
 			}
-			LOG("ComputeDepth5.2 - FRAN");
+			LOG("ComputeDepth5.2 - FRAN - %u", idxImage);
 			// map image index
 			#ifdef DENSE_USE_OPENMP
 			#pragma omp critical
 			#endif
-			LOG("ComputeDepth5.3 - FRAN");
+			LOG("ComputeDepth5.3 - FRAN - %u", idxImage);
 			{
 				imagesMap[idxImage] = data.images.GetSize();
 				data.images.Insert(idxImage);
 			}
-			LOG("ComputeDepth5.4 - FRAN");
+			LOG("ComputeDepth5.4 - FRAN - %u", idxImage);
 			// reload image at the appropriate resolution
 			unsigned nResolutionLevel(OPTDENSE::nResolutionLevel);
 			const unsigned nMaxResolution(imageData.RecomputeMaxResolution(nResolutionLevel, OPTDENSE::nMinResolution, OPTDENSE::nMaxResolution));
-			LOG("ComputeDepth5.5 - FRAN");
+			LOG("ComputeDepth5.5 - FRAN - %u", idxImage);
 			if (!imageData.ReloadImage(nMaxResolution)) {
 				#ifdef DENSE_USE_OPENMP
 				bAbort = true;
@@ -1812,14 +1812,14 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 				return false;
 				#endif
 			}
-			LOG("ComputeDepth5.6 - FRAN");
+			LOG("ComputeDepth5.6 - FRAN - %u", idxImage);
 			imageData.UpdateCamera(platforms);
-			LOG("ComputeDepth5.7 - FRAN");
+			LOG("ComputeDepth5.7 - FRAN - %u", idxImage);
 			// print image camera
 			DEBUG_ULTIMATE("K%d = \n%s", idxImage, cvMat2String(imageData.camera.K).c_str());
 			DEBUG_LEVEL(3, "R%d = \n%s", idxImage, cvMat2String(imageData.camera.R).c_str());
 			DEBUG_LEVEL(3, "C%d = \n%s", idxImage, cvMat2String(imageData.camera.C).c_str());
-			LOG("ComputeDepth5.8 - FRAN");
+			LOG("ComputeDepth5.8 - FRAN - %u", idxImage);
 		}
 		LOG("ComputeDepth6 - FRAN");
 		#ifdef DENSE_USE_OPENMP
