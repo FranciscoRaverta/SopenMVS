@@ -1763,7 +1763,8 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		LOG("ComputeDepth4 - FRAN");
 		data.images.Reserve(images.GetSize());
 		imagesMap.Resize(images.GetSize());
-		data.images.segmentation.Reserve(images.GetSize());
+		LOG("Size of images: %u", images.GetSize());
+		//data.images.segmentation.Reserve(images.GetSize());
 		#ifdef DENSE_USE_OPENMP
 		bool bAbort(false);
 		#pragma omp parallel for shared(data, bAbort)
