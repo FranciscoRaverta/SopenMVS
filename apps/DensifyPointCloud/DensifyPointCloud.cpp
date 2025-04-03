@@ -339,7 +339,6 @@ int main(int argc, LPCTSTR* argv)
 		VERBOSE("Segmentation path detected");
 		Util::ensureValidFolderPath(OPT::strSegmentationPath);
 		for (Image& image : scene.images) {
-			VERBOSE("Image segmentation path: %s", image.segmentationName.c_str());
 			if (!image.segmentationName.empty()) {
 				VERBOSE("error: Image %s has non-empty segmentationName %s", image.name.c_str(), image.segmentationName.c_str());
 				return EXIT_FAILURE;
@@ -349,6 +348,7 @@ int main(int argc, LPCTSTR* argv)
 				VERBOSE("error: Mask image %s not found", image.segmentationName.c_str());
 				return EXIT_FAILURE;
 			}
+			VERBOSE("Image segmentation path: %s", image.segmentationName.c_str());
 		}
 	}
 
