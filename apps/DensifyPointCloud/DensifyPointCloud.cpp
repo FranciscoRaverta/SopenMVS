@@ -266,7 +266,7 @@ bool Initialize(size_t argc, LPCTSTR* argv)
 	#endif
 
 	Util::Init();
-	VERBOSE("About to finilize initialization - FRAN");
+	LOG("About to finalize initialization - FRAN");
 	return true;
 }
 
@@ -336,19 +336,19 @@ int main(int argc, LPCTSTR* argv)
 	}
 	LOG("About to check segmentation path - FRAN");
 	if (!OPT::strSegmentationPath.empty()) {
-		VERBOSE("Segmentation path detected");
+		LOG("Segmentation path detected");
 		Util::ensureValidFolderPath(OPT::strSegmentationPath);
 		for (Image& image : scene.images) {
 			if (!image.segmentationName.empty()) {
-				VERBOSE("error: Image %s has non-empty segmentationName %s", image.name.c_str(), image.segmentationName.c_str());
+				LOG("error: Image %s has non-empty segmentationName %s", image.name.c_str(), image.segmentationName.c_str());
 				return EXIT_FAILURE;
 			}
 			image.segmentationName = OPT::strSegmentationPath + Util::getFileName(image.name) + ".png";
 			if (!File::access(image.segmentationName)) {
-				VERBOSE("error: Mask image %s not found", image.segmentationName.c_str());
+				LOG("error: Mask image %s not found", image.segmentationName.c_str());
 				return EXIT_FAILURE;
 			}
-			VERBOSE("Image segmentation path: %s", image.segmentationName.c_str());
+			LOG("Image segmentation path: %s", image.segmentationName.c_str());
 		}
 	}
 
