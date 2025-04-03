@@ -136,25 +136,25 @@ bool Image::LoadImage(const String& fileName, unsigned nMaxResolution)
 // open the stored image file name and read again the image data
 bool Image::ReloadImage(unsigned nMaxResolution, bool bLoadPixels)
 {
-	LOG("Reload1 - FRAN");
+	//LOG("Reload1 - FRAN");
 	IMAGEPTR pImage(bLoadPixels ? ReadImage(name, image) : ReadImageHeader(name));
-	LOG("Reload2 - FRAN");
+	LOG("Reload2 - FRAN - name: %s", name);
 	IMAGEPTR pSegmentedImage(bLoadPixels ? ReadSegmentedImage(segmentationName, segmentedImage) : ReadImageHeader(name));
-	LOG("Reload3 - FRAN");
+	LOG("Reload3 - FRAN - name: %s, segmented name: %s", name, segmentationName);
 	if (pImage == NULL) {
 		LOG("error: failed reloading image '%s'", name.c_str());
 		return false;
 	}
-	LOG("Reload4 - FRAN");
+	LOG("Reload4 - FRAN - name: %s", name);
 	if (!bLoadPixels) {
 		// init image size
 		width = pImage->GetWidth();
 		height = pImage->GetHeight();
 	}
-	LOG("Reload5 - FRAN");
+	LOG("Reload5 - FRAN - name: %s", name);
 	// resize image if needed
 	scale = ResizeImage(nMaxResolution);
-	LOG("Reload6 - FRAN");
+	LOG("Reload6 - FRAN - name: %s", name);
 	return true;
 } // ReloadImage
 /*----------------------------------------------------------------*/
