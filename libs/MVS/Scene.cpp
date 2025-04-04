@@ -81,9 +81,11 @@ bool Scene::LoadInterface(const String & fileName)
 	TD_TIMER_STARTD();
 	Interface obj;
 	// serialize in the current state
-	if (!ARCHIVE::SerializeLoad(obj, fileName))
+	if (!ARCHIVE::SerializeLoad(obj, fileName)) {
+		LOG("SerializeLoad Done!");
 		return false;
-
+	}
+	LOG("SerializeLoad Not Done!");
 	// import platforms and cameras
 	ASSERT(!obj.platforms.empty());
 	platforms.reserve((uint32_t)obj.platforms.size());
@@ -594,7 +596,7 @@ Scene::SCENE_TYPE Scene::Load(const String& fileName, bool bImport)
 		++nCalibratedImages;
 		nTotalPixels += imageData.width * imageData.height;
 	}
-	LOG("Calibrated cameras: %u" nCalibratedImages);
+	LOG("Calibrated cameras: %u", nCalibratedImages);
 	DEBUG_EXTRA("Scene loaded (%s):\n"
 				"\t%u images (%u calibrated) with a total of %.2f MPixels (%.2f MPixels/image)\n"
 				"\t%u points, %u vertices, %u faces",
