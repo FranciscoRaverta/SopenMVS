@@ -1718,7 +1718,7 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 			EstimatePointNormals(images, pointcloud);
 		LOG("DenseRecons11 - FRAN");
 		if (pointcloud.segmentations.IsEmpty() && OPTDENSE::nEstimateSegmentations == 1)
-			//EstimatePointSegmentations(images, pointcloud);										// Crear esta función - FRAN
+			EstimatePointSegmentations(images, pointcloud);										// Crear esta función - FRAN
 		LOG("DenseRecons12 - FRAN");
 	}
 	LOG("DenseRecons13 - FRAN");
@@ -2230,6 +2230,7 @@ void Scene::DenseReconstructionFilter(void* pData)
 // filter point-cloud based on camera-point visibility intersections
 void Scene::PointCloudFilter(int thRemove)
 {
+	LOG("BANDERA6");
 	TD_TIMER_STARTD();
 
 	typedef TOctree<PointCloud::PointArr,PointCloud::Point::Type,3,uint32_t> Octree;

@@ -440,6 +440,7 @@ bool Scene::LoadDMAP(const String& fileName)
 // ...
 bool Scene::LoadViewNeighbors(const String& fileName)
 {
+	LOG("BANDERA5");
 	TD_TIMER_STARTD();
 
 	// parse image list
@@ -543,6 +544,7 @@ bool Scene::Import(const String& fileName)
 
 Scene::SCENE_TYPE Scene::Load(const String& fileName, bool bImport)
 {
+	LOG("BANDERA3");
 	TD_TIMER_STARTD();
 	Release();
 

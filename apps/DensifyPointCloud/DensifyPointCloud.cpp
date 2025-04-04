@@ -298,6 +298,7 @@ int main(int argc, LPCTSTR* argv)
 
 	Scene scene(OPT::nMaxThreads);
 	if (OPT::fSampleMesh != 0) {
+		LOG("BANDERA1");
 		// sample input mesh and export the obtained point-cloud
 		if (!scene.Load(MAKE_PATH_SAFE(OPT::strInputFileName), true) || scene.mesh.IsEmpty())
 			return EXIT_FAILURE;
@@ -396,6 +397,7 @@ int main(int argc, LPCTSTR* argv)
 	}
 	if (OPT::fMaxSubsceneArea > 0) {
 		// split the scene in sub-scenes by maximum sampling area
+		LOG("BANDERA6.5");
 		Scene::ImagesChunkArr chunks;
 		scene.Split(chunks, OPT::fMaxSubsceneArea);
 		scene.ExportChunks(chunks, GET_PATH_FULL(OPT::strOutputFileName), (ARCHIVE_TYPE)OPT::nArchiveType);
@@ -417,9 +419,11 @@ int main(int argc, LPCTSTR* argv)
 			String::FormatString(_T("_%dviews"), ABS(OPT::nExportNumViews)));
 		if (OPT::nExportNumViews > 0) {
 			// export point-cloud containing only points with N+ views
+			LOG("BANDERA7");
 			scene.pointcloud.SaveNViews(baseFileName+_T(".ply"), (IIndex)OPT::nExportNumViews);
 		} else {
 			// save scene and export point-cloud containing only points with N+ views
+			LOG("BANDERA8");
 			scene.pointcloud.RemoveMinViews((IIndex)-OPT::nExportNumViews);
 			scene.Save(baseFileName+_T(".mvs"), (ARCHIVE_TYPE)OPT::nArchiveType);
 			scene.pointcloud.Save(baseFileName+_T(".ply"));
@@ -434,6 +438,7 @@ int main(int argc, LPCTSTR* argv)
 				VERBOSE("error: can not estimate normals as the point-cloud is not valid");
 				return EXIT_FAILURE;
 			}
+			LOG("BANDERA9");
 			EstimatePointNormals(scene.images, scene.pointcloud);
 		}
 		const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName)));
