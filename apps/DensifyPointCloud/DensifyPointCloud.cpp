@@ -298,7 +298,6 @@ int main(int argc, LPCTSTR* argv)
 
 	Scene scene(OPT::nMaxThreads);
 	if (OPT::fSampleMesh != 0) {
-		LOG("BANDERA1");
 		// sample input mesh and export the obtained point-cloud
 		if (!scene.Load(MAKE_PATH_SAFE(OPT::strInputFileName), true) || scene.mesh.IsEmpty())
 			return EXIT_FAILURE;

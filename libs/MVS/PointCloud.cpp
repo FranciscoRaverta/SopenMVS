@@ -320,7 +320,6 @@ namespace BasicPLY {
 // load the dense point cloud from a PLY file
 bool PointCloud::Load(const String& fileName)
 {
-	LOG("BANDERA2");
 	TD_TIMER_STARTD();
 
 	ASSERT(!fileName.empty());
