@@ -561,6 +561,7 @@ Scene::SCENE_TYPE Scene::Load(const String& fileName, bool bImport)
 		if (bImport && Import(fileName))
 			return SCENE_IMPORT;
 		LOG("FLAG before LoadInterface 1 - FRAN");
+		LOG("fileName: %s", fileName);
 		if (LoadInterface(fileName))
 			return SCENE_INTERFACE;
 		VERBOSE("error: invalid project");
@@ -593,6 +594,7 @@ Scene::SCENE_TYPE Scene::Load(const String& fileName, bool bImport)
 		++nCalibratedImages;
 		nTotalPixels += imageData.width * imageData.height;
 	}
+	LOG("Calibrated cameras: %u" nCalibratedImages);
 	DEBUG_EXTRA("Scene loaded (%s):\n"
 				"\t%u images (%u calibrated) with a total of %.2f MPixels (%.2f MPixels/image)\n"
 				"\t%u points, %u vertices, %u faces",
