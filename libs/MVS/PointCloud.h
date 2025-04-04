@@ -70,7 +70,7 @@ public:
 	typedef Pixel8U Color;
 	typedef CLISTDEFIDX(Color,Index) ColorArr;
 
-	typedef uint32_t Segmentation;
+	typedef uint8_t Segmentation;
 	typedef CLISTDEF0IDX(Segmentation,Index) SegmentationArr;
 
 	typedef AABB3f Box;
