@@ -205,6 +205,10 @@ bool Scene::LoadInterface(const String & fileName)
 			ASSERT(obj.vertices.size() == obj.verticesColor.size());
 			pointcloud.colors.CopyOf((const Pixel8U*)&obj.verticesColor[0].c, obj.vertices.size());
 		}
+		if (!obj.verticesSegmentation.empty()) {
+			ASSERT(obj.vertices.size() == obj.verticesSegmentation.size());
+			pointcloud.segmentations.CopyOf((const uint8_t*)&obj.verticesSegmentation[0].seg, obj.vertices.size());
+		}
 	}
 
 	// import region of interest
@@ -298,6 +302,15 @@ bool Scene::SaveInterface(const String & fileName, int version) const
 			const PointCloud::Color& color = pointcloud.colors[i];
 			MVS::Interface::Color& vertexColor = obj.verticesColor[i];
 			vertexColor.c = color;
+		}
+	}
+
+	if (!pointcloud.segmentations.IsEmpty()) {
+		obj.verticesSegmentation.resize(pointcloud.segmentations.size());
+		FOREACH(i, pointcloud.segmentations) {
+			const PointCloud::Segmentation& seg = pointcloud.segmentations[i];
+			MVS::Interface::Segmentation& vertexSegmentation = obj.verticesSegmentation[i];
+			vertexSegmentation.seg = seg;
 		}
 	}
 

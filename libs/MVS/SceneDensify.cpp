@@ -2347,6 +2347,7 @@ void Scene::PointCloudFilter(int thRemove)
 			if (visibility[idxPoint] <= thRemove) {
 				pc.points.push_back(pointcloud.points[idxPoint]);
 				pc.colors.push_back(pointcloud.colors[idxPoint]);
+				pc.segmentations.push_back(pointcloud.segmentations[idxPoint]);
 			}
 		}
 		pc.Save(MAKE_PATH("scene_dense_outliers.ply"));
