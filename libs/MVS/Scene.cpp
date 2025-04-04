@@ -81,11 +81,9 @@ bool Scene::LoadInterface(const String & fileName)
 	TD_TIMER_STARTD();
 	Interface obj;
 	// serialize in the current state
-	if (!ARCHIVE::SerializeLoad(obj, fileName)) {
-		LOG("SerializeLoad Done!");
+	if (!ARCHIVE::SerializeLoad(obj, fileName))
 		return false;
-	}
-	LOG("SerializeLoad Not Done!");
+
 	// import platforms and cameras
 	ASSERT(!obj.platforms.empty());
 	platforms.reserve((uint32_t)obj.platforms.size());
