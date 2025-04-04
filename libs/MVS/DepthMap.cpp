@@ -646,6 +646,8 @@ void DepthEstimator::ProcessPixel(IDX idx)
 			const Depth ndepth(depthMap0(nx));
 			if (ndepth > 0) {
 				#if DENSE_SMOOTHNESS != DENSE_SMOOTHNESS_NA
+				LOG("normalMap0(nx): %f", normalMap0(nx));
+				LOG("norm(normalMap0(nx): %f", norm(normalMap0(nx)));
 				ASSERT(ISEQUAL(norm(normalMap0(nx)), 1.f));
 				neighbors.emplace_back(nx);
 				neighborsClose.emplace_back(NeighborEstimate{ndepth,normalMap0(nx)
