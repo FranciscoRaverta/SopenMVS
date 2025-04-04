@@ -78,6 +78,7 @@ bool Scene::ImagesHaveNeighbors() const
 
 bool Scene::LoadInterface(const String & fileName)
 {
+	LOG("LoadInterfaceHere");
 	TD_TIMER_STARTD();
 	Interface obj;
 	// serialize in the current state
@@ -440,7 +441,6 @@ bool Scene::LoadDMAP(const String& fileName)
 // ...
 bool Scene::LoadViewNeighbors(const String& fileName)
 {
-	LOG("BANDERA5");
 	TD_TIMER_STARTD();
 
 	// parse image list
@@ -561,7 +561,6 @@ Scene::SCENE_TYPE Scene::Load(const String& fileName, bool bImport)
 		if (bImport && Import(fileName))
 			return SCENE_IMPORT;
 		LOG("FLAG before LoadInterface 1 - FRAN");
-		LOG("fileName: %s", fileName);
 		if (LoadInterface(fileName))
 			return SCENE_INTERFACE;
 		VERBOSE("error: invalid project");
@@ -594,7 +593,6 @@ Scene::SCENE_TYPE Scene::Load(const String& fileName, bool bImport)
 		++nCalibratedImages;
 		nTotalPixels += imageData.width * imageData.height;
 	}
-	LOG("Calibrated cameras: %u", nCalibratedImages);
 	DEBUG_EXTRA("Scene loaded (%s):\n"
 				"\t%u images (%u calibrated) with a total of %.2f MPixels (%.2f MPixels/image)\n"
 				"\t%u points, %u vertices, %u faces",
@@ -605,7 +603,6 @@ Scene::SCENE_TYPE Scene::Load(const String& fileName, bool bImport)
 	#else
 	if (bImport && Import(fileName))
 		return SCENE_IMPORT;
-	LOG("FLAG before LoadInterface 2 - FRAN");
 	if (LoadInterface(fileName))
 		return SCENE_INTERFACE;
 	return SCENE_NA;

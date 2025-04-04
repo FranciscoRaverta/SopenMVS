@@ -1572,7 +1572,6 @@ namespace BasicPLY {
 // import the mesh from the given file
 bool Mesh::Load(const String& fileName)
 {
-	LOG("BANDERA4");
 	TD_TIMER_STARTD();
 	const String ext(Util::getFileExt(fileName).ToLower());
 	bool ret;
