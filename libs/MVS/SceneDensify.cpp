@@ -1718,7 +1718,7 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 			EstimatePointNormals(images, pointcloud);
 		LOG("DenseRecons11 - FRAN");
 		if (pointcloud.segmentations.IsEmpty() && OPTDENSE::nEstimateSegmentations == 1)
-			EstimatePointSegmentations(images, pointcloud);										// Crear esta función - FRAN
+			//EstimatePointSegmentations(images, pointcloud);										// Crear esta función - FRAN
 		LOG("DenseRecons12 - FRAN");
 	}
 	LOG("DenseRecons13 - FRAN");
