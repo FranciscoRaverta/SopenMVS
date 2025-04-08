@@ -212,7 +212,7 @@ bool Scene::LoadInterface(const String & fileName)
 		}
 		if (!obj.verticesSegmentationConfidence.empty()) {
 			ASSERT(obj.vertices.size() == obj.verticesSegmentationConfidence.size());
-			pointcloud.segmentationConfidences.CopyOf((const uint8_t*)&obj.verticesSegmentationConfidence[0].segConf, obj.vertices.size());
+			pointcloud.segmentationConfidences.CopyOf((const float*)&obj.verticesSegmentationConfidence[0].segConf, obj.vertices.size());
 		}
 	}
 

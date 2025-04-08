@@ -292,7 +292,7 @@ namespace BasicPLY {
 			// 	ply.describe_property(elem_names[0], props[12]);
 			if (bSegmentation)
 				ply.describe_property(elem_names[0],props[10]);
-				ply.describe_property(elem_names[0],props[11])
+				ply.describe_property(elem_names[0],props[11]);
 			if (elem_count)
 				ply.element_count(elem_names[0], elem_count);
 		}
