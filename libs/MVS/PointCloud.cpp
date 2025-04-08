@@ -397,7 +397,7 @@ bool PointCloud::Save(const String& fileName, bool bViews, bool bLegacyTypes, bo
 		return false;
 
 	// write the header
-	BasicPLY::Vertex::InitSaveProps(ply, (int)points.size(), !colors.empty(), !normals.empty(), !segmentations.empty(), !segmentationConfidences.empty(),
+	BasicPLY::Vertex::InitSaveProps(ply, (int)points.size(), !colors.empty(), !normals.empty(), !segmentations.empty(), 
 		bViews && !pointViews.empty(), bViews && !pointWeights.empty());
 	if (!ply.header_complete())
 		return false;
@@ -411,10 +411,9 @@ bool PointCloud::Save(const String& fileName, bool bViews, bool bLegacyTypes, bo
 			vertex.c = colors[i];
 		if (!normals.empty())
 			vertex.n = normals[i];
-		if (!segmentations.empty())
+		if (!segmentations.empty()) {
 			vertex.seg = segmentations[i];
-		if (!segmentationConfidences.empty())
-			vertex.segConf = segmentationConfidences[i];
+			vertex.segConf = segmentationConfidences[i];}
 		if (!pointViews.empty()) {
 			vertex.views.num = pointViews[i].size();
 			vertex.views.pIndices = pointViews[i].data();
@@ -511,7 +510,7 @@ bool PointCloud::SaveWithScale(const String& fileName, const ImageArr& images, f
 		return false;
 
 	// export the array of 3D points
-	BasicPLY::Vertex::InitSaveProps(ply, (int)points.size(), !colors.empty(), !normals.empty(), !segmentations.empty(), !segmentationConfidences.empty(),false, false, true, true);
+	BasicPLY::Vertex::InitSaveProps(ply, (int)points.size(), !colors.empty(), !normals.empty(), !segmentations.empty(), false, false, true, true);
 	if (!ply.header_complete())
 		return false;
 	BasicPLY::Vertex vertex;
@@ -522,10 +521,9 @@ bool PointCloud::SaveWithScale(const String& fileName, const ImageArr& images, f
 			vertex.c = colors[i];
 		if (!normals.empty())
 		vertex.n = normals[i];
-		if (!segmentations.empty())
+		if (!segmentations.empty()) {
 			vertex.seg = segmentations[i];
-		if (!segmentationConfidences.empty())
-			vertex.segConf = segmentationConfidences[i];
+			vertex.segConf = segmentationConfidences[i];}
 		#if 0
 		// one sample per view
 		vertex.confidence = 1;
