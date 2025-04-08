@@ -1429,9 +1429,9 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 	pointcloud.pointWeights.Reserve(nPointsEstimate);
 	if (bEstimateColor)
 		pointcloud.colors.Reserve(nPointsEstimate);
-	if (bEstimateSegmentation)
+	if (bEstimateSegmentation) {
 		pointcloud.segmentations.Reserve(nPointsEstimate);
-		pointcloud.segmentationConfidences.Reserve(nPointsEstimate);
+		pointcloud.segmentationConfidences.Reserve(nPointsEstimate); }
 	if (bEstimateNormal)
 		pointcloud.normals.Reserve(nPointsEstimate);
 	Util::Progress progress(_T("Fused depth-maps"), connections.GetSize());
@@ -1542,7 +1542,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				}
 				uint32_t modeColor = 0;
 				uint32_t totalQuantity = 0;
-				int maxCount = 0;
+				uint32_t maxCount = 0;
 				float segConfidence = 0; 
 				for (const auto& [color, count] : segmentationFrequency) {
 					totalQuantity = totalQuantity + count;
@@ -1551,7 +1551,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						modeColor = color;
 					}
 				}
-				segConfidence = maxCount / totalQuantity;
+				segConfidence = static_cast<float>(maxCount) / static_cast<float>(totalQuantity);
 				if (views.size() < nMinViewsFuse) {
 					// remove point
 					FOREACH(v, views) {
