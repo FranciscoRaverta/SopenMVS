@@ -73,6 +73,9 @@ public:
 	typedef uint8_t Segmentation;
 	typedef CLISTDEF0IDX(Segmentation,Index) SegmentationArr;
 
+	typedef float SegmentationConfidence;
+	typedef CLISTDEF0IDX(SegmentationConfidence,Index) SegmentationConfArr;
+
 	typedef AABB3f Box;
 
 	typedef TOctree<PointArr,Point::Type,3> Octree;
@@ -84,6 +87,7 @@ public:
 	NormalArr normals;
 	ColorArr colors;
 	SegmentationArr segmentations;
+	SegmentationConfArr segmentationConfidences;
 
 public:
 	PointCloud& Swap(PointCloud&);

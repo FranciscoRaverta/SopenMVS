@@ -210,6 +210,10 @@ bool Scene::LoadInterface(const String & fileName)
 			ASSERT(obj.vertices.size() == obj.verticesSegmentation.size());
 			pointcloud.segmentations.CopyOf((const uint8_t*)&obj.verticesSegmentation[0].seg, obj.vertices.size());
 		}
+		if (!obj.verticesSegmentationConfidence.empty()) {
+			ASSERT(obj.vertices.size() == obj.verticesSegmentationConfidence.size());
+			pointcloud.segmentationConfidences.CopyOf((const uint8_t*)&obj.verticesSegmentationConfidence[0].segConf, obj.vertices.size());
+		}
 	}
 
 	// import region of interest
@@ -312,6 +316,15 @@ bool Scene::SaveInterface(const String & fileName, int version) const
 			const PointCloud::Segmentation& seg = pointcloud.segmentations[i];
 			MVS::Interface::Segmentation& vertexSegmentation = obj.verticesSegmentation[i];
 			vertexSegmentation.seg = seg;
+		}
+	}
+
+	if (!pointcloud.segmentationConfidences.IsEmpty()) {
+		obj.verticesSegmentationConfidence.resize(pointcloud.segmentationConfidences.size());
+		FOREACH(i, pointcloud.segmentationConfidences) {
+			const PointCloud::SegmentationConfidence& segConf = pointcloud.segmentationConfidences[i];
+			MVS::Interface::SegmentationConfidence& vertexSegmentationConfidence = obj.verticesSegmentationConfidence[i];
+			vertexSegmentationConfidence.segConf = segConf;
 		}
 	}
 
@@ -2078,6 +2091,7 @@ void Scene::InitTowerScene(const int towerMode)
 				pointcloud.colors.emplace_back(towerPC.colors[idxPoint]);
 			if (bHasSegmentations)
 				pointcloud.segmentations.emplace_back(towerPC.segmentations[idxPoint]);
+				pointcloud.segmentationConfidences.emplace_back(towerPC.segmentationConfidences[idxPoint]);
 			if (bHasWeights)
 				pointcloud.pointWeights.emplace_back(towerPC.pointWeights[idxPoint]);
 		}
@@ -2106,6 +2120,7 @@ void Scene::InitTowerScene(const int towerMode)
 				pointcloud.colors.emplace_back(towerPC.colors[idxPoint]);
 			if (bHasSegmentations)
 				pointcloud.segmentations.emplace_back(towerPC.segmentations[idxPoint]);
+				pointcloud.segmentationConfidences.emplace_back(towerPC.segmentationConfidences[idxPoint]);
 			if (bHasWeights)
 				pointcloud.pointWeights.emplace_back(towerPC.pointWeights[idxPoint]);
 		}

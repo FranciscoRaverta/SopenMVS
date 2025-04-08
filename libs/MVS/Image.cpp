@@ -181,7 +181,6 @@ float Image::ResizeImage(unsigned nMaxResolution)
 	width = (uint32_t)scaledSize.width;
 	height = (uint32_t)scaledSize.height;
 	if (!image.empty())
-		LOG("Scaling the images by: %u", scaledSize);
 		cv::resize(image, image, scaledSize, 0, 0, cv::INTER_AREA);
 		cv::resize(segmentedImage, segmentedImage, scaledSize, 0, 0, cv::INTER_AREA);
 	return static_cast<float>(scale);
