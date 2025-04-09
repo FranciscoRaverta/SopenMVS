@@ -81,10 +81,13 @@ void PointCloud::RemovePoint(IDX idx)
 	ASSERT(colors.IsEmpty() || colors.GetSize() == points.GetSize());
 	if (!colors.IsEmpty())
 		colors.RemoveAt(idx);
-	points.RemoveAt(idx);
-	ASSERT(segmentations.IsEmpty() || segmentations.GetSize() == segmentations.GetSize());
+	ASSERT(segmentations.IsEmpty() || segmentations.GetSize() == points.GetSize());
 	if (!segmentations.IsEmpty())
 		segmentations.RemoveAt(idx);
+	ASSERT(segmentationConfidences.IsEmpty() || segmentationConfidences.GetSize() == points.GetSize());
+	if (!segmentationConfidences.IsEmpty())
+		segmentationConfidences.RemoveAt(idx);
+	points.RemoveAt(idx);
 }
 void PointCloud::RemovePointsOutside(const OBB3f& obb) {
 	ASSERT(obb.IsValid());
@@ -282,17 +285,17 @@ namespace BasicPLY {
 				ply.describe_property(elem_names[0], 3, props+3);
 			if (bNormals)
 				ply.describe_property(elem_names[0], 3, props+6);
-			// if (bViews) // ODM: always output "views" in PLY
-				ply.describe_property(elem_names[0], props[9]);
 			// if (bWeights)
 			// 	ply.describe_property(elem_names[0], props[10]);
 			// if (bConfidence)
 			// 	ply.describe_property(elem_names[0], props[11]);
 			// if (bScale)
 			// 	ply.describe_property(elem_names[0], props[12]);
-			if (bSegmentation)
-				ply.describe_property(elem_names[0],props[10]);
-				ply.describe_property(elem_names[0],props[11]);
+			if (bSegmentation) {
+				ply.describe_property(elem_names[0],props[9]);
+				ply.describe_property(elem_names[0],props[10]); }
+			// if (bViews) // ODM: always output "views" in PLY
+			ply.describe_property(elem_names[0], props[11]);
 			if (elem_count)
 				ply.element_count(elem_names[0], elem_count);
 		}
@@ -309,7 +312,7 @@ namespace BasicPLY {
 		{"ny",            				PLY::Float32, PLY::Float32, offsetof(Vertex,n.y), 0, 0, 0, 0},
 		{"nz",            				PLY::Float32, PLY::Float32, offsetof(Vertex,n.z), 0, 0, 0, 0},
 		{"segmentation",  				PLY::Uint8,   PLY::Uint8,   offsetof(Vertex,seg), 0, 0, 0, 0},
-		{"segmentation confidence",  	PLY::Uint8,   PLY::Uint8,   offsetof(Vertex,segConf), 0, 0, 0, 0},
+		{"segmentationConfidence",  	PLY::Uint8,   PLY::Uint8,   offsetof(Vertex,segConf), 0, 0, 0, 0},
 		{"views",         				PLY::Uint8,   PLY::Uint8,   offsetof(Vertex,views.num), 0, 0, 0, 0}
 		//{"view_indices",  PLY::Uint32,  PLY::Uint32,  offsetof(Vertex,views.pIndices), 1, PLY::Uint8, PLY::Uint8, offsetof(Vertex,views.num)},
 		//{"view_weights",  PLY::Float32, PLY::Float32, offsetof(Vertex,views.pWeights), 1, PLY::Uint8, PLY::Uint8, offsetof(Vertex,views.num)},

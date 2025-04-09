@@ -1322,7 +1322,7 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 		pointcloud.normals.reserve(nPointsEstimate);
 	if (bEstimateSegmentation)
 		pointcloud.segmentations.reserve(nPointsEstimate);
-		//pointcloud.segmentationConfidences.reserve(nPointsEstimate);
+		pointcloud.segmentationConfidences.reserve(nPointsEstimate);
 	Util::Progress progress(_T("Merged depth-maps"), arrDepthData.size());
 	GET_LOGCONSOLE().Pause();
 	FOREACH(idxImage, arrDepthData) {
@@ -1351,6 +1351,7 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 					pointcloud.colors.emplace_back(image.pImageData->image(x));
 				if (bEstimateSegmentation)
 					pointcloud.segmentations.emplace_back(image.pSegmentedImageData->segmentedImage(x)); // Chequear que esté bien - FRAN
+					pointcloud.segmentationConfidences.emplace_back(0.f); // Chequear que esté bien - FRAN
 				if (bEstimateNormal)
 					depthData.GetNormal(x, pointcloud.normals.emplace_back());
 				++nDepths;
@@ -1552,6 +1553,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					}
 				}
 				segConfidence = static_cast<float>(maxCount) / static_cast<float>(totalQuantity);
+				LOG("segConfidence: %f", segConfidence);
 				if (views.size() < nMinViewsFuse) {
 					// remove point
 					FOREACH(v, views) {
@@ -2356,6 +2358,7 @@ void Scene::PointCloudFilter(int thRemove)
 				pc.points.push_back(pointcloud.points[idxPoint]);
 				pc.colors.push_back(pointcloud.colors[idxPoint]);
 				pc.segmentations.push_back(pointcloud.segmentations[idxPoint]);
+				pc.segmentationConfidences.push_back(pointcloud.segmentationConfidences[idxPoint]);
 			}
 		}
 		pc.Save(MAKE_PATH("scene_dense_outliers.ply"));
