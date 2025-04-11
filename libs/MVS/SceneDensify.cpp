@@ -1351,7 +1351,7 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 					pointcloud.colors.emplace_back(image.pImageData->image(x));
 				if (bEstimateSegmentation)
 					pointcloud.segmentations.emplace_back(image.pSegmentedImageData->segmentedImage(x)); // Chequear que esté bien - FRAN
-					pointcloud.segmentationConfidences.emplace_back(1.f); // Chequear que esté bien - FRAN
+					pointcloud.segmentationConfidences.emplace_back(0.f); // Chequear que esté bien - FRAN
 				if (bEstimateNormal)
 					depthData.GetNormal(x, pointcloud.normals.emplace_back());
 				++nDepths;
@@ -1490,6 +1490,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				Pixel32F C(Cast<float>(imageData.image(x))*confidence);
 				std::unordered_map<uint8_t, int> segmentationFrequency;
 				uint8_t segmentationColor;
+				uint32_t totalQuantity = 0;
 				PointCloud::Normal N(normal*confidence);
 				invalidDepths.Empty();
 				for (const ViewScore& neighbor: depthData.neighbors) {
@@ -1526,10 +1527,11 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							X += imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB))*REAL(confidenceB);
 							if (bEstimateColor)
 								C += Cast<float>(imageDataB.image(xB))*confidenceB;
-							if (bEstimateSegmentation)
+							if (bEstimateSegmentation) {
 								//C += Cast<float>(imageDataB.image(xB))*confidenceB; // Chequear si quedó bien - FRAN
 								segmentationColor = Cast<uint8_t>(imageDataB.segmentedImage(xB)); // Convert to a 32-bit packed color
 								segmentationFrequency[segmentationColor]++;
+								totalQuantity++; } 
 							if (bEstimateNormal)
 								N += normalB*confidenceB;
 							confidence += confidenceB;
@@ -1542,11 +1544,11 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					}
 				}
 				uint32_t modeColor = 0;
-				uint32_t totalQuantity = 0;
+				//uint32_t totalQuantity = 0;
 				uint32_t maxCount = 0;
 				float segConfidence = 0; 
 				for (const auto& [color, count] : segmentationFrequency) {
-					totalQuantity = totalQuantity + count;
+					//totalQuantity = totalQuantity + count;
 					if (count > maxCount) {
 						maxCount = count;
 						modeColor = color;
@@ -1583,6 +1585,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					for (Depth* pDepth: invalidDepths)
 						*pDepth = 0;
 				}
+				segConfidence = 0;
+				totalQuantity = 0;
 			}
 		}
 		ASSERT(pointcloud.points.size() == pointcloud.pointViews.size() && pointcloud.points.size() == pointcloud.pointWeights.size() && pointcloud.points.size() == projs.size());
