@@ -1546,8 +1546,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				uint32_t modeColor = 0;
 				//uint32_t totalQuantity = 0;
 				uint32_t maxCount = 0;
-				float segConfidence = 0; 
-				for (const auto& [color, count] : segmentationFrequency) {
+				float segConfidence = 0.f; 
+				/*for (const auto& [color, count] : segmentationFrequency) {
 					//totalQuantity = totalQuantity + count;
 					if (count > maxCount) {
 						maxCount = count;
@@ -1555,6 +1555,19 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					}
 				}
 				segConfidence = static_cast<float>(maxCount) / static_cast<float>(totalQuantity);
+				*/
+				if (totalQuantity > 0) {
+					for (const auto& [color, count] : segmentationFrequency) {
+						if (count > maxCount) {
+							maxCount = count;
+							modeColor = color;
+						}
+					}
+					segConfidence = static_cast<float>(maxCount) / static_cast<float>(totalQuantity);
+				} else {
+					modeColor = 0;       // or some invalid default
+					segConfidence = 1.f; // or maybe -1 to signal "undefined" if needed
+				}
 				LOG("segConfidence: %f", segConfidence);
 				if (views.size() < nMinViewsFuse) {
 					// remove point
