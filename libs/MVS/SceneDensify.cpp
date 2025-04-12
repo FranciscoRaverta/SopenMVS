@@ -1351,7 +1351,7 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 					pointcloud.colors.emplace_back(image.pImageData->image(x));
 				if (bEstimateSegmentation)
 					pointcloud.segmentations.emplace_back(image.pSegmentedImageData->segmentedImage(x)); // Chequear que esté bien - FRAN
-					pointcloud.segmentationConfidences.emplace_back(0.f); // Chequear que esté bien - FRAN
+					pointcloud.segmentationConfidences.emplace_back(1.f); // Chequear que esté bien - FRAN
 				if (bEstimateNormal)
 					depthData.GetNormal(x, pointcloud.normals.emplace_back());
 				++nDepths;
@@ -1490,7 +1490,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				Pixel32F C(Cast<float>(imageData.image(x))*confidence);
 				std::unordered_map<uint8_t, int> segmentationFrequency;
 				uint8_t segmentationColor;
-				uint32_t totalQuantity = 0;
+				float totalQuantity = 0.f;
 				PointCloud::Normal N(normal*confidence);
 				invalidDepths.Empty();
 				for (const ViewScore& neighbor: depthData.neighbors) {
@@ -1545,7 +1545,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				}
 				uint32_t modeColor = 0;
 				//uint32_t totalQuantity = 0;
-				uint32_t maxCount = 0;
+				float maxCount = 0.f;
 				float segConfidence = 0.f; 
 				/*for (const auto& [color, count] : segmentationFrequency) {
 					//totalQuantity = totalQuantity + count;
@@ -1563,7 +1563,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							modeColor = color;
 						}
 					}
-					segConfidence = static_cast<float>(maxCount) / static_cast<float>(totalQuantity);
+					segConfidence = maxCount / totalQuantity;
 				} else {
 					modeColor = 0;       // or some invalid default
 					segConfidence = 1.f; // or maybe -1 to signal "undefined" if needed
@@ -1598,8 +1598,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					for (Depth* pDepth: invalidDepths)
 						*pDepth = 0;
 				}
-				segConfidence = 0;
-				totalQuantity = 0;
+				segConfidence = 0.f;
+				totalQuantity = 0.f;
 			}
 		}
 		ASSERT(pointcloud.points.size() == pointcloud.pointViews.size() && pointcloud.points.size() == pointcloud.pointWeights.size() && pointcloud.points.size() == projs.size());
