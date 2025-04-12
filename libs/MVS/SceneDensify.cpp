@@ -1531,7 +1531,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								//C += Cast<float>(imageDataB.image(xB))*confidenceB; // Chequear si quedó bien - FRAN
 								segmentationColor = Cast<uint8_t>(imageDataB.segmentedImage(xB)); // Convert to a 32-bit packed color
 								segmentationFrequency[segmentationColor]++;
-								totalQuantity++; } 
+								//totalQuantity++; 
+							} 
 							if (bEstimateNormal)
 								N += normalB*confidenceB;
 							confidence += confidenceB;
@@ -1546,16 +1547,16 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				uint32_t modeColor = 0;
 				//uint32_t totalQuantity = 0;
 				float maxCount = 0.f;
-				float segConfidence = 0.f; 
-				/*for (const auto& [color, count] : segmentationFrequency) {
-					//totalQuantity = totalQuantity + count;
-					if (count > maxCount) {
-						maxCount = count;
+				float segConfidence = 1.f; 
+				for (const auto& [color, count] : segmentationFrequency) {
+					totalQuantity = totalQuantity + static_cast<float>(count);
+					if (static_cast<float>(count) > maxCount) {
+						maxCount = static_cast<float>(count);
 						modeColor = color;
 					}
 				}
-				segConfidence = static_cast<float>(maxCount) / static_cast<float>(totalQuantity);
-				*/
+				segConfidence = maxCount / totalQuantity;
+				/*
 				if (totalQuantity > 0) {
 					for (const auto& [color, count] : segmentationFrequency) {
 						if (count > maxCount) {
@@ -1563,11 +1564,11 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							modeColor = color;
 						}
 					}
-					segConfidence = maxCount / totalQuantity;
+					segConfidence = maxCount / segmentationFrequency.;
 				} else {
 					modeColor = 0;       // or some invalid default
 					segConfidence = 1.f; // or maybe -1 to signal "undefined" if needed
-				}
+				}*/
 				LOG("segConfidence: %f", segConfidence);
 				if (views.size() < nMinViewsFuse) {
 					// remove point
@@ -1598,7 +1599,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					for (Depth* pDepth: invalidDepths)
 						*pDepth = 0;
 				}
-				segConfidence = 0.f;
+				segConfidence = 1.f;
 				totalQuantity = 0.f;
 			}
 		}
