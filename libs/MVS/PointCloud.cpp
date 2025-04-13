@@ -312,7 +312,7 @@ namespace BasicPLY {
 		{"ny",            				PLY::Float32, PLY::Float32, offsetof(Vertex,n.y), 0, 0, 0, 0},
 		{"nz",            				PLY::Float32, PLY::Float32, offsetof(Vertex,n.z), 0, 0, 0, 0},
 		{"segmentation",  				PLY::Uint8,   PLY::Uint8,   offsetof(Vertex,seg), 0, 0, 0, 0},
-		{"segmentationConfidence",  	PLY::Uint8,   PLY::Uint8,   offsetof(Vertex,segConf), 0, 0, 0, 0},
+		{"segmentationConfidence",  	PLY::Float32, PLY::Float32, offsetof(Vertex,segConf), 0, 0, 0, 0},
 		{"views",         				PLY::Uint8,   PLY::Uint8,   offsetof(Vertex,views.num), 0, 0, 0, 0}
 		//{"view_indices",  PLY::Uint32,  PLY::Uint32,  offsetof(Vertex,views.pIndices), 1, PLY::Uint8, PLY::Uint8, offsetof(Vertex,views.num)},
 		//{"view_weights",  PLY::Float32, PLY::Float32, offsetof(Vertex,views.pWeights), 1, PLY::Uint8, PLY::Uint8, offsetof(Vertex,views.num)},
