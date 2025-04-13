@@ -1488,7 +1488,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				// check the projection in the neighbor depth-maps
 				Point3 X(point*confidence);
 				Pixel32F C(Cast<float>(imageData.image(x))*confidence);
-				std::unordered_map<uint8_t, int> segmentationFrequency;
+				std::unordered_map<uint8_t, float> segmentationFrequency;
 				uint8_t segmentationColor;
 				float totalQuantity = 0.f;
 				PointCloud::Normal N(normal*confidence);
@@ -1549,13 +1549,13 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				float maxCount = 0.f;
 				float segConfidence = 1.f; 
 				for (const auto& [color, count] : segmentationFrequency) {
-					totalQuantity = totalQuantity + static_cast<float>(count);
-					if (static_cast<float>(count) > maxCount) {
-						maxCount = static_cast<float>(count);
+					totalQuantity = totalQuantity + count;
+					if (count > maxCount) {
+						maxCount = count;
 						modeColor = color;
 					}
 				}
-				segConfidence = maxCount / views.num; // provar maxCount/views.num
+				segConfidence = maxCount / totalQuantity; // provar maxCount/views.num
 				/*
 				if (totalQuantity > 0) {
 					for (const auto& [color, count] : segmentationFrequency) {
@@ -1589,10 +1589,10 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					ASSERT(ISFINITE(point));
 					if (bEstimateColor)
 						pointcloud.colors.emplace_back((C*(float)nrm).cast<uint8_t>());
-					if (bEstimateSegmentation)
+					if (bEstimateSegmentation) {
 						//pointcloud.colors.emplace_back((C*(float)nrm).cast<uint8_t>()); // Chequear si esto quedó bien - FRAN
 						pointcloud.segmentations.emplace_back(modeColor);
-						pointcloud.segmentationConfidences.emplace_back(segConfidence);
+						pointcloud.segmentationConfidences.emplace_back(segConfidence); }
 					if (bEstimateNormal)
 						pointcloud.normals.emplace_back(normalized(N*(float)nrm));
 					// invalidate all neighbor depths that do not agree with it
