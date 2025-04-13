@@ -1555,7 +1555,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						modeColor = color;
 					}
 				}
-				segConfidence = maxCount / totalQuantity;
+				segConfidence = maxCount / views.num; // provar maxCount/views.num
 				/*
 				if (totalQuantity > 0) {
 					for (const auto& [color, count] : segmentationFrequency) {
