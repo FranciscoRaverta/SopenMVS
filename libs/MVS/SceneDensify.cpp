@@ -1490,7 +1490,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				Pixel32F C(Cast<float>(imageData.image(x))*confidence);
 				std::unordered_map<uint8_t, float> segmentationFrequency;
 				uint8_t segmentationColor = Cast<uint8_t>(imageData.segmentedImage(x)); // Convert to a 32-bit packed color
-				//segmentationFrequency[segmentationColor]++;
+				segmentationFrequency[segmentationColor]++;
 				//float totalQuantity = 0.f;
 				PointCloud::Normal N(normal*confidence);
 				invalidDepths.Empty();
