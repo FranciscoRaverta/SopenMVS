@@ -139,7 +139,7 @@ bool Image::ReloadImage(unsigned nMaxResolution, bool bLoadPixels)
 	LOG("Reload1 - FRAN");
 	IMAGEPTR pImage(bLoadPixels ? ReadImage(name, image) : ReadImageHeader(name));
 	LOG("Reload2 - FRAN");
-	IMAGEPTR pSegmentedImage(bLoadPixels ? ReadSegmentedImage(segmentationName, segmentedImage) : ReadImageHeader(name));
+	//IMAGEPTR pSegmentedImage(bLoadPixels ? ReadSegmentedImage(segmentationName, segmentedImage) : ReadImageHeader(name));
 	LOG("Reload3 - FRAN");
 	if (pImage == NULL) {
 		LOG("error: failed reloading image '%s'", name.c_str());
@@ -220,21 +220,16 @@ Image Image::GetImage(const PlatformArr& platforms, double scale, bool bUseImage
 // compute the camera extrinsics from the platform pose and the relative camera pose to the platform
 Camera Image::GetCamera(const PlatformArr& platforms, const Image8U::Size& resolution) const
 {
-	LOG("GetCamera1 - FRAN");
+	LOG("GetCamera - FRAN");
 	ASSERT(platformID != NO_ID);
 	ASSERT(cameraID != NO_ID);
 	ASSERT(poseID != NO_ID);
-	LOG("GetCamera2 - FRAN");
 	// compute the normalized absolute camera pose
 	const Platform& platform = platforms[platformID];
-	LOG("GetCamera3 - FRAN");
 	Camera camera(platform.GetCamera(cameraID, poseID));
-	LOG("GetCamera4 - FRAN");
 	// compute the unnormalized camera
 	camera.K = camera.GetK<REAL>(resolution.width, resolution.height);
-	LOG("GetCamera5 - FRAN");
 	camera.ComposeP();
-	LOG("GetCamera6 - FRAN");
 	return camera;
 } // GetCamera
 void Image::UpdateCamera(const PlatformArr& platforms)

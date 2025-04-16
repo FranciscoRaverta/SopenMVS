@@ -1776,15 +1776,16 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 // results are saved to "data"
 bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 {
-	LOG("ComputeDepth1 - FRAN");
+	LOG("ComputeDepth0 - FRAN");
 	// compute point-cloud from the existing mesh
 	if (!mesh.IsEmpty() && !ImagesHaveNeighbors()) {
+		LOG("ComputeDepth1 - FRAN");
 		SampleMeshWithVisibility();
 		mesh.Release();
 	}
-	LOG("ComputeDepth2 - FRAN");
 	// compute point-cloud from the existing mesh
 	if (IsEmpty() && !ImagesHaveNeighbors()) {
+		LOG("ComputeDepth2 - FRAN");
 		VERBOSE("warning: empty point-cloud, rough neighbor views selection based on image pairs baseline");
 		EstimateNeighborViewsPointCloud();
 	}
