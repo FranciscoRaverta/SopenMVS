@@ -139,7 +139,7 @@ bool Image::ReloadImage(unsigned nMaxResolution, bool bLoadPixels)
 	LOG("Reload1 - FRAN");
 	IMAGEPTR pImage(bLoadPixels ? ReadImage(name, image) : ReadImageHeader(name));
 	LOG("Reload2 - FRAN");
-	//IMAGEPTR pSegmentedImage(bLoadPixels ? ReadSegmentedImage(segmentationName, segmentedImage) : ReadImageHeader(name));
+	IMAGEPTR pSegmentedImage(bLoadPixels ? ReadSegmentedImage(segmentationName, segmentedImage) : ReadImageHeader(name));
 	LOG("Reload3 - FRAN");
 	if (pImage == NULL) {
 		LOG("error: failed reloading image '%s'", name.c_str());
