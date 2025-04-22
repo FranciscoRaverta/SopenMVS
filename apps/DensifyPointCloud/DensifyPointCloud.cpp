@@ -341,7 +341,7 @@ int main(int argc, LPCTSTR* argv)
 		for (Image& image : scene.images) {
 			if (!image.segmentationName.empty()) {
 				LOG("error: Image %s has non-empty segmentationName %s", image.name.c_str(), image.segmentationName.c_str());
-				//return EXIT_FAILURE;
+				return EXIT_FAILURE;
 			}
 			image.segmentationName = OPT::strSegmentationPath + Util::getFileName(image.name) + ".png";
 			if (!File::access(image.segmentationName)) {
