@@ -182,7 +182,7 @@ float Image::ResizeImage(unsigned nMaxResolution)
 	height = (uint32_t)scaledSize.height;
 	if (!image.empty()) {
 		cv::resize(image, image, scaledSize, 0, 0, cv::INTER_AREA);
-		cv::resize(segmentedImage, segmentedImage, scaledSize, 0, 0, cv::INTER_NEAREST); }
+		//cv::resize(segmentedImage, segmentedImage, scaledSize, 0, 0, cv::INTER_NEAREST); }
 	return static_cast<float>(scale);
 } // ResizeImage
 /*----------------------------------------------------------------*/
@@ -220,7 +220,7 @@ Image Image::GetImage(const PlatformArr& platforms, double scale, bool bUseImage
 // compute the camera extrinsics from the platform pose and the relative camera pose to the platform
 Camera Image::GetCamera(const PlatformArr& platforms, const Image8U::Size& resolution) const
 {
-	LOG("GetCamera - FRAN");
+	//LOG("GetCamera - FRAN");
 	ASSERT(platformID != NO_ID);
 	ASSERT(cameraID != NO_ID);
 	ASSERT(poseID != NO_ID);
