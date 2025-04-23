@@ -1810,11 +1810,11 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		#else
 		FOREACH(idxImage, images) {
 		#endif
-			LOG("ComputeDepth5 - FRAN image: %u", idxImage);
+			//LOG("ComputeDepth5 - FRAN image: %u", idxImage);
 			// skip invalid, uncalibrated or discarded images
-			LOG("ComputeDepth5.0 - FRAN - %u", idxImage);
+			//LOG("ComputeDepth5.0 - FRAN - %u", idxImage);
 			Image& imageData = images[idxImage];
-			LOG("ComputeDepth5.1 - FRAN - %u", idxImage);
+			//LOG("ComputeDepth5.1 - FRAN - %u", idxImage);
 			if (!imageData.IsValid()) {
 				#ifdef DENSE_USE_OPENMP
 				#pragma omp critical
@@ -1822,21 +1822,21 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 				imagesMap[idxImage] = NO_ID;
 				continue;
 			}
-			LOG("ComputeDepth5.2 - FRAN - %u", idxImage);
+			//LOG("ComputeDepth5.2 - FRAN - %u", idxImage);
 			// map image index
 			#ifdef DENSE_USE_OPENMP
 			#pragma omp critical
 			#endif
-			LOG("ComputeDepth5.3 - FRAN - %u", idxImage);
+			//LOG("ComputeDepth5.3 - FRAN - %u", idxImage);
 			{
 				imagesMap[idxImage] = data.images.GetSize();
 				data.images.Insert(idxImage);
 			}
-			LOG("ComputeDepth5.4 - FRAN - %u", idxImage);
+			//LOG("ComputeDepth5.4 - FRAN - %u", idxImage);
 			// reload image at the appropriate resolution
 			unsigned nResolutionLevel(OPTDENSE::nResolutionLevel);
 			const unsigned nMaxResolution(imageData.RecomputeMaxResolution(nResolutionLevel, OPTDENSE::nMinResolution, OPTDENSE::nMaxResolution));
-			LOG("ComputeDepth5.5 - FRAN - %u", idxImage);
+			//LOG("ComputeDepth5.5 - FRAN - %u", idxImage);
 			if (!imageData.ReloadImage(nMaxResolution)) {
 				#ifdef DENSE_USE_OPENMP
 				bAbort = true;
@@ -1846,16 +1846,16 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 				return false;
 				#endif
 			}
-			LOG("ComputeDepth5.6 - FRAN - %u", idxImage);
+			//LOG("ComputeDepth5.6 - FRAN - %u", idxImage);
 			imageData.UpdateCamera(platforms);
-			LOG("ComputeDepth5.7 - FRAN - %u", idxImage);
+			//LOG("ComputeDepth5.7 - FRAN - %u", idxImage);
 			// print image camera
 			DEBUG_ULTIMATE("K%d = \n%s", idxImage, cvMat2String(imageData.camera.K).c_str());
 			DEBUG_LEVEL(3, "R%d = \n%s", idxImage, cvMat2String(imageData.camera.R).c_str());
 			DEBUG_LEVEL(3, "C%d = \n%s", idxImage, cvMat2String(imageData.camera.C).c_str());
-			LOG("ComputeDepth5.8 - FRAN - %u", idxImage);
+			//LOG("ComputeDepth5.8 - FRAN - %u", idxImage);
 		}
-		LOG("ComputeDepth6 - FRAN");
+		//LOG("ComputeDepth6 - FRAN");
 		#ifdef DENSE_USE_OPENMP
 		if (bAbort || data.images.IsEmpty()) {
 		#else
@@ -1864,10 +1864,10 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 			VERBOSE("error: preparing images for dense reconstruction failed (errors loading images)");
 			return false;
 		}
-		LOG("ComputeDepth7 - FRAN");
+		//LOG("ComputeDepth7 - FRAN");
 		VERBOSE("Preparing images for dense reconstruction completed: %d images (%s)", images.GetSize(), TD_TIMER_GET_FMT().c_str());
 	}
-	LOG("ComputeDepth8 - FRAN");
+	//LOG("ComputeDepth8 - FRAN");
 	// select images to be used for dense reconstruction
 	{
 		TD_TIMER_START();
@@ -1905,7 +1905,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		VERBOSE("Selecting images for dense reconstruction completed: %d images (%s)", data.images.GetSize(), TD_TIMER_GET_FMT().c_str());
 	}
 	}
-	LOG("ComputeDepth9 - FRAN");
+	//LOG("ComputeDepth9 - FRAN");
 	#ifdef _USE_CUDA
 	// initialize CUDA
 	if (CUDA::desiredDeviceID >= -1 && data.nFusionMode >= 0) {
@@ -1916,7 +1916,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 			data.depthMaps.pmCUDA->Init(false);
 	}
 	#endif // _USE_CUDA
-	LOG("ComputeDepth10 - FRAN");
+	//LOG("ComputeDepth10 - FRAN");
 	// initialize the queue of images to be processed
 	const int nOptimize(OPTDENSE::nOptimize);
 	if (OPTDENSE::nEstimationGeometricIters && data.nFusionMode >= 0)
@@ -1939,12 +1939,12 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		// single-thread execution
 		DenseReconstructionEstimate((void*)&data);
 	}
-	LOG("ComputeDepth11 - FRAN");
+	//LOG("ComputeDepth11 - FRAN");
 	GET_LOGCONSOLE().Play();
 	if (!data.events.IsEmpty())
 		return false;
 	data.progress.Release();
-	LOG("ComputeDepth12 - FRAN");
+	//LOG("ComputeDepth12 - FRAN");
 	if (data.nFusionMode >= 0) {
 		#ifdef _USE_CUDA
 		// initialize CUDA
@@ -1990,7 +1990,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		}
 		data.nEstimationGeometricIter = -1;
 	}
-	LOG("ComputeDepth13 - FRAN");
+	//LOG("ComputeDepth13 - FRAN");
 	if ((OPTDENSE::nOptimize & OPTDENSE::ADJUST_FILTER) != 0) {
 		// initialize the queue of depth-maps to be filtered
 		data.sem.Clear();
@@ -2017,7 +2017,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 			return false;
 		data.progress.Release();
 	}
-	LOG("ComputeDepth14 - FRAN");
+	//LOG("ComputeDepth14 - FRAN");
 	return true;
 } // ComputeDepthMaps
 /*----------------------------------------------------------------*/
