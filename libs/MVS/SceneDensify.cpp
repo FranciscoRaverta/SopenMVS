@@ -1320,9 +1320,9 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 		pointcloud.colors.reserve(nPointsEstimate);
 	if (bEstimateNormal)
 		pointcloud.normals.reserve(nPointsEstimate);
-	if (bEstimateSegmentation)
+	if (bEstimateSegmentation) {
 		pointcloud.segmentations.reserve(nPointsEstimate);
-		pointcloud.segmentationConfidences.reserve(nPointsEstimate);
+		pointcloud.segmentationConfidences.reserve(nPointsEstimate); }
 	Util::Progress progress(_T("Merged depth-maps"), arrDepthData.size());
 	GET_LOGCONSOLE().Pause();
 	FOREACH(idxImage, arrDepthData) {
@@ -1349,9 +1349,9 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 				pointcloud.pointViews.emplace_back().push_back(idxImage);
 				if (bEstimateColor)
 					pointcloud.colors.emplace_back(image.pImageData->image(x));
-				if (bEstimateSegmentation)
+				if (bEstimateSegmentation) {
 					pointcloud.segmentations.emplace_back(image.pSegmentedImageData->segmentedImage(x)); // Chequear que esté bien - FRAN
-					pointcloud.segmentationConfidences.emplace_back(1.f); // Chequear que esté bien - FRAN
+					pointcloud.segmentationConfidences.emplace_back(1.f); }// Chequear que esté bien - FRAN
 				if (bEstimateNormal)
 					depthData.GetNormal(x, pointcloud.normals.emplace_back());
 				++nDepths;
@@ -1560,10 +1560,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				for (const auto& [color, count] : segmentationFrequency) {
 					totalCount += count;
 				}
-				LOG("maxCount: %f", maxCount);
-				LOG("maxCount: %f", totalCount);
 				float segConfidence = (totalCount > 0.f) ? (maxCount / totalCount) : -10.f;
-				LOG("maxCount: %f", segConfidence);
 				//segConfidence = maxCount / totalQuantity; // provar maxCount/views.num
 				/*
 				if (totalQuantity > 0) {

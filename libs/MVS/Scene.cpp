@@ -2089,9 +2089,9 @@ void Scene::InitTowerScene(const int towerMode)
 				pointcloud.normals.emplace_back(towerPC.normals[idxPoint]);
 			if (bHasColor)
 				pointcloud.colors.emplace_back(towerPC.colors[idxPoint]);
-			if (bHasSegmentations)
+			if (bHasSegmentations) {
 				pointcloud.segmentations.emplace_back(towerPC.segmentations[idxPoint]);
-				pointcloud.segmentationConfidences.emplace_back(towerPC.segmentationConfidences[idxPoint]);
+				pointcloud.segmentationConfidences.emplace_back(towerPC.segmentationConfidences[idxPoint]); }
 			if (bHasWeights)
 				pointcloud.pointWeights.emplace_back(towerPC.pointWeights[idxPoint]);
 		}
@@ -2118,9 +2118,9 @@ void Scene::InitTowerScene(const int towerMode)
 				pointcloud.normals.emplace_back(towerPC.normals[idxPoint]);
 			if (bHasColor)
 				pointcloud.colors.emplace_back(towerPC.colors[idxPoint]);
-			if (bHasSegmentations)
+			if (bHasSegmentations) {
 				pointcloud.segmentations.emplace_back(towerPC.segmentations[idxPoint]);
-				pointcloud.segmentationConfidences.emplace_back(towerPC.segmentationConfidences[idxPoint]);
+				pointcloud.segmentationConfidences.emplace_back(towerPC.segmentationConfidences[idxPoint]);}
 			if (bHasWeights)
 				pointcloud.pointWeights.emplace_back(towerPC.pointWeights[idxPoint]);
 		}
