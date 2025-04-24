@@ -2024,10 +2024,10 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 /*----------------------------------------------------------------*/
 
 void* DenseReconstructionEstimateTmp(void* arg) {
-	data.sem2.Wait();
 	const DenseDepthMapData& dataThreads = *((const DenseDepthMapData*)arg);
+	dataThreads.sem2.Wait();
 	dataThreads.scene.DenseReconstructionEstimate(arg);
-	data.sem2.Signal();
+	dataThreads.sem2.Signal();
 	return NULL;
 }
 
