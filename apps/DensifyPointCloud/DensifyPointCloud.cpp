@@ -266,7 +266,7 @@ bool Initialize(size_t argc, LPCTSTR* argv)
 	#endif
 
 	Util::Init();
-	LOG("About to finalize initialization - FRAN");
+	//LOG("About to finalize initialization - FRAN");
 	return true;
 }
 
@@ -287,7 +287,7 @@ void Finalize()
 
 int main(int argc, LPCTSTR* argv)
 {
-	LOG("Start main function of DensifyPointCloud - FRAN");
+	//LOG("Start main function of DensifyPointCloud - FRAN");
 	#ifdef _DEBUGINFO
 	// set _crtBreakAlloc index to stop in <dbgheap.c> at allocation
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);// | _CRTDBG_CHECK_ALWAYS_DF);
@@ -334,7 +334,7 @@ int main(int argc, LPCTSTR* argv)
 			}
 		}
 	}
-	LOG("About to check segmentation path - FRAN");
+	//LOG("About to check segmentation path - FRAN");
 	if (!OPT::strSegmentationPath.empty()) {
 		LOG("Segmentation path detected");
 		Util::ensureValidFolderPath(OPT::strSegmentationPath);
@@ -445,37 +445,37 @@ int main(int argc, LPCTSTR* argv)
 		Finalize();
 		return EXIT_SUCCESS;
 	}
-	LOG("About to sparse pointcloud - FRAN");
+	//LOG("About to sparse pointcloud - FRAN");
 	PointCloud sparsePointCloud;
-	LOG("About to sparse pointcloud1 - FRAN");
+	//LOG("About to sparse pointcloud1 - FRAN");
 	if (OPT::nArchiveType != ARCHIVE_MVS || sceneType == Scene::SCENE_INTERFACE) {
-		LOG("About to sparse pointcloud2 - FRAN");
+		//LOG("About to sparse pointcloud2 - FRAN");
 		#if TD_VERBOSE != TD_VERBOSE_OFF
 		if (VERBOSITY_LEVEL > 1 && !scene.pointcloud.IsEmpty())
 			scene.pointcloud.PrintStatistics(scene.images.data(), &scene.obb);
 		#endif
-		LOG("About to sparse pointcloud3 - FRAN");
+		//LOG("About to sparse pointcloud3 - FRAN");
 		if (OPT::nArchiveType == ARCHIVE_MVS)
 			sparsePointCloud = scene.pointcloud;
-		LOG("About to sparse pointcloud4 - FRAN");
+		//LOG("About to sparse pointcloud4 - FRAN");
 		TD_TIMER_START();
-		LOG("About to sparse pointcloud4.1 - FRAN");
+		//LOG("About to sparse pointcloud4.1 - FRAN");
 		if (!scene.DenseReconstruction(OPT::nFusionMode, OPT::bCrop2ROI, OPT::fBorderROI)) {
-			LOG("About to sparse pointcloud5 - FRAN");
+			//LOG("About to sparse pointcloud5 - FRAN");
 			if (ABS(OPT::nFusionMode) != 1)
 				return EXIT_FAILURE;
-			LOG("About to sparse pointcloud6 - FRAN");
+			//LOG("About to sparse pointcloud6 - FRAN");
 			VERBOSE("Depth-maps estimated (%s)", TD_TIMER_GET_FMT().c_str());
-			LOG("About to sparse pointcloud7 - FRAN");
+			//LOG("About to sparse pointcloud7 - FRAN");
 			Finalize();
-			LOG("About to sparse pointcloud8 - FRAN");
+			//LOG("About to sparse pointcloud8 - FRAN");
 			return EXIT_SUCCESS;
 		}
-		LOG("About to sparse pointcloud9 - FRAN");
+		//LOG("About to sparse pointcloud9 - FRAN");
 		VERBOSE("Densifying point-cloud completed: %u points (%s)", scene.pointcloud.GetSize(), TD_TIMER_GET_FMT().c_str());
 	}
-	LOG("About to sparse pointcloud10 - FRAN");
-	LOG("About to save final pointcloud - FRAN");
+	//LOG("About to sparse pointcloud10 - FRAN");
+	//LOG("About to save final pointcloud - FRAN");
 	// save the final point-cloud
 	const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName)));
 	scene.pointcloud.Save(baseFileName+_T(".ply"), OPT::nArchiveType==ARCHIVE_MVS);

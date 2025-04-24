@@ -1689,19 +1689,19 @@ static void* DenseReconstructionFilterTmp(void*);
 
 bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderROI)
 {
-	LOG("DenseRecons1 - FRAN");
+	//LOG("DenseRecons1 - FRAN");
 	DenseDepthMapData data(*this, nFusionMode);
-	LOG("DenseRecons2 - FRAN");
+	//LOG("DenseRecons2 - FRAN");
 	// estimate depth-maps
 	if (!ComputeDepthMaps(data))
 		return false;
-	LOG("DenseRecons2.5 - FRAN");
+	//LOG("DenseRecons2.5 - FRAN");
 	if (ABS(nFusionMode) == 1)
 		return true;
-	LOG("DenseRecons3 - FRAN");
+	//LOG("DenseRecons3 - FRAN");
 	// fuse all depth-maps
 	pointcloud.Release();
-	LOG("DenseRecons4 - FRAN");
+	//LOG("DenseRecons4 - FRAN");
 	if (OPTDENSE::nMinViewsFuse < 2) {
 		// merge depth-maps
 		data.depthMaps.MergeDepthMaps(pointcloud, OPTDENSE::nEstimateColors == 2, OPTDENSE::nEstimateNormals == 2, OPTDENSE::nEstimateSegmentations == 2);
@@ -1709,7 +1709,7 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 		// fuse depth-maps
 		data.depthMaps.FuseDepthMaps(pointcloud, OPTDENSE::nEstimateColors == 2, OPTDENSE::nEstimateNormals == 2, OPTDENSE::nEstimateSegmentations == 2);
 	}
-	LOG("DenseRecons5 - FRAN");
+	//LOG("DenseRecons5 - FRAN");
 	#if TD_VERBOSE != TD_VERBOSE_OFF
 	if (g_nVerbosityLevel > 2) {
 		// print number of points with 3+ views
@@ -1730,11 +1730,11 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 		}
 		VERBOSE("Dense point-cloud composed of:\n\t%u points with 1- views\n\t%u points with 2 views\n\t%u points with 3+ views", nPoints1m, nPoints2, nPoints3p);
 	}
-	LOG("DenseRecons6 - FRAN");
+	//LOG("DenseRecons6 - FRAN");
 	#endif
-	LOG("DenseRecons7 - FRAN");
+	//LOG("DenseRecons7 - FRAN");
 	if (!pointcloud.IsEmpty()) {
-		LOG("DenseRecons8 - FRAN");
+		//LOG("DenseRecons8 - FRAN");
 		if (bCrop2ROI && IsBounded()) {
 			TD_TIMER_START();
 			const size_t numPoints = pointcloud.GetSize();
@@ -1743,18 +1743,18 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 			VERBOSE("Point-cloud trimmed to ROI: %u points removed (%s)",
 				numPoints-pointcloud.GetSize(), TD_TIMER_GET_FMT().c_str());
 		}
-		LOG("DenseRecons9 - FRAN");
+		//LOG("DenseRecons9 - FRAN");
 		if (pointcloud.colors.IsEmpty() && OPTDENSE::nEstimateColors == 1)
 			EstimatePointColors(images, pointcloud);
-		LOG("DenseRecons10 - FRAN");
+		//LOG("DenseRecons10 - FRAN");
 		if (pointcloud.normals.IsEmpty() && OPTDENSE::nEstimateNormals == 1)
 			EstimatePointNormals(images, pointcloud);
-		LOG("DenseRecons11 - FRAN");
+		//LOG("DenseRecons11 - FRAN");
 		if (pointcloud.segmentations.IsEmpty() && OPTDENSE::nEstimateSegmentations == 1)
 			EstimatePointSegmentations(images, pointcloud);										// Crear esta función - FRAN
-		LOG("DenseRecons12 - FRAN");
+		//LOG("DenseRecons12 - FRAN");
 	}
-	LOG("DenseRecons13 - FRAN");
+	//LOG("DenseRecons13 - FRAN");
 	if (OPTDENSE::bRemoveDmaps) {
 		// delete all depth-map files
 		FOREACH(i, images) {
@@ -1764,7 +1764,7 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 			File::deleteFile(ComposeDepthFilePath(depthData.GetView().GetID(), "dmap"));
 		}
 	}
-	LOG("DenseRecons14 - FRAN");
+	//LOG("DenseRecons14 - FRAN");
 	return true;
 } // DenseReconstruction
 /*----------------------------------------------------------------*/
@@ -1773,20 +1773,20 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 // results are saved to "data"
 bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 {
-	LOG("ComputeDepth0 - FRAN");
+	//LOG("ComputeDepth0 - FRAN");
 	// compute point-cloud from the existing mesh
 	if (!mesh.IsEmpty() && !ImagesHaveNeighbors()) {
-		LOG("ComputeDepth1 - FRAN");
+		//LOG("ComputeDepth1 - FRAN");
 		SampleMeshWithVisibility();
 		mesh.Release();
 	}
 	// compute point-cloud from the existing mesh
 	if (IsEmpty() && !ImagesHaveNeighbors()) {
-		LOG("ComputeDepth2 - FRAN");
+		//LOG("ComputeDepth2 - FRAN");
 		VERBOSE("warning: empty point-cloud, rough neighbor views selection based on image pairs baseline");
 		EstimateNeighborViewsPointCloud();
 	}
-	LOG("ComputeDepth3 - FRAN");
+	//LOG("ComputeDepth3 - FRAN");
 	{
 	// maps global view indices to our list of views to be processed
 	IIndexArr imagesMap;
@@ -1794,10 +1794,10 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 	// prepare images for dense reconstruction (load if needed)
 	{
 		TD_TIMER_START();
-		LOG("ComputeDepth4 - FRAN");
+		//LOG("ComputeDepth4 - FRAN");
 		data.images.Reserve(images.GetSize());
 		imagesMap.Resize(images.GetSize());
-		LOG("Size of images: %u", images.GetSize());
+		//LOG("Size of images: %u", images.GetSize());
 		//data.images.segmentation.Reserve(images.GetSize());
 		#ifdef DENSE_USE_OPENMP
 		bool bAbort(false);
@@ -1927,7 +1927,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 	// start working threads
 	data.progress = new Util::Progress("Estimated depth-maps", data.images.GetSize());
 	GET_LOGCONSOLE().Pause();
-	LOG("ComputeDepth10 - FRAN");
+	//LOG("ComputeDepth10 - FRAN");
 	if (nMaxThreads > 1) {
 		// multi-thread execution
 		cList<SEACAVE::Thread> threads(2);
