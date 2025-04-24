@@ -1491,7 +1491,6 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				std::unordered_map<uint8_t, float> segmentationFrequency;
 				uint8_t segmentationColor = Cast<uint8_t>(imageData.segmentedImage(x)); // Convert to a 32-bit packed color
 				segmentationFrequency[segmentationColor]++;
-				//float totalQuantity = 0.f;
 				PointCloud::Normal N(normal*confidence);
 				invalidDepths.Empty();
 				for (const ViewScore& neighbor: depthData.neighbors) {
@@ -1532,7 +1531,6 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								//C += Cast<float>(imageDataB.image(xB))*confidenceB; // Chequear si quedó bien - FRAN
 								segmentationColor = Cast<uint8_t>(imageDataB.segmentedImage(xB)); // Convert to a 32-bit packed color
 								segmentationFrequency[segmentationColor]++;
-								//totalQuantity++; 
 							} 
 							if (bEstimateNormal)
 								N += normalB*confidenceB;
@@ -1546,11 +1544,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					}
 				}
 				uint32_t modeColor = 10001;
-				//uint32_t totalQuantity = 0;
 				float maxCount = 0.f;
-				//float segConfidence = 1.f; 
 				for (const auto& [color, count] : segmentationFrequency) {
-					//totalQuantity = totalQuantity + count;
 					if (count > maxCount) {
 						maxCount = count;
 						modeColor = color;
@@ -1561,21 +1556,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					totalCount += count;
 				}
 				float segConfidence = (totalCount > 0.f) ? (maxCount / totalCount) : -10.f;
-				//segConfidence = maxCount / totalQuantity; // provar maxCount/views.num
-				/*
-				if (totalQuantity > 0) {
-					for (const auto& [color, count] : segmentationFrequency) {
-						if (count > maxCount) {
-							maxCount = count;
-							modeColor = color;
-						}
-					}
-					segConfidence = maxCount / segmentationFrequency.;
-				} else {
-					modeColor = 0;       // or some invalid default
-					segConfidence = 1.f; // or maybe -1 to signal "undefined" if needed
-				}*/
-				//LOG("segConfidence: %f", segConfidence);
+				
 				if (views.size() < nMinViewsFuse) {
 					// remove point
 					FOREACH(v, views) {
@@ -1596,7 +1577,6 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					if (bEstimateColor)
 						pointcloud.colors.emplace_back((C*(float)nrm).cast<uint8_t>());
 					if (bEstimateSegmentation) {
-						//pointcloud.colors.emplace_back((C*(float)nrm).cast<uint8_t>()); // Chequear si esto quedó bien - FRAN
 						pointcloud.segmentations.emplace_back(modeColor);
 						pointcloud.segmentationConfidences.emplace_back(segConfidence); }
 					if (bEstimateNormal)
@@ -1605,8 +1585,6 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					for (Depth* pDepth: invalidDepths)
 						*pDepth = 0;
 				}
-				//segConfidence = 1.f;
-				//totalQuantity = 0.f;
 			}
 		}
 		ASSERT(pointcloud.points.size() == pointcloud.pointViews.size() && pointcloud.points.size() == pointcloud.pointWeights.size() && pointcloud.points.size() == projs.size());
@@ -1689,19 +1667,14 @@ static void* DenseReconstructionFilterTmp(void*);
 
 bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderROI)
 {
-	//LOG("DenseRecons1 - FRAN");
 	DenseDepthMapData data(*this, nFusionMode);
-	//LOG("DenseRecons2 - FRAN");
 	// estimate depth-maps
 	if (!ComputeDepthMaps(data))
 		return false;
-	//LOG("DenseRecons2.5 - FRAN");
 	if (ABS(nFusionMode) == 1)
 		return true;
-	//LOG("DenseRecons3 - FRAN");
 	// fuse all depth-maps
 	pointcloud.Release();
-	//LOG("DenseRecons4 - FRAN");
 	if (OPTDENSE::nMinViewsFuse < 2) {
 		// merge depth-maps
 		data.depthMaps.MergeDepthMaps(pointcloud, OPTDENSE::nEstimateColors == 2, OPTDENSE::nEstimateNormals == 2, OPTDENSE::nEstimateSegmentations == 2);
@@ -1709,7 +1682,6 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 		// fuse depth-maps
 		data.depthMaps.FuseDepthMaps(pointcloud, OPTDENSE::nEstimateColors == 2, OPTDENSE::nEstimateNormals == 2, OPTDENSE::nEstimateSegmentations == 2);
 	}
-	//LOG("DenseRecons5 - FRAN");
 	#if TD_VERBOSE != TD_VERBOSE_OFF
 	if (g_nVerbosityLevel > 2) {
 		// print number of points with 3+ views
@@ -1730,11 +1702,8 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 		}
 		VERBOSE("Dense point-cloud composed of:\n\t%u points with 1- views\n\t%u points with 2 views\n\t%u points with 3+ views", nPoints1m, nPoints2, nPoints3p);
 	}
-	//LOG("DenseRecons6 - FRAN");
 	#endif
-	//LOG("DenseRecons7 - FRAN");
 	if (!pointcloud.IsEmpty()) {
-		//LOG("DenseRecons8 - FRAN");
 		if (bCrop2ROI && IsBounded()) {
 			TD_TIMER_START();
 			const size_t numPoints = pointcloud.GetSize();
@@ -1743,18 +1712,13 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 			VERBOSE("Point-cloud trimmed to ROI: %u points removed (%s)",
 				numPoints-pointcloud.GetSize(), TD_TIMER_GET_FMT().c_str());
 		}
-		//LOG("DenseRecons9 - FRAN");
 		if (pointcloud.colors.IsEmpty() && OPTDENSE::nEstimateColors == 1)
 			EstimatePointColors(images, pointcloud);
-		//LOG("DenseRecons10 - FRAN");
 		if (pointcloud.normals.IsEmpty() && OPTDENSE::nEstimateNormals == 1)
 			EstimatePointNormals(images, pointcloud);
-		//LOG("DenseRecons11 - FRAN");
 		if (pointcloud.segmentations.IsEmpty() && OPTDENSE::nEstimateSegmentations == 1)
 			EstimatePointSegmentations(images, pointcloud);										// Crear esta función - FRAN
-		//LOG("DenseRecons12 - FRAN");
 	}
-	//LOG("DenseRecons13 - FRAN");
 	if (OPTDENSE::bRemoveDmaps) {
 		// delete all depth-map files
 		FOREACH(i, images) {
@@ -1764,7 +1728,6 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 			File::deleteFile(ComposeDepthFilePath(depthData.GetView().GetID(), "dmap"));
 		}
 	}
-	//LOG("DenseRecons14 - FRAN");
 	return true;
 } // DenseReconstruction
 /*----------------------------------------------------------------*/
@@ -1773,20 +1736,16 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 // results are saved to "data"
 bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 {
-	//LOG("ComputeDepth0 - FRAN");
 	// compute point-cloud from the existing mesh
 	if (!mesh.IsEmpty() && !ImagesHaveNeighbors()) {
-		//LOG("ComputeDepth1 - FRAN");
 		SampleMeshWithVisibility();
 		mesh.Release();
 	}
 	// compute point-cloud from the existing mesh
 	if (IsEmpty() && !ImagesHaveNeighbors()) {
-		//LOG("ComputeDepth2 - FRAN");
 		VERBOSE("warning: empty point-cloud, rough neighbor views selection based on image pairs baseline");
 		EstimateNeighborViewsPointCloud();
 	}
-	//LOG("ComputeDepth3 - FRAN");
 	{
 	// maps global view indices to our list of views to be processed
 	IIndexArr imagesMap;
@@ -1794,11 +1753,8 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 	// prepare images for dense reconstruction (load if needed)
 	{
 		TD_TIMER_START();
-		//LOG("ComputeDepth4 - FRAN");
 		data.images.Reserve(images.GetSize());
 		imagesMap.Resize(images.GetSize());
-		//LOG("Size of images: %u", images.GetSize());
-		//data.images.segmentation.Reserve(images.GetSize());
 		#ifdef DENSE_USE_OPENMP
 		bool bAbort(false);
 		#pragma omp parallel for shared(data, bAbort)
@@ -1810,11 +1766,8 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		#else
 		FOREACH(idxImage, images) {
 		#endif
-			//LOG("ComputeDepth5 - FRAN image: %u", idxImage);
 			// skip invalid, uncalibrated or discarded images
-			//LOG("ComputeDepth5.0 - FRAN - %u", idxImage);
 			Image& imageData = images[idxImage];
-			//LOG("ComputeDepth5.1 - FRAN - %u", idxImage);
 			if (!imageData.IsValid()) {
 				#ifdef DENSE_USE_OPENMP
 				#pragma omp critical
@@ -1822,21 +1775,17 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 				imagesMap[idxImage] = NO_ID;
 				continue;
 			}
-			//LOG("ComputeDepth5.2 - FRAN - %u", idxImage);
 			// map image index
 			#ifdef DENSE_USE_OPENMP
 			#pragma omp critical
 			#endif
-			//LOG("ComputeDepth5.3 - FRAN - %u", idxImage);
 			{
 				imagesMap[idxImage] = data.images.GetSize();
 				data.images.Insert(idxImage);
 			}
-			//LOG("ComputeDepth5.4 - FRAN - %u", idxImage);
 			// reload image at the appropriate resolution
 			unsigned nResolutionLevel(OPTDENSE::nResolutionLevel);
 			const unsigned nMaxResolution(imageData.RecomputeMaxResolution(nResolutionLevel, OPTDENSE::nMinResolution, OPTDENSE::nMaxResolution));
-			//LOG("ComputeDepth5.5 - FRAN - %u", idxImage);
 			if (!imageData.ReloadImage(nMaxResolution)) {
 				#ifdef DENSE_USE_OPENMP
 				bAbort = true;
@@ -1846,16 +1795,12 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 				return false;
 				#endif
 			}
-			//LOG("ComputeDepth5.6 - FRAN - %u", idxImage);
 			imageData.UpdateCamera(platforms);
-			//LOG("ComputeDepth5.7 - FRAN - %u", idxImage);
 			// print image camera
 			DEBUG_ULTIMATE("K%d = \n%s", idxImage, cvMat2String(imageData.camera.K).c_str());
 			DEBUG_LEVEL(3, "R%d = \n%s", idxImage, cvMat2String(imageData.camera.R).c_str());
 			DEBUG_LEVEL(3, "C%d = \n%s", idxImage, cvMat2String(imageData.camera.C).c_str());
-			//LOG("ComputeDepth5.8 - FRAN - %u", idxImage);
 		}
-		//LOG("ComputeDepth6 - FRAN");
 		#ifdef DENSE_USE_OPENMP
 		if (bAbort || data.images.IsEmpty()) {
 		#else
@@ -1864,10 +1809,8 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 			VERBOSE("error: preparing images for dense reconstruction failed (errors loading images)");
 			return false;
 		}
-		//LOG("ComputeDepth7 - FRAN");
 		VERBOSE("Preparing images for dense reconstruction completed: %d images (%s)", images.GetSize(), TD_TIMER_GET_FMT().c_str());
 	}
-	//LOG("ComputeDepth8 - FRAN");
 	// select images to be used for dense reconstruction
 	{
 		TD_TIMER_START();
@@ -1905,7 +1848,6 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		VERBOSE("Selecting images for dense reconstruction completed: %d images (%s)", data.images.GetSize(), TD_TIMER_GET_FMT().c_str());
 	}
 	}
-	//LOG("ComputeDepth9 - FRAN");
 	#ifdef _USE_CUDA
 	// initialize CUDA
 	if (CUDA::desiredDeviceID >= -1 && data.nFusionMode >= 0) {
@@ -1916,7 +1858,6 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 			data.depthMaps.pmCUDA->Init(false);
 	}
 	#endif // _USE_CUDA
-	//LOG("ComputeDepth10 - FRAN");
 	// initialize the queue of images to be processed
 	const int nOptimize(OPTDENSE::nOptimize);
 	if (OPTDENSE::nEstimationGeometricIters && data.nFusionMode >= 0)
@@ -1927,7 +1868,6 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 	// start working threads
 	data.progress = new Util::Progress("Estimated depth-maps", data.images.GetSize());
 	GET_LOGCONSOLE().Pause();
-	//LOG("ComputeDepth10 - FRAN");
 	if (nMaxThreads > 1) {
 		// multi-thread execution
 		cList<SEACAVE::Thread> threads(2);
@@ -1939,12 +1879,10 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		// single-thread execution
 		DenseReconstructionEstimate((void*)&data);
 	}
-	//LOG("ComputeDepth11 - FRAN");
 	GET_LOGCONSOLE().Play();
 	if (!data.events.IsEmpty())
 		return false;
 	data.progress.Release();
-	//LOG("ComputeDepth12 - FRAN");
 	if (data.nFusionMode >= 0) {
 		#ifdef _USE_CUDA
 		// initialize CUDA
@@ -1990,11 +1928,9 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		}
 		data.nEstimationGeometricIter = -1;
 	}
-	//LOG("ComputeDepth13 - FRAN");
 	if ((OPTDENSE::nOptimize & OPTDENSE::ADJUST_FILTER) != 0) {
 		// initialize the queue of depth-maps to be filtered
 		data.sem.Clear();
-		data.sem2.Clear();
 		data.idxImage = data.images.GetSize();
 		ASSERT(data.events.IsEmpty());
 		FOREACH(i, data.images)
@@ -2018,7 +1954,6 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 			return false;
 		data.progress.Release();
 	}
-	//LOG("ComputeDepth14 - FRAN");
 	return true;
 } // ComputeDepthMaps
 /*----------------------------------------------------------------*/
@@ -2033,18 +1968,16 @@ void* DenseReconstructionEstimateTmp(void* arg) {
 void Scene::DenseReconstructionEstimate(void* pData)
 {
 	DenseDepthMapData& data = *((DenseDepthMapData*)pData);
-	data.sem2.Wait();
 	while (true) {
 		CAutoPtr<Event> evt(data.events.GetEvent());
 		switch (evt->GetID()) {
-			case EVT_PROCESSIMAGE: {
-				const EVTProcessImage& evtImage = *((EVTProcessImage*)(Event*)evt);
-				if (evtImage.idxImage >= data.images.size()) {
-					if (nMaxThreads > 1) {
-						// close working threads
+		case EVT_PROCESSIMAGE: {
+			const EVTProcessImage& evtImage = *((EVTProcessImage*)(Event*)evt);
+			if (evtImage.idxImage >= data.images.size()) {
+				if (nMaxThreads > 1) {
+					// close working threads
 					data.events.AddEvent(new EVTClose);
 				}
-				data.sem2.Signal();
 				return;
 			}
 			// select views to reconstruct the depth-map for this image
@@ -2160,16 +2093,12 @@ void Scene::DenseReconstructionEstimate(void* pData)
 			break; }
 
 		case EVT_CLOSE: {
-			data.sem2.Signal();
-				
 			return; }
 
 		default:
 			ASSERT("Should not happen!" == NULL);
 		}
 	}
-	data.sem2.Signal();
-				
 } // DenseReconstructionEstimate
 /*----------------------------------------------------------------*/
 
@@ -2272,7 +2201,6 @@ void Scene::DenseReconstructionFilter(void* pData)
 // filter point-cloud based on camera-point visibility intersections
 void Scene::PointCloudFilter(int thRemove)
 {
-	LOG("BANDERA6");
 	TD_TIMER_STARTD();
 
 	typedef TOctree<PointCloud::PointArr,PointCloud::Point::Type,3,uint32_t> Octree;

@@ -136,25 +136,20 @@ bool Image::LoadImage(const String& fileName, unsigned nMaxResolution)
 // open the stored image file name and read again the image data
 bool Image::ReloadImage(unsigned nMaxResolution, bool bLoadPixels)
 {
-	//LOG("Reload1 - FRAN");
 	IMAGEPTR pImage(bLoadPixels ? ReadImage(name, image) : ReadImageHeader(name));
-	//LOG("Reload2 - FRAN");
 	IMAGEPTR pSegmentedImage(bLoadPixels ? ReadSegmentedImage(segmentationName, segmentedImage) : ReadImageHeader(segmentationName));
-	//LOG("Reload3 - FRAN");
+	
 	if (pImage == NULL) {
 		LOG("error: failed reloading image '%s'", name.c_str());
 		return false;
 	}
-	//LOG("Reload4 - FRAN");
 	if (!bLoadPixels) {
 		// init image size
 		width = pImage->GetWidth();
 		height = pImage->GetHeight();
 	}
-	//LOG("Reload5 - FRAN");
 	// resize image if needed
 	scale = ResizeImage(nMaxResolution);
-	//LOG("Reload6 - FRAN");
 	return true;
 } // ReloadImage
 /*----------------------------------------------------------------*/
@@ -221,7 +216,6 @@ Image Image::GetImage(const PlatformArr& platforms, double scale, bool bUseImage
 // compute the camera extrinsics from the platform pose and the relative camera pose to the platform
 Camera Image::GetCamera(const PlatformArr& platforms, const Image8U::Size& resolution) const
 {
-	//LOG("GetCamera - FRAN");
 	ASSERT(platformID != NO_ID);
 	ASSERT(cameraID != NO_ID);
 	ASSERT(poseID != NO_ID);

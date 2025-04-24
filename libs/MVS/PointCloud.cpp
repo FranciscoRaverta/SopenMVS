@@ -278,7 +278,7 @@ namespace BasicPLY {
 			}
 		}
 		static void InitSaveProps(PLY& ply, int elem_count,
-			bool bColors, bool bNormals, bool bSegmentation, bool bViews, bool bWeights ,bool bConfidence=false, bool bScale=false)
+			bool bColors, bool bNormals, bool bSegmentation, bool bViews, bool bWeights, bool bConfidence=false, bool bScale=false)
 		{
 			ply.describe_property(elem_names[0], 3, props+0);
 			if (bColors)
@@ -523,7 +523,7 @@ bool PointCloud::SaveWithScale(const String& fileName, const ImageArr& images, f
 		if (!colors.empty())
 			vertex.c = colors[i];
 		if (!normals.empty())
-		vertex.n = normals[i];
+			vertex.n = normals[i];
 		if (!segmentations.empty()) {
 			vertex.seg = segmentations[i];
 			vertex.segConf = segmentationConfidences[i];}

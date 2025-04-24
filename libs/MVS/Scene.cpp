@@ -78,9 +78,9 @@ bool Scene::ImagesHaveNeighbors() const
 
 bool Scene::LoadInterface(const String & fileName)
 {
-	LOG("LoadInterfaceHere");
 	TD_TIMER_STARTD();
 	Interface obj;
+
 	// serialize in the current state
 	if (!ARCHIVE::SerializeLoad(obj, fileName))
 		return false;
@@ -168,6 +168,7 @@ bool Scene::LoadInterface(const String & fileName)
 	}
 	if (images.size() < 2)
 		return false;
+
 	// import 3D points
 	if (!obj.vertices.empty()) {
 		bool bValidWeights(false);
@@ -557,7 +558,6 @@ bool Scene::Import(const String& fileName)
 
 Scene::SCENE_TYPE Scene::Load(const String& fileName, bool bImport)
 {
-	//LOG("BANDERA3");
 	TD_TIMER_STARTD();
 	Release();
 
@@ -573,7 +573,6 @@ Scene::SCENE_TYPE Scene::Load(const String& fileName, bool bImport)
 		fs.close();
 		if (bImport && Import(fileName))
 			return SCENE_IMPORT;
-		//LOG("FLAG before LoadInterface 1 - FRAN");
 		if (LoadInterface(fileName))
 			return SCENE_INTERFACE;
 		VERBOSE("error: invalid project");

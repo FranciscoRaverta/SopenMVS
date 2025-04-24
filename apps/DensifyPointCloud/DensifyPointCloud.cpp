@@ -266,7 +266,6 @@ bool Initialize(size_t argc, LPCTSTR* argv)
 	#endif
 
 	Util::Init();
-	//LOG("About to finalize initialization - FRAN");
 	return true;
 }
 
@@ -287,7 +286,6 @@ void Finalize()
 
 int main(int argc, LPCTSTR* argv)
 {
-	//LOG("Start main function of DensifyPointCloud - FRAN");
 	#ifdef _DEBUGINFO
 	// set _crtBreakAlloc index to stop in <dbgheap.c> at allocation
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);// | _CRTDBG_CHECK_ALWAYS_DF);
@@ -334,7 +332,6 @@ int main(int argc, LPCTSTR* argv)
 			}
 		}
 	}
-	//LOG("About to check segmentation path - FRAN");
 	if (!OPT::strSegmentationPath.empty()) {
 		LOG("Segmentation path detected");
 		Util::ensureValidFolderPath(OPT::strSegmentationPath);
@@ -396,7 +393,6 @@ int main(int argc, LPCTSTR* argv)
 	}
 	if (OPT::fMaxSubsceneArea > 0) {
 		// split the scene in sub-scenes by maximum sampling area
-		LOG("BANDERA6.5");
 		Scene::ImagesChunkArr chunks;
 		scene.Split(chunks, OPT::fMaxSubsceneArea);
 		scene.ExportChunks(chunks, GET_PATH_FULL(OPT::strOutputFileName), (ARCHIVE_TYPE)OPT::nArchiveType);
@@ -418,11 +414,9 @@ int main(int argc, LPCTSTR* argv)
 			String::FormatString(_T("_%dviews"), ABS(OPT::nExportNumViews)));
 		if (OPT::nExportNumViews > 0) {
 			// export point-cloud containing only points with N+ views
-			LOG("BANDERA7");
 			scene.pointcloud.SaveNViews(baseFileName+_T(".ply"), (IIndex)OPT::nExportNumViews);
 		} else {
 			// save scene and export point-cloud containing only points with N+ views
-			LOG("BANDERA8");
 			scene.pointcloud.RemoveMinViews((IIndex)-OPT::nExportNumViews);
 			scene.Save(baseFileName+_T(".mvs"), (ARCHIVE_TYPE)OPT::nArchiveType);
 			scene.pointcloud.Save(baseFileName+_T(".ply"));
@@ -437,7 +431,6 @@ int main(int argc, LPCTSTR* argv)
 				VERBOSE("error: can not estimate normals as the point-cloud is not valid");
 				return EXIT_FAILURE;
 			}
-			LOG("BANDERA9");
 			EstimatePointNormals(scene.images, scene.pointcloud);
 		}
 		const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName)));
@@ -445,41 +438,28 @@ int main(int argc, LPCTSTR* argv)
 		Finalize();
 		return EXIT_SUCCESS;
 	}
-	//LOG("About to sparse pointcloud - FRAN");
 	PointCloud sparsePointCloud;
-	//LOG("About to sparse pointcloud1 - FRAN");
 	if (OPT::nArchiveType != ARCHIVE_MVS || sceneType == Scene::SCENE_INTERFACE) {
-		//LOG("About to sparse pointcloud2 - FRAN");
 		#if TD_VERBOSE != TD_VERBOSE_OFF
 		if (VERBOSITY_LEVEL > 1 && !scene.pointcloud.IsEmpty())
 			scene.pointcloud.PrintStatistics(scene.images.data(), &scene.obb);
 		#endif
-		//LOG("About to sparse pointcloud3 - FRAN");
 		if (OPT::nArchiveType == ARCHIVE_MVS)
 			sparsePointCloud = scene.pointcloud;
-		//LOG("About to sparse pointcloud4 - FRAN");
 		TD_TIMER_START();
-		//LOG("About to sparse pointcloud4.1 - FRAN");
 		if (!scene.DenseReconstruction(OPT::nFusionMode, OPT::bCrop2ROI, OPT::fBorderROI)) {
-			//LOG("About to sparse pointcloud5 - FRAN");
 			if (ABS(OPT::nFusionMode) != 1)
 				return EXIT_FAILURE;
-			//LOG("About to sparse pointcloud6 - FRAN");
 			VERBOSE("Depth-maps estimated (%s)", TD_TIMER_GET_FMT().c_str());
-			//LOG("About to sparse pointcloud7 - FRAN");
 			Finalize();
-			//LOG("About to sparse pointcloud8 - FRAN");
 			return EXIT_SUCCESS;
 		}
-		//LOG("About to sparse pointcloud9 - FRAN");
 		VERBOSE("Densifying point-cloud completed: %u points (%s)", scene.pointcloud.GetSize(), TD_TIMER_GET_FMT().c_str());
 	}
-	//LOG("About to sparse pointcloud10 - FRAN");
-	//LOG("About to save final pointcloud - FRAN");
+	
 	// save the final point-cloud
 	const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName)));
 	scene.pointcloud.Save(baseFileName+_T(".ply"), OPT::nArchiveType==ARCHIVE_MVS);
-	LOG("Point cloud saved");
 	#if TD_VERBOSE != TD_VERBOSE_OFF
 	if (VERBOSITY_LEVEL > 2)
 		scene.ExportCamerasMLP(baseFileName+_T(".mlp"), baseFileName+_T(".ply"));

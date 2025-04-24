@@ -68,7 +68,7 @@ public:
 	typedef CLISTDEF0IDX(Normal,Index) NormalArr;
 
 	typedef Pixel8U Color;
-	typedef CLISTDEFIDX(Color,Index) ColorArr;
+	typedef CLISTDEF0IDX(Color,Index) ColorArr;
 
 	typedef uint8_t Segmentation;
 	typedef CLISTDEF0IDX(Segmentation,Index) SegmentationArr;

@@ -101,7 +101,6 @@ struct MVS_API DenseDepthMapData {
 	volatile Thread::safe_t idxImage;
 	SEACAVE::EventQueue events; // internal events queue (processed by the working threads)
 	Semaphore sem;
-	Semaphore sem2;
 	CAutoPtr<Util::Progress> progress;
 	int nEstimationGeometricIter;
 	int nFusionMode;
