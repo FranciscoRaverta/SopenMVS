@@ -557,7 +557,7 @@ bool Scene::Import(const String& fileName)
 
 Scene::SCENE_TYPE Scene::Load(const String& fileName, bool bImport)
 {
-	LOG("BANDERA3");
+	//LOG("BANDERA3");
 	TD_TIMER_STARTD();
 	Release();
 

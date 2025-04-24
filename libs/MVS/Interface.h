@@ -13,7 +13,7 @@
 // D E F I N E S ///////////////////////////////////////////////////
 
 #define MVSI_PROJECT_ID "MVSI" // identifies the project stream
-#define MVSI_PROJECT_VER ((uint32_t)7) // identifies the version of a project stream
+#define MVSI_PROJECT_VER ((uint32_t)6) // identifies the version of a project stream
 
 // set a default namespace name if none given
 #ifndef _INTERFACE_NAMESPACE
