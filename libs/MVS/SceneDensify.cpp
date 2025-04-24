@@ -1994,6 +1994,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 	if ((OPTDENSE::nOptimize & OPTDENSE::ADJUST_FILTER) != 0) {
 		// initialize the queue of depth-maps to be filtered
 		data.sem.Clear();
+		data.sem2.Clear();
 		data.idxImage = data.images.GetSize();
 		ASSERT(data.events.IsEmpty());
 		FOREACH(i, data.images)
@@ -2023,8 +2024,10 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 /*----------------------------------------------------------------*/
 
 void* DenseReconstructionEstimateTmp(void* arg) {
+	data.sem2.Wait();
 	const DenseDepthMapData& dataThreads = *((const DenseDepthMapData*)arg);
 	dataThreads.scene.DenseReconstructionEstimate(arg);
+	data.sem2.Signal();
 	return NULL;
 }
 
