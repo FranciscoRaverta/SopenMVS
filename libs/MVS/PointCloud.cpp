@@ -268,7 +268,7 @@ namespace BasicPLY {
 				switch (p) {
 				case 0: points.resize((IDX)elem_count); break;
 				//case 3: case 13: colors.resize((IDX)elem_count); break;
-				case 3: case 14: colors.resize((IDX)elem_count); break;
+				case 3: case 15: colors.resize((IDX)elem_count); break;
 				case 6: normals.resize((IDX)elem_count); break;
 				case 9: segmentations.resize((IDX)elem_count); break;
 				case 10: segmentationConfidences.resize((IDX)elem_count);break;

@@ -219,12 +219,15 @@ Camera Image::GetCamera(const PlatformArr& platforms, const Image8U::Size& resol
 	ASSERT(platformID != NO_ID);
 	ASSERT(cameraID != NO_ID);
 	ASSERT(poseID != NO_ID);
+
 	// compute the normalized absolute camera pose
 	const Platform& platform = platforms[platformID];
 	Camera camera(platform.GetCamera(cameraID, poseID));
+
 	// compute the unnormalized camera
 	camera.K = camera.GetK<REAL>(resolution.width, resolution.height);
 	camera.ComposeP();
+
 	return camera;
 } // GetCamera
 void Image::UpdateCamera(const PlatformArr& platforms)

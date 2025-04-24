@@ -1668,11 +1668,13 @@ static void* DenseReconstructionFilterTmp(void*);
 bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderROI)
 {
 	DenseDepthMapData data(*this, nFusionMode);
+
 	// estimate depth-maps
 	if (!ComputeDepthMaps(data))
 		return false;
 	if (ABS(nFusionMode) == 1)
 		return true;
+
 	// fuse all depth-maps
 	pointcloud.Release();
 	if (OPTDENSE::nMinViewsFuse < 2) {
@@ -1702,6 +1704,7 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 		}
 		VERBOSE("Dense point-cloud composed of:\n\t%u points with 1- views\n\t%u points with 2 views\n\t%u points with 3+ views", nPoints1m, nPoints2, nPoints3p);
 	}
+
 	#endif
 	if (!pointcloud.IsEmpty()) {
 		if (bCrop2ROI && IsBounded()) {
@@ -1719,6 +1722,7 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 		if (pointcloud.segmentations.IsEmpty() && OPTDENSE::nEstimateSegmentations == 1)
 			EstimatePointSegmentations(images, pointcloud);										// Crear esta función - FRAN
 	}
+
 	if (OPTDENSE::bRemoveDmaps) {
 		// delete all depth-map files
 		FOREACH(i, images) {
@@ -1741,11 +1745,13 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		SampleMeshWithVisibility();
 		mesh.Release();
 	}
+
 	// compute point-cloud from the existing mesh
 	if (IsEmpty() && !ImagesHaveNeighbors()) {
 		VERBOSE("warning: empty point-cloud, rough neighbor views selection based on image pairs baseline");
 		EstimateNeighborViewsPointCloud();
 	}
+
 	{
 	// maps global view indices to our list of views to be processed
 	IIndexArr imagesMap;
@@ -1811,6 +1817,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		}
 		VERBOSE("Preparing images for dense reconstruction completed: %d images (%s)", images.GetSize(), TD_TIMER_GET_FMT().c_str());
 	}
+
 	// select images to be used for dense reconstruction
 	{
 		TD_TIMER_START();
@@ -1848,6 +1855,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		VERBOSE("Selecting images for dense reconstruction completed: %d images (%s)", data.images.GetSize(), TD_TIMER_GET_FMT().c_str());
 	}
 	}
+
 	#ifdef _USE_CUDA
 	// initialize CUDA
 	if (CUDA::desiredDeviceID >= -1 && data.nFusionMode >= 0) {
@@ -1858,6 +1866,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 			data.depthMaps.pmCUDA->Init(false);
 	}
 	#endif // _USE_CUDA
+
 	// initialize the queue of images to be processed
 	const int nOptimize(OPTDENSE::nOptimize);
 	if (OPTDENSE::nEstimationGeometricIters && data.nFusionMode >= 0)
@@ -1883,6 +1892,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 	if (!data.events.IsEmpty())
 		return false;
 	data.progress.Release();
+
 	if (data.nFusionMode >= 0) {
 		#ifdef _USE_CUDA
 		// initialize CUDA
@@ -1928,6 +1938,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		}
 		data.nEstimationGeometricIter = -1;
 	}
+
 	if ((OPTDENSE::nOptimize & OPTDENSE::ADJUST_FILTER) != 0) {
 		// initialize the queue of depth-maps to be filtered
 		data.sem.Clear();

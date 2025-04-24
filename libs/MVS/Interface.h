@@ -271,8 +271,8 @@ bool SerializeLoad(_Tp& obj, const std::string& fileName, uint32_t* pVersion=NUL
 	// serialize in the current state
 	ARCHIVE::ArchiveLoad serializer(stream, version);
 	serializer & obj;
-	if (pVersion) {
-		*pVersion = version; }
+	if (pVersion)
+		*pVersion = version;
 	return true;
 }
 

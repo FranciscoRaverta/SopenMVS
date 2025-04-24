@@ -456,7 +456,7 @@ int main(int argc, LPCTSTR* argv)
 		}
 		VERBOSE("Densifying point-cloud completed: %u points (%s)", scene.pointcloud.GetSize(), TD_TIMER_GET_FMT().c_str());
 	}
-	
+
 	// save the final point-cloud
 	const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName)));
 	scene.pointcloud.Save(baseFileName+_T(".ply"), OPT::nArchiveType==ARCHIVE_MVS);

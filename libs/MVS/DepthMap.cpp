@@ -1466,7 +1466,7 @@ void MVS::EstimatePointColors(const ImageArr& images, PointCloud& pointcloud)
 } // EstimatePointColors
 /*----------------------------------------------------------------*/
 
-// estimate the colors of the given dense point cloud
+// estimate the segmentation of the given dense point cloud
 void MVS::EstimatePointSegmentations(const ImageArr& images, PointCloud& pointcloud)
 {
 	TD_TIMER_START();
@@ -1502,7 +1502,7 @@ void MVS::EstimatePointSegmentations(const ImageArr& images, PointCloud& pointcl
 		}
 	}
 
-	DEBUG_ULTIMATE("Estimate dense point cloud colors: %u colors (%s)", pointcloud.colors.GetSize(), TD_TIMER_GET_FMT().c_str());
+	DEBUG_ULTIMATE("Estimate dense point cloud colors: %u colors (%s)", pointcloud.segmentations.GetSize(), TD_TIMER_GET_FMT().c_str());
 } // EstimatePointSegmentations
 /*----------------------------------------------------------------*/
 

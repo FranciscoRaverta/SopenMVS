@@ -227,7 +227,7 @@ struct MVS_API DepthData {
 		for (ViewData& image: images) {
 			image.image.release();
 			image.depthMap.release();
-			//image.segmentedImage.release();
+			image.segmentedImage.release();
 		}
 	}
 	inline void Release() {
