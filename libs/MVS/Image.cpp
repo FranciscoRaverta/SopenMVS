@@ -182,7 +182,8 @@ float Image::ResizeImage(unsigned nMaxResolution)
 	height = (uint32_t)scaledSize.height;
 	if (!image.empty()) {
 		cv::resize(image, image, scaledSize, 0, 0, cv::INTER_AREA);
-		//cv::resize(segmentedImage, segmentedImage, scaledSize, 0, 0, cv::INTER_NEAREST); }
+		//cv::resize(segmentedImage, segmentedImage, scaledSize, 0, 0, cv::INTER_NEAREST); 
+		}
 	return static_cast<float>(scale);
 } // ResizeImage
 /*----------------------------------------------------------------*/
