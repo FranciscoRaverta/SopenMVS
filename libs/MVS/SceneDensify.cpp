@@ -2025,9 +2025,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 
 void* DenseReconstructionEstimateTmp(void* arg) {
 	const DenseDepthMapData& dataThreads = *((const DenseDepthMapData*)arg);
-	dataThreads.sem2.Wait();
 	dataThreads.scene.DenseReconstructionEstimate(arg);
-	dataThreads.sem2.Signal();
 	return NULL;
 }
 
@@ -2035,16 +2033,18 @@ void* DenseReconstructionEstimateTmp(void* arg) {
 void Scene::DenseReconstructionEstimate(void* pData)
 {
 	DenseDepthMapData& data = *((DenseDepthMapData*)pData);
+	data.sem2.Wait();
 	while (true) {
 		CAutoPtr<Event> evt(data.events.GetEvent());
 		switch (evt->GetID()) {
-		case EVT_PROCESSIMAGE: {
-			const EVTProcessImage& evtImage = *((EVTProcessImage*)(Event*)evt);
-			if (evtImage.idxImage >= data.images.size()) {
-				if (nMaxThreads > 1) {
-					// close working threads
+			case EVT_PROCESSIMAGE: {
+				const EVTProcessImage& evtImage = *((EVTProcessImage*)(Event*)evt);
+				if (evtImage.idxImage >= data.images.size()) {
+					if (nMaxThreads > 1) {
+						// close working threads
 					data.events.AddEvent(new EVTClose);
 				}
+				data.sem2.Signal();
 				return;
 			}
 			// select views to reconstruct the depth-map for this image
@@ -2160,12 +2160,16 @@ void Scene::DenseReconstructionEstimate(void* pData)
 			break; }
 
 		case EVT_CLOSE: {
+			data.sem2.Signal();
+				
 			return; }
 
 		default:
 			ASSERT("Should not happen!" == NULL);
 		}
 	}
+	data.sem2.Signal();
+				
 } // DenseReconstructionEstimate
 /*----------------------------------------------------------------*/
 
