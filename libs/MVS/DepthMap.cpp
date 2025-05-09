@@ -1845,7 +1845,7 @@ bool MVS::ExportPointCloud(const String& fileName, const Image& imageData, const
 				vertex.x = X.x; vertex.y = X.y; vertex.z = X.z;
 				const Pixel8U c(imageData.image.empty() ? Pixel8U::WHITE : imageData.image(ROUND2INT(scaleImage.y*j),ROUND2INT(scaleImage.x*i)));
 				vertex.r = c.r; vertex.g = c.g; vertex.b = c.b;
-				uint8_t vertex.seg = Cast<uint8_t>(imageData.segmentedImage(j, i));
+				vertex.seg = Cast<uint8_t>(imageData.segmentedImage(j, i));
 				ply.put_element(&vertex);
 			}
 		}
@@ -1910,7 +1910,7 @@ bool MVS::ExportPointCloud(const String& fileName, const Image& imageData, const
 				vertex.nx = N.x; vertex.ny = N.y; vertex.nz = N.z;
 				const Pixel8U c(imageData.image.empty() ? Pixel8U::WHITE : imageData.image(j, i));
 				vertex.r = c.r; vertex.g = c.g; vertex.b = c.b;
-				uint8_t vertex.seg = Cast<uint8_t>(imageData.segmentedImage(j, i));
+				vertex.seg = Cast<uint8_t>(imageData.segmentedImage(j, i));
 				ply.put_element(&vertex);
 			}
 		}
