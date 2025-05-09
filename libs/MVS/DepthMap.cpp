@@ -1800,6 +1800,8 @@ bool MVS::ExportPointCloud(const String& fileName, const Image& imageData, const
 		struct Vertex {
 			float x,y,z;
 			uint8_t r,g,b;
+			uint8_t seg;
+			//float segConf;
 		};
 		// list of property information for a vertex
 		static PLY::PlyProperty vert_props[] = {
@@ -1809,6 +1811,8 @@ bool MVS::ExportPointCloud(const String& fileName, const Image& imageData, const
 			{"red", PLY::Uint8, PLY::Uint8, offsetof(Vertex,r), 0, 0, 0, 0},
 			{"green", PLY::Uint8, PLY::Uint8, offsetof(Vertex,g), 0, 0, 0, 0},
 			{"blue", PLY::Uint8, PLY::Uint8, offsetof(Vertex,b), 0, 0, 0, 0},
+			{"segmentation",  				PLY::Uint8,   PLY::Uint8,   offsetof(Vertex,seg), 0, 0, 0, 0},
+			//{"segmentationConfidence",  	PLY::Float32, PLY::Float32, offsetof(Vertex,segConf), 0, 0, 0, 0},
 		};
 		// list of the kinds of elements in the PLY
 		static const char* elem_names[] = {
@@ -1818,13 +1822,15 @@ bool MVS::ExportPointCloud(const String& fileName, const Image& imageData, const
 		// create PLY object
 		ASSERT(!fileName.IsEmpty());
 		Util::ensureFolder(fileName);
-		const size_t bufferSize = depthMap.area()*(8*3/*pos*/+3*3/*color*/+7/*space*/+2/*eol*/) + 2048/*extra size*/;
+		//const size_t bufferSize = depthMap.area()*(8*3/*pos*/+3*3/*color*/+3/*segmentation*/+8/*segConf*/+7/*space*/+2/*eol*/) + 2048/*extra size*/;
+		const size_t bufferSize = depthMap.area()*(8*3/*pos*/+3*3/*color*/+3/*segmentation*/+7/*space*/+2/*eol*/) + 2048/*extra size*/;
 		PLY ply;
 		if (!ply.write(fileName, 1, elem_names, PLY::BINARY_LE, bufferSize))
 			return false;
 
 		// describe what properties go into the vertex elements
-		ply.describe_property("vertex", 6, vert_props);
+		//ply.describe_property("vertex", 8, vert_props);
+		ply.describe_property("vertex", 7, vert_props);
 
 		// export the array of 3D points
 		Vertex vertex;
@@ -1839,6 +1845,7 @@ bool MVS::ExportPointCloud(const String& fileName, const Image& imageData, const
 				vertex.x = X.x; vertex.y = X.y; vertex.z = X.z;
 				const Pixel8U c(imageData.image.empty() ? Pixel8U::WHITE : imageData.image(ROUND2INT(scaleImage.y*j),ROUND2INT(scaleImage.x*i)));
 				vertex.r = c.r; vertex.g = c.g; vertex.b = c.b;
+				uint8_t vertex.seg = Cast<uint8_t>(imageData.segmentedImage(j, i));
 				ply.put_element(&vertex);
 			}
 		}
@@ -1854,6 +1861,8 @@ bool MVS::ExportPointCloud(const String& fileName, const Image& imageData, const
 			float x,y,z;
 			float nx,ny,nz;
 			uint8_t r,g,b;
+			uint8_t seg;
+			//float segConf;
 		};
 		// list of property information for a vertex
 		static PLY::PlyProperty vert_props[] = {
@@ -1866,6 +1875,8 @@ bool MVS::ExportPointCloud(const String& fileName, const Image& imageData, const
 			{"red", PLY::Uint8, PLY::Uint8, offsetof(Vertex,r), 0, 0, 0, 0},
 			{"green", PLY::Uint8, PLY::Uint8, offsetof(Vertex,g), 0, 0, 0, 0},
 			{"blue", PLY::Uint8, PLY::Uint8, offsetof(Vertex,b), 0, 0, 0, 0},
+			{"segmentation",  				PLY::Uint8,   PLY::Uint8,   offsetof(Vertex,seg), 0, 0, 0, 0},
+			//{"segmentationConfidence",  	PLY::Float32, PLY::Float32, offsetof(Vertex,segConf), 0, 0, 0, 0},
 		};
 		// list of the kinds of elements in the PLY
 		static const char* elem_names[] = {
@@ -1875,13 +1886,15 @@ bool MVS::ExportPointCloud(const String& fileName, const Image& imageData, const
 		// create PLY object
 		ASSERT(!fileName.IsEmpty());
 		Util::ensureFolder(fileName);
-		const size_t bufferSize = depthMap.area()*(8*3/*pos*/+8*3/*normal*/+3*3/*color*/+8/*space*/+2/*eol*/) + 2048/*extra size*/;
+		//const size_t bufferSize = depthMap.area()*(8*3/*pos*/+8*3/*normal*/+3*3/*color*/+3/*segmentation*/+8/*segConf*/+8/*space*/+2/*eol*/) + 2048/*extra size*/;
+		const size_t bufferSize = depthMap.area()*(8*3/*pos*/+8*3/*normal*/+3*3/*color*/+3/*segmentation*/+8/*space*/+2/*eol*/) + 2048/*extra size*/;
 		PLY ply;
 		if (!ply.write(fileName, 1, elem_names, PLY::BINARY_LE, bufferSize))
 			return false;
 
 		// describe what properties go into the vertex elements
-		ply.describe_property("vertex", 9, vert_props);
+		//ply.describe_property("vertex", 11, vert_props);
+		ply.describe_property("vertex", 10, vert_props);
 
 		// export the array of 3D points
 		Vertex vertex;
@@ -1897,6 +1910,7 @@ bool MVS::ExportPointCloud(const String& fileName, const Image& imageData, const
 				vertex.nx = N.x; vertex.ny = N.y; vertex.nz = N.z;
 				const Pixel8U c(imageData.image.empty() ? Pixel8U::WHITE : imageData.image(j, i));
 				vertex.r = c.r; vertex.g = c.g; vertex.b = c.b;
+				uint8_t vertex.seg = Cast<uint8_t>(imageData.segmentedImage(j, i));
 				ply.put_element(&vertex);
 			}
 		}
