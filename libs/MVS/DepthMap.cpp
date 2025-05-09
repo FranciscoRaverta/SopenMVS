@@ -1847,7 +1847,7 @@ bool MVS::ExportPointCloud(const String& fileName, const Image& imageData, const
 				vertex.r = c.r; vertex.g = c.g; vertex.b = c.b;
 				vertex.seg = Cast<uint8_t>(imageData.segmentedImage(j, i));
 				LOG("Printing filtered");
-				LOG("vertex.seg: ", vertex.seg)
+				LOG("vertex.seg: ", vertex.seg);
 				ply.put_element(&vertex);
 			}
 		}
@@ -1914,7 +1914,7 @@ bool MVS::ExportPointCloud(const String& fileName, const Image& imageData, const
 				vertex.r = c.r; vertex.g = c.g; vertex.b = c.b;
 				vertex.seg = Cast<uint8_t>(imageData.segmentedImage(j, i));
 				LOG("Printing filtered");
-				LOG("vertex.seg: ", vertex.seg)
+				LOG("vertex.seg: ", vertex.seg);
 				ply.put_element(&vertex);
 			}
 		}
