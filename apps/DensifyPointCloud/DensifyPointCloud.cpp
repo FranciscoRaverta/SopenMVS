@@ -401,9 +401,11 @@ int main(int argc, LPCTSTR* argv)
 	}
 	if (OPT::thFilterPointCloud < 0) {
 		// filter point-cloud based on camera-point visibility intersections
+		LOG("Filtering stage - FRAN");
 		scene.PointCloudFilter(OPT::thFilterPointCloud);
 		const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName))+_T("_filtered"));
 		scene.Save(baseFileName+_T(".mvs"), (ARCHIVE_TYPE)OPT::nArchiveType);
+		LOG(baseFileName+_T(".ply"))
 		scene.pointcloud.Save(baseFileName+_T(".ply"));
 		Finalize();
 		return EXIT_SUCCESS;
