@@ -329,6 +329,7 @@ namespace BasicPLY {
 // load the dense point cloud from a PLY file
 bool PointCloud::Load(const String& fileName)
 {
+	LOG("Carga PointCloud - FRAN");
 	TD_TIMER_STARTD();
 
 	ASSERT(!fileName.empty());
@@ -356,9 +357,9 @@ bool PointCloud::Load(const String& fileName)
 					colors[v] = vertex.c;
 				if (!normals.empty())
 					normals[v] = vertex.n;
-				//if (!segmentations.empty())
+				if (!segmentations.empty())
 					segmentations[v] = vertex.seg;
-				//if (!segmentationConfidences.empty())
+				if (!segmentationConfidences.empty())
 					segmentationConfidences[v] = vertex.segConf;
 				if (!pointViews.empty()) {
 					ViewArr pv(vertex.views.num, vertex.views.pIndices);
