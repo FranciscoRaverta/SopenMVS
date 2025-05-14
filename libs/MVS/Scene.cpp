@@ -78,6 +78,7 @@ bool Scene::ImagesHaveNeighbors() const
 
 bool Scene::LoadInterface(const String & fileName)
 {
+	LOG("Serialize Load");
 	TD_TIMER_STARTD();
 	Interface obj;
 
@@ -233,6 +234,7 @@ bool Scene::LoadInterface(const String & fileName)
 
 bool Scene::SaveInterface(const String & fileName, int version) const
 {
+	LOG("Save Interface");
 	TD_TIMER_STARTD();
 	Interface obj;
 
@@ -597,6 +599,7 @@ Scene::SCENE_TYPE Scene::Load(const String& fileName, bool bImport)
 	uint64_t nReserved;
 	fs.read((char*)&nReserved, sizeof(uint64_t));
 	// serialize in the current state
+	LOG("Load type", nType);
 	if (!SerializeLoad(*this, fs, (ARCHIVE_TYPE)nType))
 		return SCENE_NA;
 	// init images
@@ -630,6 +633,7 @@ bool Scene::Save(const String& fileName, ARCHIVE_TYPE type) const
 {
 	TD_TIMER_STARTD();
 	// save using MVS interface if requested
+	LOG("Save type", type);
 	if (type == ARCHIVE_MVS) {
 		if (mesh.IsEmpty())
 			return SaveInterface(fileName);
