@@ -78,7 +78,7 @@ bool Scene::ImagesHaveNeighbors() const
 
 bool Scene::LoadInterface(const String & fileName)
 {
-	LOG("Serialize Load");
+	LOG("LoadInterface");
 	TD_TIMER_STARTD();
 	Interface obj;
 
@@ -208,6 +208,7 @@ bool Scene::LoadInterface(const String & fileName)
 			ASSERT(obj.vertices.size() == obj.verticesColor.size());
 			pointcloud.colors.CopyOf((const Pixel8U*)&obj.verticesColor[0].c, obj.vertices.size());
 		}
+		LOG("Antes de LoadVertexSegmentations");
 		if (!obj.verticesSegmentation.empty()) {
 			ASSERT(obj.vertices.size() == obj.verticesSegmentation.size());
 			pointcloud.segmentations.CopyOf((const uint8_t*)&obj.verticesSegmentation[0].seg, obj.vertices.size());
@@ -314,7 +315,7 @@ bool Scene::SaveInterface(const String & fileName, int version) const
 			vertexColor.c = color;
 		}
 	}
-
+	LOG("Before SaveVertexSegmentation");
 	if (!pointcloud.segmentations.IsEmpty()) {
 		obj.verticesSegmentation.resize(pointcloud.segmentations.size());
 		FOREACH(i, pointcloud.segmentations) {
@@ -599,7 +600,7 @@ Scene::SCENE_TYPE Scene::Load(const String& fileName, bool bImport)
 	uint64_t nReserved;
 	fs.read((char*)&nReserved, sizeof(uint64_t));
 	// serialize in the current state
-	LOG("Load type", nType);
+	LOG("Load type %u", nType);
 	if (!SerializeLoad(*this, fs, (ARCHIVE_TYPE)nType))
 		return SCENE_NA;
 	// init images
@@ -633,7 +634,7 @@ bool Scene::Save(const String& fileName, ARCHIVE_TYPE type) const
 {
 	TD_TIMER_STARTD();
 	// save using MVS interface if requested
-	LOG("Save type", type);
+	LOG("Save type %u", type);
 	if (type == ARCHIVE_MVS) {
 		if (mesh.IsEmpty())
 			return SaveInterface(fileName);
