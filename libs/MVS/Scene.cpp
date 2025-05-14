@@ -210,10 +210,12 @@ bool Scene::LoadInterface(const String & fileName)
 		if (!obj.verticesSegmentation.empty()) {
 			ASSERT(obj.vertices.size() == obj.verticesSegmentation.size());
 			pointcloud.segmentations.CopyOf((const uint8_t*)&obj.verticesSegmentation[0].seg, obj.vertices.size());
+			LOG("LoadVertexSegmentations", pointcloud.segmentations);
 		}
 		if (!obj.verticesSegmentationConfidence.empty()) {
 			ASSERT(obj.vertices.size() == obj.verticesSegmentationConfidence.size());
 			pointcloud.segmentationConfidences.CopyOf((const float*)&obj.verticesSegmentationConfidence[0].segConf, obj.vertices.size());
+			LOG("LoadVertexSegmentations", pointcloud.segmentationConfidences);
 		}
 	}
 
@@ -317,6 +319,7 @@ bool Scene::SaveInterface(const String & fileName, int version) const
 			const PointCloud::Segmentation& seg = pointcloud.segmentations[i];
 			MVS::Interface::Segmentation& vertexSegmentation = obj.verticesSegmentation[i];
 			vertexSegmentation.seg = seg;
+			LOG("SaveVertexSegmentation", vertexSegmentation.seg);
 		}
 	}
 
@@ -326,6 +329,7 @@ bool Scene::SaveInterface(const String & fileName, int version) const
 			const PointCloud::SegmentationConfidence& segConf = pointcloud.segmentationConfidences[i];
 			MVS::Interface::SegmentationConfidence& vertexSegmentationConfidence = obj.verticesSegmentationConfidence[i];
 			vertexSegmentationConfidence.segConf = segConf;
+			LOG("SaveVertexSegmentationConfidence", vertexSegmentationConfidence.segConf);
 		}
 	}
 
