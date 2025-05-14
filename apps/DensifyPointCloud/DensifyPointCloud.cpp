@@ -312,6 +312,7 @@ int main(int argc, LPCTSTR* argv)
 	}
 	// load and estimate a dense point-cloud
 	const Scene::SCENE_TYPE sceneType(scene.Load(MAKE_PATH_SAFE(OPT::strInputFileName)));
+	LOG("Scene type: %u", sceneType);
 	if (sceneType == Scene::SCENE_NA)
 		return EXIT_FAILURE;
 	if (!OPT::strPointCloudFileName.empty() && !scene.pointcloud.Load(MAKE_PATH_SAFE(OPT::strPointCloudFileName))) {

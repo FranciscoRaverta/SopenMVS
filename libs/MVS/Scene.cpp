@@ -602,6 +602,7 @@ Scene::SCENE_TYPE Scene::Load(const String& fileName, bool bImport)
 	// serialize in the current state
 	LOG("Load type %u", nType);
 	if (!SerializeLoad(*this, fs, (ARCHIVE_TYPE)nType))
+		LOG("Case SceneNA");
 		return SCENE_NA;
 	// init images
 	nCalibratedImages = 0;

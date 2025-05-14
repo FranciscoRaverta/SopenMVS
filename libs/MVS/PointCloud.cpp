@@ -329,8 +329,8 @@ namespace BasicPLY {
 // load the dense point cloud from a PLY file
 bool PointCloud::Load(const String& fileName)
 {
-	LOG("Carga PointCloud - FRAN");
 	TD_TIMER_STARTD();
+	LOG("Carga PointCloud - FRAN");
 
 	ASSERT(!fileName.empty());
 	Release();
@@ -389,6 +389,7 @@ bool PointCloud::Save(const String& fileName, bool bViews, bool bLegacyTypes, bo
 	if (points.empty())
 		return false;
 	TD_TIMER_STARTD();
+	LOG("PointCloud Save");
 
 	// create PLY object
 	ASSERT(!fileName.empty());
