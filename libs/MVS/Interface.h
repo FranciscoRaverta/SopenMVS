@@ -218,7 +218,6 @@ ArchiveLoad& ArchiveLoad::operator & (_Tp& obj) {
 template<typename _Tp>
 bool SerializeSave(const _Tp& obj, const std::string& fileName, uint32_t version=MVSI_PROJECT_VER) {
 	// open the output stream
-	LOG("SerializeSave");
 	std::ofstream stream(fileName, std::ofstream::binary);
 	if (!stream.is_open())
 		return false;
@@ -240,7 +239,6 @@ bool SerializeSave(const _Tp& obj, const std::string& fileName, uint32_t version
 template<typename _Tp>
 bool SerializeLoad(_Tp& obj, const std::string& fileName, uint32_t* pVersion=NULL) {
 	// open the input stream
-	LOG("SerializeLoad");
 	std::ifstream stream(fileName, std::ifstream::binary);
 	if (!stream.is_open())
 		return false;
