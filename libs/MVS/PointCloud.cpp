@@ -419,7 +419,7 @@ bool PointCloud::Save(const String& fileName, bool bViews, bool bLegacyTypes, bo
 			vertex.n = normals[i];
 		if (!segmentations.empty()) {
 			vertex.seg = segmentations[i];
-			LOG("Save Segmentations FRAN %u", segmentations[i]);
+			// LOG("Save Segmentations FRAN %u", segmentations[i]); Esto funciona
 			vertex.segConf = segmentationConfidences[i];}
 		if (!pointViews.empty()) {
 			vertex.views.num = pointViews[i].size();
