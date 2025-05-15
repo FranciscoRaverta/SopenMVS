@@ -1846,8 +1846,6 @@ bool MVS::ExportPointCloud(const String& fileName, const Image& imageData, const
 				const Pixel8U c(imageData.image.empty() ? Pixel8U::WHITE : imageData.image(ROUND2INT(scaleImage.y*j),ROUND2INT(scaleImage.x*i)));
 				vertex.r = c.r; vertex.g = c.g; vertex.b = c.b;
 				vertex.seg = Cast<uint8_t>(imageData.segmentedImage(j, i));
-				LOG("Printing filtered");
-				LOG("vertex.seg: ", vertex.seg);
 				ply.put_element(&vertex);
 			}
 		}
@@ -1913,8 +1911,6 @@ bool MVS::ExportPointCloud(const String& fileName, const Image& imageData, const
 				const Pixel8U c(imageData.image.empty() ? Pixel8U::WHITE : imageData.image(j, i));
 				vertex.r = c.r; vertex.g = c.g; vertex.b = c.b;
 				vertex.seg = Cast<uint8_t>(imageData.segmentedImage(j, i));
-				LOG("Printing filtered");
-				LOG("vertex.seg: ", vertex.seg);
 				ply.put_element(&vertex);
 			}
 		}
