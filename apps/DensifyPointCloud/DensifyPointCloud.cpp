@@ -312,7 +312,6 @@ int main(int argc, LPCTSTR* argv)
 	}
 	// load and estimate a dense point-cloud
 	const Scene::SCENE_TYPE sceneType(scene.Load(MAKE_PATH_SAFE(OPT::strInputFileName)));
-	LOG("Scene type: %u", sceneType);
 	if (sceneType == Scene::SCENE_NA)
 		return EXIT_FAILURE;
 	if (!OPT::strPointCloudFileName.empty() && !scene.pointcloud.Load(MAKE_PATH_SAFE(OPT::strPointCloudFileName))) {
@@ -402,11 +401,9 @@ int main(int argc, LPCTSTR* argv)
 	}
 	if (OPT::thFilterPointCloud < 0) {
 		// filter point-cloud based on camera-point visibility intersections
-		LOG("Filtering stage - FRAN");
 		scene.PointCloudFilter(OPT::thFilterPointCloud);
 		const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName))+_T("_filtered"));
 		scene.Save(baseFileName+_T(".mvs"), (ARCHIVE_TYPE)OPT::nArchiveType);
-		LOG(baseFileName+_T(".ply"));
 		scene.pointcloud.Save(baseFileName+_T(".ply"));
 		Finalize();
 		return EXIT_SUCCESS;

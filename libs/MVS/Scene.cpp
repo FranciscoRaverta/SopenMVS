@@ -78,7 +78,6 @@ bool Scene::ImagesHaveNeighbors() const
 
 bool Scene::LoadInterface(const String & fileName)
 {
-	LOG("LoadInterface");
 	TD_TIMER_STARTD();
 	Interface obj;
 
@@ -208,16 +207,13 @@ bool Scene::LoadInterface(const String & fileName)
 			ASSERT(obj.vertices.size() == obj.verticesColor.size());
 			pointcloud.colors.CopyOf((const Pixel8U*)&obj.verticesColor[0].c, obj.vertices.size());
 		}
-		LOG("Antes de LoadVertexSegmentations");
 		if (!obj.verticesSegmentation.empty()) {
 			ASSERT(obj.vertices.size() == obj.verticesSegmentation.size());
 			pointcloud.segmentations.CopyOf((const uint8_t*)&obj.verticesSegmentation[0].seg, obj.vertices.size());
-			LOG("LoadVertexSegmentations %u", pointcloud.segmentations);
 		}
 		if (!obj.verticesSegmentationConfidence.empty()) {
 			ASSERT(obj.vertices.size() == obj.verticesSegmentationConfidence.size());
 			pointcloud.segmentationConfidences.CopyOf((const float*)&obj.verticesSegmentationConfidence[0].segConf, obj.vertices.size());
-			LOG("LoadVertexSegmentations %f", pointcloud.segmentationConfidences);
 		}
 	}
 
@@ -235,7 +231,6 @@ bool Scene::LoadInterface(const String & fileName)
 
 bool Scene::SaveInterface(const String & fileName, int version) const
 {
-	LOG("Save Interface");
 	TD_TIMER_STARTD();
 	Interface obj;
 
@@ -315,14 +310,12 @@ bool Scene::SaveInterface(const String & fileName, int version) const
 			vertexColor.c = color;
 		}
 	}
-	LOG("Before SaveVertexSegmentation");
 	if (!pointcloud.segmentations.IsEmpty()) {
 		obj.verticesSegmentation.resize(pointcloud.segmentations.size());
 		FOREACH(i, pointcloud.segmentations) {
 			const PointCloud::Segmentation& seg = pointcloud.segmentations[i];
 			MVS::Interface::Segmentation& vertexSegmentation = obj.verticesSegmentation[i];
 			vertexSegmentation.seg = seg;
-			LOG("SaveVertexSegmentation %u", vertexSegmentation.seg);
 		}
 	}
 
@@ -332,7 +325,6 @@ bool Scene::SaveInterface(const String & fileName, int version) const
 			const PointCloud::SegmentationConfidence& segConf = pointcloud.segmentationConfidences[i];
 			MVS::Interface::SegmentationConfidence& vertexSegmentationConfidence = obj.verticesSegmentationConfidence[i];
 			vertexSegmentationConfidence.segConf = segConf;
-			LOG("SaveVertexSegmentationConfidence %f", vertexSegmentationConfidence.segConf);
 		}
 	}
 
@@ -565,7 +557,6 @@ bool Scene::Import(const String& fileName)
 
 Scene::SCENE_TYPE Scene::Load(const String& fileName, bool bImport)
 {
-	LOG("Carga Scene");
 	TD_TIMER_STARTD();
 	Release();
 
@@ -600,10 +591,8 @@ Scene::SCENE_TYPE Scene::Load(const String& fileName, bool bImport)
 	uint64_t nReserved;
 	fs.read((char*)&nReserved, sizeof(uint64_t));
 	// serialize in the current state
-	LOG("Load type %u", nType);
-	if (!SerializeLoad(*this, fs, (ARCHIVE_TYPE)nType)) {
-		LOG("Case SceneNA");
-		return SCENE_NA;}
+	if (!SerializeLoad(*this, fs, (ARCHIVE_TYPE)nType)) 
+		return SCENE_NA;
 	// init images
 	nCalibratedImages = 0;
 	size_t nTotalPixels(0);
@@ -635,7 +624,6 @@ bool Scene::Save(const String& fileName, ARCHIVE_TYPE type) const
 {
 	TD_TIMER_STARTD();
 	// save using MVS interface if requested
-	LOG("Save type %u", type);
 	if (type == ARCHIVE_MVS) {
 		if (mesh.IsEmpty())
 			return SaveInterface(fileName);
