@@ -359,6 +359,7 @@ bool PointCloud::Load(const String& fileName)
 					normals[v] = vertex.n;
 				if (!segmentations.empty())
 					segmentations[v] = vertex.seg;
+					LOG("Load Segmentations FRAN %u", segmentations[v]);
 				if (!segmentationConfidences.empty())
 					segmentationConfidences[v] = vertex.segConf;
 				if (!pointViews.empty()) {
@@ -418,6 +419,7 @@ bool PointCloud::Save(const String& fileName, bool bViews, bool bLegacyTypes, bo
 			vertex.n = normals[i];
 		if (!segmentations.empty()) {
 			vertex.seg = segmentations[i];
+			LOG("Save Segmentations FRAN %u", segmentations[i]);
 			vertex.segConf = segmentationConfidences[i];}
 		if (!pointViews.empty()) {
 			vertex.views.num = pointViews[i].size();
