@@ -125,6 +125,8 @@ public:
 		ar & pointWeights;
 		ar & normals;
 		ar & colors;
+		ar & segmentations;
+		ar & segmentationConfidences;
 	}
 	#endif
 };
