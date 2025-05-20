@@ -222,10 +222,11 @@ bool Scene::LoadInterface(const String & fileName)
 
 	DEBUG_EXTRA("Scene loaded from interface format (%s):\n"
 				"\t%u images (%u calibrated) with a total of %.2f MPixels (%.2f MPixels/image)\n"
-				"\t%u points, %u vertices, %u faces",
+				"\t%u points, %u vertices, %u faces"
+				"\t%u segmentations",
 				TD_TIMER_GET_FMT().c_str(),
 				images.size(), nCalibratedImages, (double)nTotalPixels/(1024.0*1024.0), (double)nTotalPixels/(1024.0*1024.0*nCalibratedImages),
-				pointcloud.points.size(), mesh.vertices.size(), mesh.faces.size());
+				pointcloud.points.size(), mesh.vertices.size(), mesh.faces.size(), pointcloud.segmentations.size());
 	return true;
 } // LoadInterface
 
@@ -650,10 +651,11 @@ bool Scene::Save(const String& fileName, ARCHIVE_TYPE type) const
 		return false;
 	DEBUG_EXTRA("Scene saved (%s):\n"
 				"\t%u images (%u calibrated)\n"
-				"\t%u points, %u vertices, %u faces",
+				"\t%u points, %u vertices, %u faces"
+				"\t%u segmentation data",
 				TD_TIMER_GET_FMT().c_str(),
 				images.GetSize(), nCalibratedImages,
-				pointcloud.points.GetSize(), mesh.vertices.GetSize(), mesh.faces.GetSize());
+				pointcloud.points.GetSize(), mesh.vertices.GetSize(), mesh.faces.GetSize(), pointcloud.segmentations.GetSize());
 	return true;
 	#else
 	return false;
