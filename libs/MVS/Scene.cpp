@@ -606,10 +606,10 @@ Scene::SCENE_TYPE Scene::Load(const String& fileName, bool bImport)
 	}
 	DEBUG_EXTRA("Scene loaded (%s):\n"
 				"\t%u images (%u calibrated) with a total of %.2f MPixels (%.2f MPixels/image)\n"
-				"\t%u points, %u vertices, %u faces, %u segmentations",
+				"\t%u points, %u vertices, %u faces, %u segmentations, %u nType, %u nReserved",
 				TD_TIMER_GET_FMT().c_str(),
 				images.GetSize(), nCalibratedImages, (double)nTotalPixels/(1024.0*1024.0), (double)nTotalPixels/(1024.0*1024.0*nCalibratedImages),
-				pointcloud.points.GetSize(), mesh.vertices.GetSize(), mesh.faces.GetSize(), pointcloud.segmentations.GetSize());
+				pointcloud.points.GetSize(), mesh.vertices.GetSize(), mesh.faces.GetSize(), pointcloud.segmentations.GetSize(),nType, nReserved);
 	return SCENE_MVS;
 	#else
 	if (bImport && Import(fileName))
@@ -651,10 +651,10 @@ bool Scene::Save(const String& fileName, ARCHIVE_TYPE type) const
 	DEBUG_EXTRA("Scene saved (%s):\n"
 				"\t%u images (%u calibrated)\n"
 				"\t%u points, %u vertices, %u faces\n"
-				"\t%u segmentation data",
+				"\t%u segmentation data, %u type, %u nReserved",
 				TD_TIMER_GET_FMT().c_str(),
 				images.GetSize(), nCalibratedImages,
-				pointcloud.points.GetSize(), mesh.vertices.GetSize(), mesh.faces.GetSize(), pointcloud.segmentations.GetSize());
+				pointcloud.points.GetSize(), mesh.vertices.GetSize(), mesh.faces.GetSize(), pointcloud.segmentations.GetSize(), type, nReserved);
 	return true;
 	#else
 	return false;
