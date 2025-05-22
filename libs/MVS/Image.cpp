@@ -137,7 +137,8 @@ bool Image::LoadImage(const String& fileName, unsigned nMaxResolution)
 bool Image::ReloadImage(unsigned nMaxResolution, bool bLoadPixels)
 {
 	IMAGEPTR pImage(bLoadPixels ? ReadImage(name, image) : ReadImageHeader(name));
-	IMAGEPTR pSegmentedImage(bLoadPixels ? ReadSegmentedImage(segmentationName, segmentedImage) : ReadImageHeader(segmentationName));
+	if (!segmentationName.empty())
+		IMAGEPTR pSegmentedImage(bLoadPixels ? ReadSegmentedImage(segmentationName, segmentedImage) : ReadImageHeader(segmentationName));
 	
 	if (pImage == NULL) {
 		LOG("error: failed reloading image '%s'", name.c_str());
@@ -175,10 +176,11 @@ float Image::ResizeImage(unsigned nMaxResolution)
 	const cv::Size scaledSize(Image8U::computeResize(GetSize(), scale));
 	width = (uint32_t)scaledSize.width;
 	height = (uint32_t)scaledSize.height;
-	if (!image.empty()) {
+	if (!image.empty()) 
 		cv::resize(image, image, scaledSize, 0, 0, cv::INTER_AREA);
+	if (!segmentedImage.empty())
 		cv::resize(segmentedImage, segmentedImage, scaledSize, 0, 0, cv::INTER_NEAREST); 
-		}
+	
 	return static_cast<float>(scale);
 } // ResizeImage
 /*----------------------------------------------------------------*/
