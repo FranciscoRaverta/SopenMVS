@@ -1489,8 +1489,9 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				Point3 X(point*confidence);
 				Pixel32F C(Cast<float>(imageData.image(x))*confidence);
 				std::unordered_map<uint8_t, float> segmentationFrequency;
-				uint8_t segmentationColor = Cast<uint8_t>(imageData.segmentedImage(x)); // Convert to a 32-bit packed color
-				segmentationFrequency[segmentationColor]++;
+				if (bEstimateSegmentation) {
+					uint8_t segmentationColor = Cast<uint8_t>(imageData.segmentedImage(x)); // Convert to a 32-bit packed color
+					segmentationFrequency[segmentationColor]++; }
 				PointCloud::Normal N(normal*confidence);
 				invalidDepths.Empty();
 				for (const ViewScore& neighbor: depthData.neighbors) {
@@ -2329,8 +2330,9 @@ void Scene::PointCloudFilter(int thRemove)
 			if (visibility[idxPoint] <= thRemove) {
 				pc.points.push_back(pointcloud.points[idxPoint]);
 				pc.colors.push_back(pointcloud.colors[idxPoint]);
-				pc.segmentations.push_back(pointcloud.segmentations[idxPoint]);
-				pc.segmentationConfidences.push_back(pointcloud.segmentationConfidences[idxPoint]);
+				if (!pointcloud.segmentations.IsEmpty()) {
+					pc.segmentations.push_back(pointcloud.segmentations[idxPoint]);
+					pc.segmentationConfidences.push_back(pointcloud.segmentationConfidences[idxPoint]);}
 			}
 		}
 		pc.Save(MAKE_PATH("scene_dense_outliers.ply"));
