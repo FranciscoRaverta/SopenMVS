@@ -1350,8 +1350,8 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 				if (bEstimateColor)
 					pointcloud.colors.emplace_back(image.pImageData->image(x));
 				if (bEstimateSegmentation) {
-					pointcloud.segmentations.emplace_back(image.pSegmentedImageData->segmentedImage(x)); // Chequear que esté bien - FRAN
-					pointcloud.segmentationConfidences.emplace_back(1.f); }// Chequear que esté bien - FRAN
+					pointcloud.segmentations.emplace_back(image.pSegmentedImageData->segmentedImage(x)); 
+					pointcloud.segmentationConfidences.emplace_back(1.f); }
 				if (bEstimateNormal)
 					depthData.GetNormal(x, pointcloud.normals.emplace_back());
 				++nDepths;
@@ -1531,7 +1531,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							if (bEstimateColor)
 								C += Cast<float>(imageDataB.image(xB))*confidenceB;
 							if (bEstimateSegmentation) {
-								//C += Cast<float>(imageDataB.image(xB))*confidenceB; // Chequear si quedó bien - FRAN
+								//C += Cast<float>(imageDataB.image(xB))*confidenceB; 
 								segmentationColor = Cast<uint8_t>(imageDataB.segmentedImage(xB)); // Convert to a 32-bit packed color
 								segmentationFrequency[segmentationColor]++;
 							} 
@@ -1678,14 +1678,12 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 		return false;
 	if (ABS(nFusionMode) == 1)
 		return true;
-	LOG("Flag 2 FRAN");
 	// fuse all depth-maps
 	pointcloud.Release();
 	if (OPTDENSE::nMinViewsFuse < 2) {
 		// merge depth-maps
 		data.depthMaps.MergeDepthMaps(pointcloud, OPTDENSE::nEstimateColors == 2, OPTDENSE::nEstimateNormals == 2, OPTDENSE::nEstimateSegmentations == 2);
 	} else {
-		LOG("Flag 3 FRAN");
 		// fuse depth-maps
 		data.depthMaps.FuseDepthMaps(pointcloud, OPTDENSE::nEstimateColors == 2, OPTDENSE::nEstimateNormals == 2, OPTDENSE::nEstimateSegmentations == 2);
 	}
@@ -1725,7 +1723,7 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 		if (pointcloud.normals.IsEmpty() && OPTDENSE::nEstimateNormals == 1)
 			EstimatePointNormals(images, pointcloud);
 		if (pointcloud.segmentations.IsEmpty() && OPTDENSE::nEstimateSegmentations == 1)
-			EstimatePointSegmentations(images, pointcloud);										// Crear esta función - FRAN
+			EstimatePointSegmentations(images, pointcloud);
 	}
 
 	if (OPTDENSE::bRemoveDmaps) {
@@ -1965,7 +1963,6 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 			// single-thread execution
 			DenseReconstructionFilter((void*)&data);
 		}
-		LOG("Flag 1 FRAN");
 		GET_LOGCONSOLE().Play();
 		if (!data.events.IsEmpty())
 			return false;

@@ -1,4 +1,6 @@
-# OpenMVS: open Multi-View Stereo reconstruction library
+# SOpenMVS: Segmented open Multi-View Stereo reconstruction library
+
+This is a modificationof the OpenMVS software used for SODM to do dense reconstruction. The modifications allow to add the semantic segmentation information of images to the densified pointcloud.
 
 [![Watch reconstruction](https://i.imgur.com/S4L0E6r.jpeg)](https://sketchfab.com/models/3aedcdd22c31447199c18dd9aec5d952/embed)
 
