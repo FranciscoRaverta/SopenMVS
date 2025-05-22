@@ -1489,8 +1489,10 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				Point3 X(point*confidence);
 				Pixel32F C(Cast<float>(imageData.image(x))*confidence);
 				std::unordered_map<uint8_t, float> segmentationFrequency;
+				uint8_t segmentationColor;
+				float segConfidence;
 				if (bEstimateSegmentation) {
-					uint8_t segmentationColor = Cast<uint8_t>(imageData.segmentedImage(x)); // Convert to a 32-bit packed color
+					segmentationColor = Cast<uint8_t>(imageData.segmentedImage(x)); // Convert to a 32-bit packed color
 					segmentationFrequency[segmentationColor]++; }
 				PointCloud::Normal N(normal*confidence);
 				invalidDepths.Empty();
@@ -1545,19 +1547,20 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					}
 				}
 				uint32_t modeColor = 10001;
-				float maxCount = 0.f;
-				for (const auto& [color, count] : segmentationFrequency) {
-					if (count > maxCount) {
-						maxCount = count;
-						modeColor = color;
+				if (bEstimateSegmentation) {
+					float maxCount = 0.f;
+					for (const auto& [color, count] : segmentationFrequency) {
+						if (count > maxCount) {
+							maxCount = count;
+							modeColor = color;
+						}
 					}
+					float totalCount = 0.f;
+					for (const auto& [color, count] : segmentationFrequency) {
+						totalCount += count;
+					}
+					segConfidence = (totalCount > 0.f) ? (maxCount / totalCount) : -10.f;
 				}
-				float totalCount = 0.f;
-				for (const auto& [color, count] : segmentationFrequency) {
-					totalCount += count;
-				}
-				float segConfidence = (totalCount > 0.f) ? (maxCount / totalCount) : -10.f;
-				
 				if (views.size() < nMinViewsFuse) {
 					// remove point
 					FOREACH(v, views) {
