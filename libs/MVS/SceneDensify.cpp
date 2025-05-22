@@ -1678,13 +1678,14 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 		return false;
 	if (ABS(nFusionMode) == 1)
 		return true;
-
+	LOG("Flag 2 FRAN");
 	// fuse all depth-maps
 	pointcloud.Release();
 	if (OPTDENSE::nMinViewsFuse < 2) {
 		// merge depth-maps
 		data.depthMaps.MergeDepthMaps(pointcloud, OPTDENSE::nEstimateColors == 2, OPTDENSE::nEstimateNormals == 2, OPTDENSE::nEstimateSegmentations == 2);
 	} else {
+		LOG("Flag 3 FRAN");
 		// fuse depth-maps
 		data.depthMaps.FuseDepthMaps(pointcloud, OPTDENSE::nEstimateColors == 2, OPTDENSE::nEstimateNormals == 2, OPTDENSE::nEstimateSegmentations == 2);
 	}
@@ -1964,6 +1965,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 			// single-thread execution
 			DenseReconstructionFilter((void*)&data);
 		}
+		LOG("Flag 1 FRAN");
 		GET_LOGCONSOLE().Play();
 		if (!data.events.IsEmpty())
 			return false;
