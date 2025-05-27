@@ -332,7 +332,7 @@ int main(int argc, LPCTSTR* argv)
 			}
 		}
 	}
-	if (!OPT::strSegmentationPath.empty()) {
+	if (!OPT::strSegmentationPath.empty() and OPT::nEstimateSegmentations == 2) {
 		LOG("Segmentation path detected");
 		Util::ensureValidFolderPath(OPT::strSegmentationPath);
 		for (Image& image : scene.images) {
