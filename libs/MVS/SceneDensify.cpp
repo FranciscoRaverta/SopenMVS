@@ -1493,6 +1493,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				float segConfidence;
 				if (bEstimateSegmentation) {
 					segmentationColor = Cast<uint8_t>(imageData.segmentedImage(x)); // Convert to a 32-bit packed color
+					if (segmentationFrequency.find(segmentationColor) == segmentationFrequency.end())
+						segmentationFrequency[segmentationColor] = 0.0f;
 					segmentationFrequency[segmentationColor]++; }
 				PointCloud::Normal N(normal*confidence);
 				invalidDepths.Empty();
@@ -1533,6 +1535,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							if (bEstimateSegmentation) {
 								//C += Cast<float>(imageDataB.image(xB))*confidenceB; 
 								segmentationColor = Cast<uint8_t>(imageDataB.segmentedImage(xB)); // Convert to a 32-bit packed color
+								if (segmentationFrequency.find(segmentationColor) == segmentationFrequency.end())
+									segmentationFrequency[segmentationColor] = 0.0f;
 								segmentationFrequency[segmentationColor]++;
 							} 
 							if (bEstimateNormal)
@@ -1589,6 +1593,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					for (Depth* pDepth: invalidDepths)
 						*pDepth = 0;
 				}
+				segmentationFrequency.clear();
 			}
 		}
 		ASSERT(pointcloud.points.size() == pointcloud.pointViews.size() && pointcloud.points.size() == pointcloud.pointWeights.size() && pointcloud.points.size() == projs.size());
