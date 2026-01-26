@@ -1322,7 +1322,8 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 		pointcloud.normals.reserve(nPointsEstimate);
 	if (bEstimateSegmentation) {
 		pointcloud.segmentations.reserve(nPointsEstimate);
-		pointcloud.segmentationConfidences.reserve(nPointsEstimate); }
+		pointcloud.segmentationConfidences.reserve(nPointsEstimate);
+		pointcloud.segmentationConfidencesExtended.reserve(nPointsEstimate); }
 	Util::Progress progress(_T("Merged depth-maps"), arrDepthData.size());
 	GET_LOGCONSOLE().Pause();
 	FOREACH(idxImage, arrDepthData) {
@@ -1351,7 +1352,8 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 					pointcloud.colors.emplace_back(image.pImageData->image(x));
 				if (bEstimateSegmentation) {
 					pointcloud.segmentations.emplace_back(image.pSegmentedImageData->segmentedImage(x)); 
-					pointcloud.segmentationConfidences.emplace_back(1.f); }
+					pointcloud.segmentationConfidences.emplace_back(1.f);
+					pointcloud.segmentationConfidencesExtended.emplace_back(1.f); }
 				if (bEstimateNormal)
 					depthData.GetNormal(x, pointcloud.normals.emplace_back());
 				++nDepths;
@@ -1432,7 +1434,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 		pointcloud.colors.Reserve(nPointsEstimate);
 	if (bEstimateSegmentation) {
 		pointcloud.segmentations.Reserve(nPointsEstimate);
-		pointcloud.segmentationConfidences.Reserve(nPointsEstimate); }
+		pointcloud.segmentationConfidences.Reserve(nPointsEstimate);
+		pointcloud.segmentationConfidencesExtended.Reserve(nPointsEstimate); }
 	if (bEstimateNormal)
 		pointcloud.normals.Reserve(nPointsEstimate);
 	Util::Progress progress(_T("Fused depth-maps"), connections.GetSize());
@@ -1491,8 +1494,11 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				std::unordered_map<uint8_t, float> segmentationFrequency;
 				uint8_t segmentationColor;
 				float segConfidence;
+				float pixelConfidence = 1.f;
 				if (bEstimateSegmentation) {
 					segmentationColor = Cast<uint8_t>(imageData.segmentedImage(x)); // Convert to a 32-bit packed color
+					pixelConfidence = Cast<float>(imageData.confidenceImage(x)); // Convert to a 32-bit packed color
+					//std::cout << "Pixel Confidence" << pixelConfidence << std::cout;
 					if (segmentationFrequency.find(segmentationColor) == segmentationFrequency.end())
 						segmentationFrequency[segmentationColor] = 0.0f;
 					segmentationFrequency[segmentationColor]++; }
@@ -1586,7 +1592,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						pointcloud.colors.emplace_back((C*(float)nrm).cast<uint8_t>());
 					if (bEstimateSegmentation) {
 						pointcloud.segmentations.emplace_back(modeColor);
-						pointcloud.segmentationConfidences.emplace_back(segConfidence); }
+						pointcloud.segmentationConfidences.emplace_back(segConfidence);
+						pointcloud.segmentationConfidencesExtended.emplace_back(segConfidence * pixelConfidence); }
 					if (bEstimateNormal)
 						pointcloud.normals.emplace_back(normalized(N*(float)nrm));
 					// invalidate all neighbor depths that do not agree with it
@@ -2339,7 +2346,8 @@ void Scene::PointCloudFilter(int thRemove)
 				pc.colors.push_back(pointcloud.colors[idxPoint]);
 				if (!pointcloud.segmentations.IsEmpty()) {
 					pc.segmentations.push_back(pointcloud.segmentations[idxPoint]);
-					pc.segmentationConfidences.push_back(pointcloud.segmentationConfidences[idxPoint]);}
+					pc.segmentationConfidences.push_back(pointcloud.segmentationConfidences[idxPoint]);
+					pc.segmentationConfidencesExtended.push_back(pointcloud.segmentationConfidencesExtended[idxPoint]);}
 			}
 		}
 		pc.Save(MAKE_PATH("scene_dense_outliers.ply"));

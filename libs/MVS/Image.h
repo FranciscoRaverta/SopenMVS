@@ -62,10 +62,12 @@ public:
 	String name; // image file name (relative path)
 	String maskName; // segmentation file name (optional)
 	String segmentationName; // segmentation file name (optional)
+	String confidenceName;
 	Camera camera; // view's pose
 	uint32_t width, height; // image size
 	Image8U3 image; // image color pixels
 	Image8U segmentedImage; // image color pixels
+	Image32F confidenceImage; 
 	ViewScoreArr neighbors; // scored neighbor images
 	float scale; // image scale relative to the original size
 	float avgDepth; // average depth of the points seen by this camera
@@ -82,8 +84,10 @@ public:
 	static IMAGEPTR ReadImageHeader(const String& fileName);
 	static IMAGEPTR ReadImage(const String& fileName, Image8U3& image);
 	static IMAGEPTR ReadSegmentedImage(const String& fileName, Image8U& segmentedImage);
+	static IMAGEPTR ReadConfidenceImage(const String& fileName, Image32F& confidenceImage);
 	static bool ReadImage(IMAGEPTR pImage, Image8U3& image);
 	static bool ReadSegmentedImage(IMAGEPTR pSegmentedImage, Image8U& segmentedImage);
+	static bool ReadConfidenceImage(IMAGEPTR pConfidenceImage, Image32F& confidenceImage);
 	bool LoadImage(const String& fileName, unsigned nMaxResolution=0);
 	bool ReloadImage(unsigned nMaxResolution=0, bool bLoadPixels=true);
 	void ReleaseImage();
@@ -139,6 +143,8 @@ public:
 		maskName = maskName.empty() ? String() : MAKE_PATH_FULL(WORKING_FOLDER_FULL, maskName);
 		ar & segmentationName;
 		segmentationName = segmentationName.empty() ? String() : MAKE_PATH_FULL(WORKING_FOLDER_FULL, segmentationName);
+		ar & confidenceName;
+		confidenceName = confidenceName.empty() ? String() : MAKE_PATH_FULL(WORKING_FOLDER_FULL, confidenceName);
 		ar & width & height;
 		ar & neighbors;
 		ar & avgDepth;

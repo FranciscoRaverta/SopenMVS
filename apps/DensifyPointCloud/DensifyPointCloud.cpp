@@ -58,6 +58,7 @@ String strDenseConfigFileName;
 String strExportDepthMapsName;
 String strMaskPath;
 String strSegmentationPath;
+String strConfidencePath;
 float fMaxSubsceneArea;
 float fSampleMesh;
 float fBorderROI;
@@ -146,6 +147,7 @@ bool Initialize(size_t argc, LPCTSTR* argv)
 		("ignore-mask-label", boost::program_options::value(&nIgnoreMaskLabel)->default_value(-1), "label value to ignore in the image mask, stored in the MVS scene or next to each image with '.mask.png' extension (<0 - disabled)")
 		("mask-path", boost::program_options::value<std::string>(&OPT::strMaskPath), "path to folder containing mask images with '.mask.png' extension")
 		("segmentation-path", boost::program_options::value<std::string>(&OPT::strSegmentationPath), "path to folder containing segmentation images with '.png.png' extension")
+		("confidence-path", boost::program_options::value<std::string>(&OPT::strConfidencePath), "path to folder containing confidence images with '.png.png' extension")
 		("iters", boost::program_options::value(&nEstimationIters)->default_value(numIters), "number of patch-match iterations")
 		("geometric-iters", boost::program_options::value(&nEstimationGeometricIters)->default_value(2), "number of geometric consistent patch-match iterations (0 - disabled)")
 		("estimate-colors", boost::program_options::value(&nEstimateColors)->default_value(2), "estimate the colors for the dense point-cloud (0 - disabled, 1 - final, 2 - estimate)")
@@ -346,6 +348,22 @@ int main(int argc, LPCTSTR* argv)
 				return EXIT_FAILURE;
 			}
 			LOG("Image segmentation path: %s", image.segmentationName.c_str());
+		}
+	}
+	if (!OPT::strConfidencePath.empty() and OPTDENSE::nEstimateSegmentations == 2) {
+		LOG("Segmentation path detected");
+		Util::ensureValidFolderPath(OPT::strConfidencePath);
+		for (Image& image : scene.images) {
+			if (!image.confidenceName.empty()) {
+				LOG("error: Image %s has non-empty segmentationName %s", image.name.c_str(), image.confidenceName.c_str());
+				return EXIT_FAILURE;
+			}
+			image.confidenceName = OPT::strConfidencePath + Util::getFileName(image.name) + ".png";
+			if (!File::access(image.confidenceName)) {
+				LOG("error: Mask image %s not found", image.confidenceName.c_str());
+				return EXIT_FAILURE;
+			}
+			LOG("Image confidence path: %s", image.confidenceName.c_str());
 		}
 	}
 

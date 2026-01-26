@@ -112,6 +112,30 @@ bool Image::ReadSegmentedImage(IMAGEPTR pSegmentedImage, Image8U& image)
 } // ReadImage
 /*----------------------------------------------------------------*/
 
+IMAGEPTR Image::ReadConfidenceImage(const String& fileName, Image32F& image)
+{
+	IMAGEPTR pConfidenceImage(OpenImage(fileName));
+	if (pConfidenceImage != NULL && !ReadConfidenceImage(pConfidenceImage, image))
+		pConfidenceImage.Release();
+	return pConfidenceImage;
+} // ReadImage
+/*----------------------------------------------------------------*/
+
+bool Image::ReadConfidenceImage(IMAGEPTR pConfidenceImage, Image32F& image)
+{
+	if (FAILED(pConfidenceImage->ReadHeader())) {
+		LOG("error: failed loading image header");
+		return false;
+	}
+	image.create(pConfidenceImage->GetHeight(), pConfidenceImage->GetWidth());
+	if (FAILED(pConfidenceImage->ReadData(image.data, PF_GRAYF32, 1, (CImage::Size)image.step))) {
+		LOG("error: failed loading image data");
+		return false;
+	}
+	return true;
+} // ReadImage
+/*----------------------------------------------------------------*/
+
 
 bool Image::LoadImage(const String& fileName, unsigned nMaxResolution)
 {
@@ -139,6 +163,8 @@ bool Image::ReloadImage(unsigned nMaxResolution, bool bLoadPixels)
 	IMAGEPTR pImage(bLoadPixels ? ReadImage(name, image) : ReadImageHeader(name));
 	if (!segmentationName.empty())
 		IMAGEPTR pSegmentedImage(bLoadPixels ? ReadSegmentedImage(segmentationName, segmentedImage) : ReadImageHeader(segmentationName));
+	if (!confidenceName.empty())
+		IMAGEPTR pConfidenceImage(bLoadPixels ? ReadConfidenceImage(segmentationName, confidenceName) : ReadImageHeader(confidenceName));
 	
 	if (pImage == NULL) {
 		LOG("error: failed reloading image '%s'", name.c_str());
@@ -180,6 +206,8 @@ float Image::ResizeImage(unsigned nMaxResolution)
 		cv::resize(image, image, scaledSize, 0, 0, cv::INTER_AREA);
 	if (!segmentedImage.empty())
 		cv::resize(segmentedImage, segmentedImage, scaledSize, 0, 0, cv::INTER_NEAREST); 
+	if (!confidenceImage.empty())
+		cv::resize(confidenceImage, confidenceImage, scaledSize, 0, 0, cv::INTER_NEAREST);
 	
 	return static_cast<float>(scale);
 } // ResizeImage
