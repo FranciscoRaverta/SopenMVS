@@ -164,7 +164,7 @@ bool Image::ReloadImage(unsigned nMaxResolution, bool bLoadPixels)
 	if (!segmentationName.empty())
 		IMAGEPTR pSegmentedImage(bLoadPixels ? ReadSegmentedImage(segmentationName, segmentedImage) : ReadImageHeader(segmentationName));
 	if (!confidenceName.empty())
-		IMAGEPTR pConfidenceImage(bLoadPixels ? ReadConfidenceImage(segmentationName, confidenceName) : ReadImageHeader(confidenceName));
+		IMAGEPTR pConfidenceImage(bLoadPixels ? ReadConfidenceImage(confidenceName, confidenceImage) : ReadImageHeader(confidenceName));
 	
 	if (pImage == NULL) {
 		LOG("error: failed reloading image '%s'", name.c_str());
