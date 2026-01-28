@@ -1495,9 +1495,12 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				uint8_t segmentationColor;
 				float segConfidence;
 				float pixelConfidence = 1.f;
+				float sumLogsConfidence = 0.f;
+				int logNumber = 0;
 				if (bEstimateSegmentation) {
 					segmentationColor = Cast<uint8_t>(imageData.segmentedImage(x)); // Convert to a 32-bit packed color
-					pixelConfidence = Cast<float>(imageData.confidenceImage(x)); // Convert to a 32-bit packed color
+					sumLogsConfidence += std::log(std::max(Cast<float>(imageData.confidenceImage(x)),1e-4)); 
+					logNumber += 1;
 					//std::cout << "Pixel Confidence" << pixelConfidence << std::cout;
 					if (segmentationFrequency.find(segmentationColor) == segmentationFrequency.end())
 						segmentationFrequency[segmentationColor] = 0.0f;
@@ -1544,6 +1547,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								if (segmentationFrequency.find(segmentationColor) == segmentationFrequency.end())
 									segmentationFrequency[segmentationColor] = 0.0f;
 								segmentationFrequency[segmentationColor]++;
+								sumLogsConfidence += std::log(std::max(Cast<float>(imageData.confidenceImage(xB)),1e-4));
+								logNumber += 1;
 							} 
 							if (bEstimateNormal)
 								N += normalB*confidenceB;
@@ -1593,6 +1598,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					if (bEstimateSegmentation) {
 						pointcloud.segmentations.emplace_back(modeColor);
 						pointcloud.segmentationConfidences.emplace_back(segConfidence);
+						pixelConfidence = std::exp(sumLogsConfidence / logNumber);
 						pointcloud.segmentationConfidencesExtended.emplace_back(segConfidence * pixelConfidence); }
 					if (bEstimateNormal)
 						pointcloud.normals.emplace_back(normalized(N*(float)nrm));
