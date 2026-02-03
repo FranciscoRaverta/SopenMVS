@@ -333,14 +333,14 @@ bool Scene::SaveInterface(const String & fileName, int version) const
 		}
 	}
 
-	if (!pointcloud.segmentationConfidencesExtended.IsEmpty()) {
-		obj.verticesSegmentationConfidenceExtended.resize(pointcloud.segmentationConfidencesExtended.size());
-		FOREACH(i, pointcloud.segmentationConfidencesExtended) {
-			const PointCloud::SegmentationConfidenceExtended& segConfExtended = pointcloud.segmentationConfidencesExtended[i];
-			MVS::Interface::SegmentationConfidenceExtended& vertexSegmentationConfidenceExtended = obj.verticesSegmentationConfidenceExtended[i];
-			vertexSegmentationConfidenceExtended.segConfExtended = segConfExtended;
-		}
-	}
+	// if (!pointcloud.segmentationConfidencesExtended.IsEmpty()) {
+	// 	obj.verticesSegmentationConfidenceExtended.resize(pointcloud.segmentationConfidencesExtended.size());
+	// 	FOREACH(i, pointcloud.segmentationConfidencesExtended) {
+	// 		const PointCloud::SegmentationConfidenceExtended& segConfExtended = pointcloud.segmentationConfidencesExtended[i];
+	// 		MVS::Interface::SegmentationConfidenceExtended& vertexSegmentationConfidenceExtended = obj.verticesSegmentationConfidenceExtended[i];
+	// 		vertexSegmentationConfidenceExtended.segConfExtended = segConfExtended;
+	// 	}
+	// }
 
 	// export region of interest
 	obj.obb.rot = Matrix3x3f(obb.m_rot);
