@@ -313,9 +313,9 @@ int main(int argc, LPCTSTR* argv)
 		return EXIT_SUCCESS;
 	}
 	// load and estimate a dense point-cloud
-	std::cout << "Before scene Load" << std::endl;
+	std::cout << "Before scene Load - FRAN" << std::endl;
 	const Scene::SCENE_TYPE sceneType(scene.Load(MAKE_PATH_SAFE(OPT::strInputFileName)));
-	std::cout << "After scene Load" << std::endl;
+	std::cout << "After scene Load - FRAN" << std::endl;
 	if (sceneType == Scene::SCENE_NA)
 		return EXIT_FAILURE;
 	if (!OPT::strPointCloudFileName.empty() && !scene.pointcloud.Load(MAKE_PATH_SAFE(OPT::strPointCloudFileName))) {
@@ -421,15 +421,15 @@ int main(int argc, LPCTSTR* argv)
 	}
 	if (OPT::thFilterPointCloud < 0) {
 		// filter point-cloud based on camera-point visibility intersections
-		std::cout << "Before PointCloudFilter" << std::endl;
+		std::cout << "Before PointCloudFilter - FRAN" << std::endl;
 		scene.PointCloudFilter(OPT::thFilterPointCloud);
-		std::cout << "After PointCloudFilter" << std::endl;
+		std::cout << "After PointCloudFilter - FRAN" << std::endl;
 		const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName))+_T("_filtered"));
-		std::cout << "Before scene save" << std::endl;
+		std::cout << "Before scene save - FRAN" << std::endl;
 		scene.Save(baseFileName+_T(".mvs"), (ARCHIVE_TYPE)OPT::nArchiveType);
-		std::cout << "After scene save" << std::endl;
+		std::cout << "After scene save - FRAN" << std::endl;
 		scene.pointcloud.Save(baseFileName+_T(".ply"));
-		std::cout << "After pointcloud save" << std::endl;
+		std::cout << "After pointcloud save - FRAN" << std::endl;
 		Finalize();
 		return EXIT_SUCCESS;
 	}
