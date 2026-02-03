@@ -438,7 +438,7 @@ struct Interface
 
 			Pose() {}
 			template <typename MAT, typename POS>
-			Pose(const MAT& _R, const POS& _C) : R(_R), C(_C) {}
+			Pose(const MAT& _R, const POS& _C) : R(_R), C(_C), Cov(Mat66d::Identity()) {}
 			template <typename MAT, typename POS, typename MATC>
 			Pose(const MAT& _R, const POS& _C, const MATC& _Cov) : R(_R), C(_C), Cov(_Cov) {}
 
@@ -514,7 +514,8 @@ struct Interface
 			// add the relative camera pose to the platform
 			return Pose{
 				camera.R*pose.R,
-				pose.R.t()*camera.C+pose.C
+				pose.R.t()*camera.C+pose.C,
+				pose.Cov
 			};
 		}
 
