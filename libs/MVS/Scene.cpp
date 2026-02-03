@@ -110,6 +110,7 @@ bool Scene::LoadInterface(const String & fileName)
 			Platform::Pose& pose = platform.poses.emplace_back();
 			pose.R = itPose.R;
 			pose.C = itPose.C;
+			pose.Cov = itPose.Cov;
 		}
 		ASSERT(platform.poses.size() == itPlatform.poses.size());
 	}

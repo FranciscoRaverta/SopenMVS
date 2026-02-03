@@ -57,11 +57,13 @@ public:
 	struct Pose {
 		RMatrix R; // platform's rotation matrix
 		CMatrix C; // platform's translation vector in the global coordinate system
+		CovMatrix Cov; // platform's covariance matrix
 		#ifdef _USE_BOOST
 		template <class Archive>
 		void serialize(Archive& ar, const unsigned int /*version*/) {
 			ar & R;
 			ar & C;
+			ar & Cov;
 		}
 		#endif
 	};

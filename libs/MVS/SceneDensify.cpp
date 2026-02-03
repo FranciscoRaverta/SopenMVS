@@ -1599,7 +1599,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						pointcloud.segmentations.emplace_back(modeColor);
 						pointcloud.segmentationConfidences.emplace_back(segConfidence);
 						pixelConfidence = std::exp(sumLogsConfidence / logNumber);
-						pointcloud.segmentationConfidencesExtended.emplace_back(segConfidence * pixelConfidence); }
+						pointcloud.segmentationConfidencesExtended.emplace_back(segConfidence * pixelConfidence * 0.5); }
 					if (bEstimateNormal)
 						pointcloud.normals.emplace_back(normalized(N*(float)nrm));
 					// invalidate all neighbor depths that do not agree with it

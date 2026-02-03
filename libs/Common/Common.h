@@ -225,6 +225,7 @@ typedef TMatrix<double,2,2> Matrix2x2d;
 typedef TMatrix<double,3,3> Matrix3x3d;
 typedef TMatrix<double,3,4> Matrix3x4d;
 typedef TMatrix<double,4,4> Matrix4x4d;
+typedef TMatrix<double,6,6> Matrix6x6d;
 
 typedef TSphere<REAL, 2> Sphere2;
 typedef TSphere<REAL, 3> Sphere3;
@@ -257,6 +258,7 @@ typedef Point3      CMatrix;
 typedef RMatrixBase RMatrix;
 typedef Matrix3x3   KMatrix;
 typedef Matrix3x4   PMatrix;
+typedef Matrix6x6d  CovMatrix; 
 
 // reconstructed 3D point type
 typedef Vec3 X3D;
@@ -303,6 +305,7 @@ DEFINE_CVDATATYPE(SEACAVE::Matrix2x2d)
 DEFINE_CVDATATYPE(SEACAVE::Matrix3x3d)
 DEFINE_CVDATATYPE(SEACAVE::Matrix3x4d)
 DEFINE_CVDATATYPE(SEACAVE::Matrix4x4d)
+DEFINE_CVDATATYPE(SEACAVE::Matrix6x6d)
 /*----------------------------------------------------------------*/
 
 #endif // _COMMON_COMMON_H_
