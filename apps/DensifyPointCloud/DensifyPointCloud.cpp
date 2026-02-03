@@ -477,14 +477,22 @@ int main(int argc, LPCTSTR* argv)
 
 	// save the final point-cloud
 	const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName)));
+	std::cout << "Before saving pointcloud" << std::endl;
 	scene.pointcloud.Save(baseFileName+_T(".ply"), OPT::nArchiveType==ARCHIVE_MVS);
+	std::cout << "After saving pointcloud" << std::endl;
+	std::cout << "Before export camera" << std::endl;
 	#if TD_VERBOSE != TD_VERBOSE_OFF
 	if (VERBOSITY_LEVEL > 2)
 		scene.ExportCamerasMLP(baseFileName+_T(".mlp"), baseFileName+_T(".ply"));
 	#endif
+	std::cout << "After export camera" << std::endl;
+	std::cout << "Before swap" << std::endl;
 	if (OPT::nArchiveType == ARCHIVE_MVS)
 		scene.pointcloud.Swap(sparsePointCloud);
+	std::cout << "After swap" << std::endl;
+	std::cout << "Before saving scene" << std::endl;
 	scene.Save(baseFileName+_T(".mvs"), (ARCHIVE_TYPE)OPT::nArchiveType);
+	std::cout << "After saving scene" << std::endl;
 
 	Finalize();
 	return EXIT_SUCCESS;
