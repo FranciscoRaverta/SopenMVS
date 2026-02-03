@@ -143,8 +143,8 @@ public:
 		maskName = maskName.empty() ? String() : MAKE_PATH_FULL(WORKING_FOLDER_FULL, maskName);
 		ar & segmentationName;
 		segmentationName = segmentationName.empty() ? String() : MAKE_PATH_FULL(WORKING_FOLDER_FULL, segmentationName);
-		ar & confidenceName;
-		confidenceName = confidenceName.empty() ? String() : MAKE_PATH_FULL(WORKING_FOLDER_FULL, confidenceName);
+		//ar & confidenceName;
+		//confidenceName = confidenceName.empty() ? String() : MAKE_PATH_FULL(WORKING_FOLDER_FULL, confidenceName);
 		ar & width & height;
 		ar & neighbors;
 		ar & avgDepth;
