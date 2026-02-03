@@ -419,10 +419,15 @@ int main(int argc, LPCTSTR* argv)
 	}
 	if (OPT::thFilterPointCloud < 0) {
 		// filter point-cloud based on camera-point visibility intersections
+		std::cout << "Before PointCloudFilter" << std::endl;
 		scene.PointCloudFilter(OPT::thFilterPointCloud);
+		std::cout << "After PointCloudFilter" << std::endl;
 		const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName))+_T("_filtered"));
+		std::cout << "Before scene save" << std::endl;
 		scene.Save(baseFileName+_T(".mvs"), (ARCHIVE_TYPE)OPT::nArchiveType);
+		std::cout << "After scene save" << std::endl;
 		scene.pointcloud.Save(baseFileName+_T(".ply"));
+		std::cout << "After pointcloud save" << std::endl;
 		Finalize();
 		return EXIT_SUCCESS;
 	}
