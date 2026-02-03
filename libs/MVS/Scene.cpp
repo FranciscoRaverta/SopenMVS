@@ -256,6 +256,7 @@ bool Scene::SaveInterface(const String & fileName, int version) const
 			Interface::Platform::Pose p;
 			p.R = pose.R;
 			p.C = pose.C;
+			p.Cov = pose.Cov;
 			plat.poses.emplace_back(p);
 		}
 		obj.platforms.emplace_back(std::move(plat));
