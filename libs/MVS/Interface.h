@@ -439,7 +439,8 @@ struct Interface
 			Pose() {}
 			template <typename MAT, typename POS>
 			Pose(const MAT& _R, const POS& _C) : R(_R), C(_C) {}
-			Pose(const MAT& _R, const POS& _C, const MAT& _Cov) : R(_R), C(_C) Cov(_Cov) {}
+			template <typename MAT, typename POS, typename MATC>
+			Pose(const MAT& _R, const POS& _C, const MATC& _Cov) : R(_R), C(_C) Cov(_Cov) {}
 
 			// translation vector t = -RC
 			inline Pos3d GetTranslation() const { return R*(-C); }
