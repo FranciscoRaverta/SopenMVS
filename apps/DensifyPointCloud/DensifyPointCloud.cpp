@@ -313,7 +313,9 @@ int main(int argc, LPCTSTR* argv)
 		return EXIT_SUCCESS;
 	}
 	// load and estimate a dense point-cloud
+	std::cout << "Before scene Load" << std::endl;
 	const Scene::SCENE_TYPE sceneType(scene.Load(MAKE_PATH_SAFE(OPT::strInputFileName)));
+	std::cout << "After scene Load" << std::endl;
 	if (sceneType == Scene::SCENE_NA)
 		return EXIT_FAILURE;
 	if (!OPT::strPointCloudFileName.empty() && !scene.pointcloud.Load(MAKE_PATH_SAFE(OPT::strPointCloudFileName))) {
