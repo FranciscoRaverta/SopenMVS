@@ -142,12 +142,7 @@ bool Image::ReadConfidenceImage(IMAGEPTR pConfidenceImage, Image32F& image)
     }
 
     image.create(temp.rows, temp.cols);
-
-    const int total = image.rows * image.cols;
-    for (int i = 0; i < total; ++i) {	
-		image.data[i] = float(temp.data[i]) / 100.0f;
-		std::cout << "FRAN - Print confidence pixel " << i << ": " << image.data[i] << std::endl;
-	}
+	image.data = float(temp.data) / 100.0f;
 
     return true;
 } // ReadImage
