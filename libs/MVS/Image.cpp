@@ -127,19 +127,27 @@ bool Image::ReadConfidenceImage(IMAGEPTR pConfidenceImage, Image32F& image)
 		LOG("error: failed loading image header");
 		return false;
 	}
-	image.create(pConfidenceImage->GetHeight(), pConfidenceImage->GetWidth());
-	if (FAILED(pConfidenceImage->ReadData(image.data, PF_GRAY8, 1, (CImage::Size)image.step))) {
-		LOG("error: failed loading image data");
-		return false;
-	}
-	const int total = image.rows * image.cols; //FRAN
-	uint8_t* src = (uint8_t*)image.data;
-	float* dst = image.data;
+	// image.create(pConfidenceImage->GetHeight(), pConfidenceImage->GetWidth());
+	// if (FAILED(pConfidenceImage->ReadData(image.data, PF_GRAYF32, 1, (CImage::Size)image.step))) {
+	// 	LOG("error: failed loading image data");
+	// 	return false;
+	// }
 
-	for (int i = total - 1; i >= 0; --i) {
-		dst[i] = float(src[i]) / 100.0f;
-	}
-	return true;
+    Image8U temp;
+    temp.create(pConfidenceImage->GetHeight(), pConfidenceImage->GetWidth());
+
+    if (FAILED(pConfidenceImage->ReadData(temp.data, PF_GRAY8, 1, (CImage::Size)temp.step))) {
+        LOG("error: failed loading image data");
+        return false;
+    }
+
+    image.create(temp.rows, temp.cols);
+
+    const int total = image.rows * image.cols;
+    for (int i = 0; i < total; ++i)
+        image.data[i] = float(temp.data[i]) / 100.0f;
+
+    return true;
 } // ReadImage
 /*----------------------------------------------------------------*/
 
