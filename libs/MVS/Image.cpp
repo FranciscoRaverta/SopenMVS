@@ -132,12 +132,12 @@ bool Image::ReadConfidenceImage(IMAGEPTR pConfidenceImage, Image32F& image)
 		LOG("error: failed loading image data");
 		return false;
 	}
-	const int total = image.rows * image.cols;
-	float* ptr = image.data;
+	// const int total = image.rows * image.cols; FRAN
+	// float* ptr = image.data;
 
-	for (int i = 0; i < total; ++i) {
-		ptr[i] *= 0.01f;   // divide by 100
-	}
+	// for (int i = 0; i < total; ++i) {
+	// 	ptr[i] *= 0.01f;   // divide by 100
+	// }
 	return true;
 } // ReadImage
 /*----------------------------------------------------------------*/
