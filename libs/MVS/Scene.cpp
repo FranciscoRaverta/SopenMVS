@@ -111,6 +111,7 @@ bool Scene::LoadInterface(const String & fileName)
 			pose.R = itPose.R;
 			pose.C = itPose.C;
 			pose.Cov = itPose.Cov;
+			std::cout << "Covariances - FRAN \n" << itPose.Cov << std::endl;  
 		}
 		ASSERT(platform.poses.size() == itPlatform.poses.size());
 	}
@@ -257,6 +258,7 @@ bool Scene::SaveInterface(const String & fileName, int version) const
 			p.R = pose.R;
 			p.C = pose.C;
 			p.Cov = pose.Cov;
+			std::cout << "Covariances2 - FRAN \n" << pose.Cov << std::endl;  
 			plat.poses.emplace_back(p);
 		}
 		obj.platforms.emplace_back(std::move(plat));

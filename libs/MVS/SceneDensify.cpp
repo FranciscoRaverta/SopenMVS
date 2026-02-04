@@ -1398,8 +1398,9 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 
 	// FRAN
 	FOREACH(i, scene.platforms) {
-		FOREACH(j, scene.platforms[i].poses)
-		std::cout << "Index " << i << " , " << j << ", covariance \n" << scene.platforms[i].poses[j].Cov << std::endl;
+		FOREACH(j, scene.platforms[i].poses) {
+			std::cout << "Index " << i << " , " << j << ", covariance \n" << scene.platforms[i].poses[j].Cov << std::endl;
+		}
 	}
 
 	// find best connected images
