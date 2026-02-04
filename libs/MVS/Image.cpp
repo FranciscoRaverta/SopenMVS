@@ -133,7 +133,7 @@ bool Image::ReadConfidenceImage(IMAGEPTR pConfidenceImage, Image32F& image)
 	// 	return false;
 	// }
 
-    Image8U temp;
+    Image8U temp; //FRAN
     temp.create(pConfidenceImage->GetHeight(), pConfidenceImage->GetWidth());
 
     if (FAILED(pConfidenceImage->ReadData(temp.data, PF_GRAY8, 1, (CImage::Size)temp.step))) {
@@ -146,6 +146,7 @@ bool Image::ReadConfidenceImage(IMAGEPTR pConfidenceImage, Image32F& image)
     const int total = image.rows * image.cols;
     for (int i = 0; i < total; ++i)
         image.data[i] = float(temp.data[i]) / 100.0f;
+		std::cout << "FRAN - Print confidence pixel " << i << ": " << image.data[i] << std::endl;
 
     return true;
 } // ReadImage

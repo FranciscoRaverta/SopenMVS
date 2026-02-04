@@ -1499,8 +1499,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				int logNumber = 0;
 				if (bEstimateSegmentation) {
 					segmentationColor = Cast<uint8_t>(imageData.segmentedImage(x)); // Convert to a 32-bit packed color
-					std::cout << Cast<float>(imageData.confidenceImage(x))/100.0f << std::endl;
-					sumLogsConfidence += std::log(std::max(Cast<float>(imageData.confidenceImage(x))/100.0f,1e-4f)); 
+					std::cout << Cast<float>(imageData.confidenceImage(x)) << std::endl; // FRAN
+					sumLogsConfidence += std::log(std::max(Cast<float>(imageData.confidenceImage(x)),1e-4f)); 
 					logNumber += 1;
 					//std::cout << "Pixel Confidence" << pixelConfidence << std::cout;
 					if (segmentationFrequency.find(segmentationColor) == segmentationFrequency.end())
@@ -1548,8 +1548,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								if (segmentationFrequency.find(segmentationColor) == segmentationFrequency.end())
 									segmentationFrequency[segmentationColor] = 0.0f;
 								segmentationFrequency[segmentationColor]++;
-								std::cout << Cast<float>(imageData.confidenceImage(xB))/100.0f << std::endl;
-								sumLogsConfidence += std::log(std::max(Cast<float>(imageData.confidenceImage(xB))/100.0f,1e-4f));
+								std::cout << Cast<float>(imageData.confidenceImage(xB)) << std::endl; // FRAN
+								sumLogsConfidence += std::log(std::max(Cast<float>(imageData.confidenceImage(xB)),1e-4f));
 								logNumber += 1;
 							} 
 							if (bEstimateNormal)
