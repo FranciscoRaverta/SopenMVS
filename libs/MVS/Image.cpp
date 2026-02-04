@@ -128,16 +128,17 @@ bool Image::ReadConfidenceImage(IMAGEPTR pConfidenceImage, Image32F& image)
 		return false;
 	}
 	image.create(pConfidenceImage->GetHeight(), pConfidenceImage->GetWidth());
-	if (FAILED(pConfidenceImage->ReadData(image.data, PF_GRAYF32, 1, (CImage::Size)image.step))) {
+	if (FAILED(pConfidenceImage->ReadData(image.data, PF_GRAY8, 1, (CImage::Size)image.step))) {
 		LOG("error: failed loading image data");
 		return false;
 	}
-	// const int total = image.rows * image.cols; FRAN
-	// float* ptr = image.data;
+	const int total = image.rows * image.cols; FRAN
+	uint8_t* src = (uint8_t*)image.data
+	float* dst = image.data;
 
-	// for (int i = 0; i < total; ++i) {
-	// 	ptr[i] *= 0.01f;   // divide by 100
-	// }
+	for (int i = total - 1; i >= 0; --i) {
+		dst[i] = float(src[i]) / 100.0f;
+	}
 	return true;
 } // ReadImage
 /*----------------------------------------------------------------*/
