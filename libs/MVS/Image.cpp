@@ -151,7 +151,7 @@ bool Image::ReadConfidenceImage(IMAGEPTR pConfidenceImage, Image32F& image)
 	for (int i = 0; i < total; ++i) {
 		dst[i] = float(src[i]) / 100.0f;
 	}
-	printf("dst[0] = %f\n", dst[0]);
+	//printf("dst[0] = %f\n", dst[0]);
     return true;
 } // ReadImage
 /*----------------------------------------------------------------*/

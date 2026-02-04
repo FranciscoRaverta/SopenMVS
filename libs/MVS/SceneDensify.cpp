@@ -1396,6 +1396,12 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 	typedef SEACAVE::cList<Proj,const Proj&,0,4,uint32_t> ProjArr;
 	typedef SEACAVE::cList<ProjArr,const ProjArr&,1,65536> ProjsArr;
 
+	// FRAN
+	FOREACH(i, scene.platforms) {
+		FOREACH(j, scene.platforms[i].poses)
+		std::cout << "Index " << i << " , " << j << ", covariance \n" << scene.platforms[i].poses[j].Cov << std::endl;
+	}
+
 	// find best connected images
 	IndexScoreArr connections(0, scene.images.GetSize());
 	size_t nPointsEstimate(0);
@@ -1499,7 +1505,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				int logNumber = 0;
 				if (bEstimateSegmentation) {
 					segmentationColor = Cast<uint8_t>(imageData.segmentedImage(x)); // Convert to a 32-bit packed color
-					std::cout << Cast<float>(imageData.confidenceImage(x)) << std::endl; // FRAN
+					//std::cout << Cast<float>(imageData.confidenceImage(x)) << std::endl; // FRAN
 					sumLogsConfidence += std::log(std::max(Cast<float>(imageData.confidenceImage(x)),1e-4f)); 
 					logNumber += 1;
 					//std::cout << "Pixel Confidence" << pixelConfidence << std::cout;
@@ -1548,7 +1554,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								if (segmentationFrequency.find(segmentationColor) == segmentationFrequency.end())
 									segmentationFrequency[segmentationColor] = 0.0f;
 								segmentationFrequency[segmentationColor]++;
-								std::cout << Cast<float>(imageData.confidenceImage(xB)) << std::endl; // FRAN
+								//std::cout << Cast<float>(imageData.confidenceImage(xB)) << std::endl; // FRAN
 								sumLogsConfidence += std::log(std::max(Cast<float>(imageData.confidenceImage(xB)),1e-4f));
 								logNumber += 1;
 							} 
