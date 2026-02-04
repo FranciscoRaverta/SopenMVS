@@ -141,9 +141,17 @@ bool Image::ReadConfidenceImage(IMAGEPTR pConfidenceImage, Image32F& image)
         return false;
     }
 
-    image.create(temp.rows, temp.cols);
-	image.data = float(temp.data) / 100.0f;
+	image.create(temp.rows, temp.cols);
 
+	float* dst = reinterpret_cast<float*>(image.data);
+	uint8_t* src = temp.data;
+
+	const int total = image.rows * image.cols;
+
+	for (int i = 0; i < total; ++i) {
+		dst[i] = float(src[i]) / 100.0f;
+	}
+	printf("dst[0] = %f\n", dst[0]);
     return true;
 } // ReadImage
 /*----------------------------------------------------------------*/
