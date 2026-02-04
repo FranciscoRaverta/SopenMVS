@@ -133,7 +133,7 @@ bool Image::ReadConfidenceImage(IMAGEPTR pConfidenceImage, Image32F& image)
 		return false;
 	}
 	const int total = image.rows * image.cols; //FRAN
-	uint8_t* src = (uint8_t*)image.data
+	uint8_t* src = (uint8_t*)image.data;
 	float* dst = image.data;
 
 	for (int i = total - 1; i >= 0; --i) {
