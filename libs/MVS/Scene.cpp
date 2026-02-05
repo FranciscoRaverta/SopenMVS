@@ -111,7 +111,7 @@ bool Scene::LoadInterface(const String & fileName)
 			pose.R = itPose.R;
 			pose.C = itPose.C;
 			pose.Cov = itPose.Cov;
-			std::cout << "Covariances - FRAN \n" << itPose.Cov << std::endl;  
+			//std::cout << "Covariances - FRAN \n" << itPose.Cov << std::endl;  
 		}
 		ASSERT(platform.poses.size() == itPlatform.poses.size());
 	}

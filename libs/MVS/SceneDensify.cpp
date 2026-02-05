@@ -1397,11 +1397,11 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 	typedef SEACAVE::cList<ProjArr,const ProjArr&,1,65536> ProjsArr;
 
 	// FRAN
-	FOREACH(i, scene.platforms) {
-		FOREACH(j, scene.platforms[i].poses) {
-			std::cout << "Index " << i << " , " << j << ", covariance \n" << scene.platforms[i].poses[j].Cov << std::endl;
-		}
-	}
+	// FOREACH(i, scene.platforms) {
+	// 	FOREACH(j, scene.platforms[i].poses) {
+	// 		std::cout << "Index " << i << " , " << j << ", covariance \n" << scene.platforms[i].poses[j].Cov << std::endl;
+	// 	}
+	// }
 
 	// find best connected images
 	IndexScoreArr connections(0, scene.images.GetSize());
