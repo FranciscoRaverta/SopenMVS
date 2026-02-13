@@ -176,6 +176,7 @@ bool Image::ReadProbabilityImage(const String& fileName, cv::Mat& image)
 	// 	LOG("error: failed loading image data");
 	// 	return false;
 	// }
+	std::cout << "About to read probabilities - FRAN" << std::endl;
     cnpy::npz_t archive;
 
     try { archive = cnpy::npz_load(fileName.c_str()); }
@@ -200,7 +201,7 @@ bool Image::ReadProbabilityImage(const String& fileName, cv::Mat& image)
         H,W,CV_MAKETYPE(CV_32F,C),
         arr.data<float>()
     ).clone();
-    
+    std::cout << "Probabilities read - FRAN" << std::endl;
 
 	std::cout << image << std::endl;
     return true;
@@ -237,8 +238,7 @@ bool Image::ReloadImage(unsigned nMaxResolution, bool bLoadPixels)
 	if (!confidenceName.empty())
 		IMAGEPTR pConfidenceImage(bLoadPixels ? ReadConfidenceImage(confidenceName, confidenceImage) : ReadImageHeader(confidenceName));
 	if (!probabilitiesName.empty())
-		{std::cout << "There are probability names - FRAN" << std::endl;
-		ReadProbabilityImage(probabilitiesName, probabilitiesImage);}
+		ReadProbabilityImage(probabilitiesName, probabilitiesImage);
 	
 	if (pImage == NULL) {
 		LOG("error: failed reloading image '%s'", name.c_str());
