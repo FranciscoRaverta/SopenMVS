@@ -176,7 +176,7 @@ bool Image::ReadProbabilityImage(const String& fileName, cv::Mat& image)
 	// 	LOG("error: failed loading image data");
 	// 	return false;
 	// }
-	std::cout << "About to read probabilities - FRAN" << std::endl;
+
     cnpy::npz_t archive;
 
     try { archive = cnpy::npz_load(fileName.c_str()); }
@@ -186,15 +186,13 @@ bool Image::ReadProbabilityImage(const String& fileName, cv::Mat& image)
     }
 
     if (!archive.count("arr_0"))
-		{std::cout << "Error2 - FRAN" << std::endl;
-        return false;}
+		return false;
 
 	
     cnpy::NpyArray arr = archive["arr_0"];
 
     if (arr.word_size != sizeof(float) || arr.shape.size()!=3)
-        {std::cout << "Error - FRAN" << std::endl;
-			return false;}
+        return false;
 
     int H = arr.shape[0];
     int W = arr.shape[1];
@@ -204,9 +202,7 @@ bool Image::ReadProbabilityImage(const String& fileName, cv::Mat& image)
         H,W,CV_MAKETYPE(CV_32F,C),
         arr.data<float>()
     ).clone();
-    std::cout << "Probabilities read - FRAN" << std::endl;
-
-	std::cout << image << std::endl;
+    
     return true;
 } // ReadImage
 /*----------------------------------------------------------------*/
