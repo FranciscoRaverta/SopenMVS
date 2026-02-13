@@ -59,6 +59,7 @@ String strExportDepthMapsName;
 String strMaskPath;
 String strSegmentationPath;
 String strConfidencePath;
+String strProbabilitiesPath;
 float fMaxSubsceneArea;
 float fSampleMesh;
 float fBorderROI;
@@ -148,6 +149,7 @@ bool Initialize(size_t argc, LPCTSTR* argv)
 		("mask-path", boost::program_options::value<std::string>(&OPT::strMaskPath), "path to folder containing mask images with '.mask.png' extension")
 		("segmentation-path", boost::program_options::value<std::string>(&OPT::strSegmentationPath), "path to folder containing segmentation images with '.png.png' extension")
 		("confidence-path", boost::program_options::value<std::string>(&OPT::strConfidencePath), "path to folder containing confidence images with '.png.png' extension")
+		("probabilities-path", boost::program_options::value<std::string>(&OPT::strProbabilitiesPath), "path to folder containing probability values with '.png.npz' extension")
 		("iters", boost::program_options::value(&nEstimationIters)->default_value(numIters), "number of patch-match iterations")
 		("geometric-iters", boost::program_options::value(&nEstimationGeometricIters)->default_value(2), "number of geometric consistent patch-match iterations (0 - disabled)")
 		("estimate-colors", boost::program_options::value(&nEstimateColors)->default_value(2), "estimate the colors for the dense point-cloud (0 - disabled, 1 - final, 2 - estimate)")
@@ -364,6 +366,22 @@ int main(int argc, LPCTSTR* argv)
 				return EXIT_FAILURE;
 			}
 			LOG("Image confidence path: %s", image.confidenceName.c_str());
+		}
+	}
+	if (!OPT::strProbabilitiesPath.empty() and OPTDENSE::nEstimateSegmentations == 2) {
+		LOG("Segmentation path detected");
+		Util::ensureValidFolderPath(OPT::strProbabilitiesPath);
+		for (Image& image : scene.images) {
+			if (!image.probabilitiesName.empty()) {
+				LOG("error: Image %s has non-empty segmentationName %s", image.name.c_str(), image.probabilitiesName.c_str());
+				return EXIT_FAILURE;
+			}
+			image.probabilitiesName = OPT::strProbabilitiesPath + Util::getFileName(image.name) + ".npz";
+			if (!File::access(image.probabilitiesName)) {
+				LOG("error: Probabilities numpy file %s not found", image.probabilitiesName.c_str());
+				return EXIT_FAILURE;
+			}
+			LOG("Image probabilities path: %s", image.probabilitiesName.c_str());
 		}
 	}
 

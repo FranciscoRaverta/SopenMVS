@@ -63,11 +63,13 @@ public:
 	String maskName; // segmentation file name (optional)
 	String segmentationName; // segmentation file name (optional)
 	String confidenceName;
+	String probabilitiesName;
 	Camera camera; // view's pose
 	uint32_t width, height; // image size
 	Image8U3 image; // image color pixels
 	Image8U segmentedImage; // image color pixels
 	Image32F confidenceImage; 
+	cv::Mat probabilitiesImage;
 	ViewScoreArr neighbors; // scored neighbor images
 	float scale; // image scale relative to the original size
 	float avgDepth; // average depth of the points seen by this camera
@@ -85,9 +87,11 @@ public:
 	static IMAGEPTR ReadImage(const String& fileName, Image8U3& image);
 	static IMAGEPTR ReadSegmentedImage(const String& fileName, Image8U& segmentedImage);
 	static IMAGEPTR ReadConfidenceImage(const String& fileName, Image32F& confidenceImage);
+	static bool ReadProbabilityImage(const String& fileName, cv::Mat& probabilitiesImage);
 	static bool ReadImage(IMAGEPTR pImage, Image8U3& image);
 	static bool ReadSegmentedImage(IMAGEPTR pSegmentedImage, Image8U& segmentedImage);
 	static bool ReadConfidenceImage(IMAGEPTR pConfidenceImage, Image32F& confidenceImage);
+	//static bool ReadProbabilityImage(IMAGEPTR pProbabilitiesImage, Image32F& probabilitiesImage);
 	bool LoadImage(const String& fileName, unsigned nMaxResolution=0);
 	bool ReloadImage(unsigned nMaxResolution=0, bool bLoadPixels=true);
 	void ReleaseImage();

@@ -165,6 +165,8 @@ struct MVS_API DepthData {
 		Image8U segmentedImage; // image int intensities 
 		Image32F confidenceImage;
 		Image* pConfidenceImageData;
+		cv::Mat probabilitiesImage;
+		cv::Mat* pProbabilitiesImageData;
 
 		Matrix3x3 Hl; //
 		Vec3 Hm;      // constants during per-pixel loops
@@ -231,6 +233,7 @@ struct MVS_API DepthData {
 			image.depthMap.release();
 			image.segmentedImage.release();
 			image.confidenceImage.release();
+			image.probabilitiesImage.release();
 		}
 	}
 	inline void Release() {

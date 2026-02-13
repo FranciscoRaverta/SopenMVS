@@ -31,6 +31,7 @@
 
 #include "Common.h"
 #include "Image.h"
+#include "../cnpy/cnpy.h"
 
 using namespace MVS;
 
@@ -156,6 +157,57 @@ bool Image::ReadConfidenceImage(IMAGEPTR pConfidenceImage, Image32F& image)
 } // ReadImage
 /*----------------------------------------------------------------*/
 
+bool Image::ReadProbabilityImage(const String& fileName, cv::Mat& image)
+{
+// {
+// 	IMAGEPTR pProbabilityImage(OpenImage(fileName));
+// 	if (pProbabilityImage != NULL && !ReadProbabilityImage(pProbabilityImage, image))
+// 		pProbabilityImage.Release();
+// 	return pProbabilityImage;
+// } // ReadImage
+// /*----------------------------------------------------------------*/
+// bool Image::ReadProbabilityImage(IMAGEPTR pProbabilityImage, cv::Mat& image)
+// {
+	// if (FAILED(pProbabilityImage->ReadHeader())) {
+	// 	LOG("error: failed loading image header");
+	// 	return false;
+	// }
+	// image.create(pConfidenceImage->GetHeight(), pConfidenceImage->GetWidth());
+	// if (FAILED(pConfidenceImage->ReadData(image.data, PF_GRAYF32, 1, (CImage::Size)image.step))) {
+	// 	LOG("error: failed loading image data");
+	// 	return false;
+	// }
+    cnpy::npz_t archive;
+
+    try { archive = cnpy::npz_load(fileName.c_str()); }
+    catch (...) {
+        LOG("error: failed loading npz");
+        return false;
+    }
+
+    if (!archive.count("data"))
+        return false;
+
+    cnpy::NpyArray arr = archive["data"];
+
+    if (arr.word_size != sizeof(float) || arr.shape.size()!=3)
+        return false;
+
+    int H = arr.shape[0];
+    int W = arr.shape[1];
+    int C = arr.shape[2];
+
+    image = cv::Mat(
+        H,W,CV_MAKETYPE(CV_32F,C),
+        arr.data<float>()
+    ).clone();
+    
+
+	std::cout << image << std::endl;
+    return true;
+} // ReadImage
+/*----------------------------------------------------------------*/
+
 
 bool Image::LoadImage(const String& fileName, unsigned nMaxResolution)
 {
@@ -185,6 +237,8 @@ bool Image::ReloadImage(unsigned nMaxResolution, bool bLoadPixels)
 		IMAGEPTR pSegmentedImage(bLoadPixels ? ReadSegmentedImage(segmentationName, segmentedImage) : ReadImageHeader(segmentationName));
 	if (!confidenceName.empty())
 		IMAGEPTR pConfidenceImage(bLoadPixels ? ReadConfidenceImage(confidenceName, confidenceImage) : ReadImageHeader(confidenceName));
+	if (!probabilitiesName.empty())
+		ReadProbabilitiesImage(probabilitiesName, probabilitiesImage);
 	
 	if (pImage == NULL) {
 		LOG("error: failed reloading image '%s'", name.c_str());
@@ -228,6 +282,8 @@ float Image::ResizeImage(unsigned nMaxResolution)
 		cv::resize(segmentedImage, segmentedImage, scaledSize, 0, 0, cv::INTER_NEAREST); 
 	if (!confidenceImage.empty())
 		cv::resize(confidenceImage, confidenceImage, scaledSize, 0, 0, cv::INTER_NEAREST);
+	if (!probabilitiesImage.empty())
+		cv::resize(probabilitiesImage, probabilitiesImage, scaledSize, 0, 0, cv::INTER_NEAREST);
 	
 	return static_cast<float>(scale);
 } // ResizeImage
