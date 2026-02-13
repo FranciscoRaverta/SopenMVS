@@ -1505,6 +1505,13 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				std::unordered_map<uint8_t, float> sumLogsConfidence;
 				//float sumLogsConfidence = 0.f;
 				int logNumber = 0;
+				// New - FRAN
+				const int numLabels = Cast<float>(imageData.probabilitiesImage(x)).length;
+				std::cout << "numLabels - FRAN " << numLabels << std::endl;
+				std::vector<float> sumLogProbs(numLabels, 0.0f);
+				int numViewsUsed = 0;
+				uint8_t modeLabel = 255;
+
 				if (bEstimateSegmentation) {
 					segmentationColor = Cast<uint8_t>(imageData.segmentedImage(x)); // Convert to a 32-bit packed color
 					//std::cout << Cast<float>(imageData.confidenceImage(x)) << std::endl; // FRAN
