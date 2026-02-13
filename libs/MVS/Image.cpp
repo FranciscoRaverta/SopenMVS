@@ -238,7 +238,7 @@ bool Image::ReloadImage(unsigned nMaxResolution, bool bLoadPixels)
 	if (!confidenceName.empty())
 		IMAGEPTR pConfidenceImage(bLoadPixels ? ReadConfidenceImage(confidenceName, confidenceImage) : ReadImageHeader(confidenceName));
 	if (!probabilitiesName.empty())
-		ReadProbabilitiesImage(probabilitiesName, probabilitiesImage);
+		ReadProbabilityImage(probabilitiesName, probabilitiesImage);
 	
 	if (pImage == NULL) {
 		LOG("error: failed reloading image '%s'", name.c_str());
