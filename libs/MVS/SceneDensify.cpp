@@ -1615,6 +1615,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					logNumber = maxCount;
 				}
 				if (bEstimateSegmentation) {
+					for(float& v : sumLogProbs)
+    					v /= numViewsUsed;
 					bestLabel = 0;
 					bestVal = sumLogProbs[0];
 					for(int c=1;c<numLabels;c++)
