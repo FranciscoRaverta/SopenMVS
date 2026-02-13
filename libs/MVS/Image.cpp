@@ -185,12 +185,12 @@ bool Image::ReadProbabilityImage(const String& fileName, cv::Mat& image)
         return false;
     }
 
-    if (!archive.count("data"))
+    if (!archive.count("arr_0"))
 		{std::cout << "Error2 - FRAN" << std::endl;
         return false;}
 
 	
-    cnpy::NpyArray arr = archive["data"];
+    cnpy::NpyArray arr = archive["arr_0"];
 
     if (arr.word_size != sizeof(float) || arr.shape.size()!=3)
         {std::cout << "Error - FRAN" << std::endl;
