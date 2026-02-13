@@ -25,5 +25,3 @@ endif(ENABLE_STATIC)
 
 install(FILES "cnpy.h" DESTINATION include)
 
-
-add_executable(example1 example1.cpp)
