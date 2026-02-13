@@ -1506,7 +1506,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				//float sumLogsConfidence = 0.f;
 				int logNumber = 0;
 				// New - FRAN
-				const int numLabels = imageDataB.probabilityImage(x).length;
+				const int numLabels = imageData.probabilityImage(x).length;
 				std::cout << "numLabels - FRAN " << numLabels << std::endl;
 				std::vector<float> sumLogProbs(numLabels, 0.0f);
 				int numViewsUsed = 0;
