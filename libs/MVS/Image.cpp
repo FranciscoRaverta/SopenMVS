@@ -31,7 +31,6 @@
 
 #include "Common.h"
 #include "Image.h"
-#include "../cnpy/cnpy.h"
 
 using namespace MVS;
 
