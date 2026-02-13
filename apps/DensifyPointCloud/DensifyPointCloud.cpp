@@ -353,7 +353,7 @@ int main(int argc, LPCTSTR* argv)
 		}
 	}
 	if (!OPT::strConfidencePath.empty() and OPTDENSE::nEstimateSegmentations == 2) {
-		LOG("Segmentation path detected");
+		LOG("Segmentation confidences path detected");
 		Util::ensureValidFolderPath(OPT::strConfidencePath);
 		for (Image& image : scene.images) {
 			if (!image.confidenceName.empty()) {
@@ -369,7 +369,7 @@ int main(int argc, LPCTSTR* argv)
 		}
 	}
 	if (!OPT::strProbabilitiesPath.empty() and OPTDENSE::nEstimateSegmentations == 2) {
-		LOG("Segmentation path detected");
+		LOG("Segmentation probabilities path detected");
 		Util::ensureValidFolderPath(OPT::strProbabilitiesPath);
 		for (Image& image : scene.images) {
 			if (!image.probabilitiesName.empty()) {

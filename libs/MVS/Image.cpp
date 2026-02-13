@@ -237,7 +237,8 @@ bool Image::ReloadImage(unsigned nMaxResolution, bool bLoadPixels)
 	if (!confidenceName.empty())
 		IMAGEPTR pConfidenceImage(bLoadPixels ? ReadConfidenceImage(confidenceName, confidenceImage) : ReadImageHeader(confidenceName));
 	if (!probabilitiesName.empty())
-		ReadProbabilityImage(probabilitiesName, probabilitiesImage);
+		{std::cout << "There are probability names - FRAN" << std::endl;
+		ReadProbabilityImage(probabilitiesName, probabilitiesImage);}
 	
 	if (pImage == NULL) {
 		LOG("error: failed reloading image '%s'", name.c_str());
