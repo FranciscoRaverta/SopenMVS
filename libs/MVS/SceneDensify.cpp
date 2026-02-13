@@ -1507,10 +1507,12 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				int logNumber = 0;
 				// New - FRAN
 				const int numLabels = imageData.probabilitiesImage.channels();
-				std::cout << "numLabels - FRAN " << numLabels << std::endl;
+				//std::cout << "numLabels - FRAN " << numLabels << std::endl;
 				std::vector<float> sumLogProbs(numLabels, 0.0f);
 				int numViewsUsed = 0;
 				uint8_t modeLabel = 255;
+				int bestLabel = 0;
+				float bestVal;
 
 				if (bEstimateSegmentation) {
 					segmentationColor = Cast<uint8_t>(imageData.segmentedImage(x)); // Convert to a 32-bit packed color
@@ -1523,6 +1525,14 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						sumLogsConfidence[segmentationColor] = 0.0f; }
 					sumLogsConfidence[segmentationColor] += std::log(std::max(Cast<float>(imageData.confidenceImage(x)),1e-4f)); 
 					segmentationFrequency[segmentationColor]++; }
+				
+				if (bEstimateSegmentation) {
+					const float* probs = imageData.probabilitiesImage.ptr<float>(x.y, x.x);
+					for(int c=0;c<numLabels;c++)
+						sumLogProbs[c] += std::log(std::max(probs[c],1e-6f));
+
+					numViewsUsed++;
+				}
 				PointCloud::Normal N(normal*confidence);
 				invalidDepths.Empty();
 				for (const ViewScore& neighbor: depthData.neighbors) {
@@ -1571,6 +1581,12 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								//sumLogsConfidence += std::log(std::max(Cast<float>(imageData.confidenceImage(xB)),1e-4f));
 								//logNumber += 1;
 							} 
+							if (bEstimateSegmentation) {
+								const float* probsB = imageDataB.probabilitiesImage.ptr<float>(xB.y, xB.x);
+								for(int c=0;c<numLabels;c++)
+									sumLogProbs[c] += std::log(std::max(probsB[c],1e-6f));
+								numViewsUsed++;
+							}
 							if (bEstimateNormal)
 								N += normalB*confidenceB;
 							confidence += confidenceB;
@@ -1598,6 +1614,18 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					segConfidence = (totalCount > 0.f) ? (maxCount / totalCount) : -10.f;
 					logNumber = maxCount;
 				}
+				if (bEstimateSegmentation) {
+					bestLabel = 0;
+					bestVal = sumLogProbs[0];
+					for(int c=1;c<numLabels;c++)
+					{
+						if(sumLogProbs[c] > bestVal)
+						{
+							bestVal = sumLogProbs[c];
+							bestLabel = c;
+						}
+					}
+				}
 				if (views.size() < nMinViewsFuse) {
 					// remove point
 					FOREACH(v, views) {
@@ -1618,10 +1646,19 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					if (bEstimateColor)
 						pointcloud.colors.emplace_back((C*(float)nrm).cast<uint8_t>());
 					if (bEstimateSegmentation) {
-						pointcloud.segmentations.emplace_back(modeColor);
+						//Normalized posterior:
+						float maxLog = *std::max_element(sumLogProbs.begin(), sumLogProbs.end());
+						float Z = 0.f;
+						for(float& v: sumLogProbs)
+							Z += exp(v - maxLog);
+						float prob = exp(bestVal - maxLog)/Z;
+
+						//pointcloud.segmentations.emplace_back(modeColor);
+						pointcloud.segmentations.emplace_back(bestLabel);
 						pointcloud.segmentationConfidences.emplace_back(segConfidence);
 						pixelConfidence = std::exp(sumLogsConfidence[modeColor] / logNumber);
-						pointcloud.segmentationConfidencesExtended.emplace_back(segConfidence * pixelConfidence); }
+						//pointcloud.segmentationConfidencesExtended.emplace_back(segConfidence * pixelConfidence); }
+						pointcloud.segmentationConfidencesExtended.emplace_back(prob); }
 					if (bEstimateNormal)
 						pointcloud.normals.emplace_back(normalized(N*(float)nrm));
 					// invalidate all neighbor depths that do not agree with it
