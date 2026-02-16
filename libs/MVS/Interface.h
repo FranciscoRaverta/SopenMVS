@@ -830,10 +830,7 @@ struct HeaderDepthDataRaw {
 	static uint16_t HeaderDepthDataRawName() { return *reinterpret_cast<const uint16_t*>("DR"); }
 };
 /*----------------------------------------------------------------*/
-struct PointXYZRGB {
-    Eigen::Vector3f xyz; // 3D coordinates
-    Eigen::Vector3f rgb; // RGB color, optional
-};
+
 
 } // namespace _INTERFACE_NAMESPACE
 

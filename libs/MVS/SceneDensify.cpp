@@ -1752,7 +1752,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 
 			for(size_t i=0; i<pointcloud.points.size(); ++i){
 				crf_points[i].xyz = pointcloud.points[i]; // Point3 -> Eigen::Vector3f
-				crf_points[i].rgb = pointcloud.colors[i];//.cast<float>(); // optional
+				const auto& col = pointcloud.colors[i];
+				crf_points[i].rgb = Eigen::Vector3f(col.r, col.g, col.b);
 				crf_probs[i] = per_point_probabilities[i]; // your fused probabilities
 			}
 

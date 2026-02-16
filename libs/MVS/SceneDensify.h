@@ -113,7 +113,10 @@ struct MVS_API DenseDepthMapData {
 	void SignalCompleteDepthmapFilter();
 };
 /*----------------------------------------------------------------*/
-
+struct PointXYZRGB {
+    Eigen::Vector3f xyz; // 3D coordinates
+    Eigen::Vector3f rgb; // RGB color, optional
+};
 } // namespace MVS
 
 #endif
