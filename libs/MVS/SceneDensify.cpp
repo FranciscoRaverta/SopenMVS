@@ -1514,7 +1514,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 	Util::Progress progress(_T("Fused depth-maps"), connections.GetSize());
 	GET_LOGCONSOLE().Pause();
 
-	const std::vector<std::vector<float>> per_point_probabilities;
+	std::vector<std::vector<float>> per_point_probabilities;
 
 	FOREACHPTR(pConnection, connections) {
 		TD_TIMER_STARTD();
@@ -1724,7 +1724,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						//	Z += exp(v - maxLog);
 						//float prob = exp(bestVal - maxLog)/Z;
 						float prob = std::exp(bestVal);
-						const std::vector<float> probabs;
+						std::vector<float> probabs;
 						for(int c=0;c<numLabels;c++)
 							probabs[c] += std::exp(sumLogProbs[c]);
 						per_point_probabilities.emplace_back(probabs);
