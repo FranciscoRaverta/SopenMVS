@@ -35,7 +35,7 @@
 #include "PatchMatchCUDA.h"
 // MRF: view selection
 #include "../Math/TRWS/MRFEnergy.h"
-#include "densecrf.h"
+#include "../densecrf/densecrf.h"
 
 using namespace MVS;
 
