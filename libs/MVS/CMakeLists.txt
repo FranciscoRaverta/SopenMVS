@@ -25,7 +25,7 @@ if(OpenMVS_USE_CERES)
 endif()
 
 # List sources files
-FILE(GLOB LIBRARY_FILES_C "*.cpp"  "../cnpy/cnpy.cpp"  "../densecrf/densecrf/src.cpp")
+FILE(GLOB LIBRARY_FILES_C "*.cpp"  "../cnpy/cnpy.cpp")
 FILE(GLOB LIBRARY_FILES_H "*.h" "*.inl")
 if(_USE_CUDA)
 	FILE(GLOB LIBRARY_FILES_CUDA "*.cu")
@@ -50,7 +50,7 @@ endif()
 if(_USE_CUDA)
 	SET_TARGET_PROPERTIES(MVS PROPERTIES CUDA_ARCHITECTURES "50;72;75")
 endif()
-TARGET_LINK_LIBRARIES(MVS PRIVATE Common Math IO CGAL::CGAL ${CERES_LIBRARIES} ${CUDA_CUDA_LIBRARY})
+TARGET_LINK_LIBRARIES(MVS PRIVATE Common Math IO CGAL::CGAL ${CERES_LIBRARIES} ${CUDA_CUDA_LIBRARY} densecrf)
 
 if(OpenMVS_USE_PYTHON)
 	# Create the Python wrapper
