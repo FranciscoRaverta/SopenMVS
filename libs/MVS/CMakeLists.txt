@@ -25,7 +25,7 @@ if(OpenMVS_USE_CERES)
 endif()
 
 # List sources files
-FILE(GLOB LIBRARY_FILES_C "*.cpp"  "../cnpy/cnpy.cpp")
+FILE(GLOB LIBRARY_FILES_C "*.cpp"  "../cnpy/cnpy.cpp"  "../densecrf/densecrf/src.cpp")
 FILE(GLOB LIBRARY_FILES_H "*.h" "*.inl")
 if(_USE_CUDA)
 	FILE(GLOB LIBRARY_FILES_CUDA "*.cu")
