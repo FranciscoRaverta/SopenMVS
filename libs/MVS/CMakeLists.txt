@@ -50,7 +50,8 @@ endif()
 if(_USE_CUDA)
 	SET_TARGET_PROPERTIES(MVS PROPERTIES CUDA_ARCHITECTURES "50;72;75")
 endif()
-add_subdirectory(${CMAKE_SOURCE_DIR}/densecrf)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../densecrf
+                 ${CMAKE_CURRENT_BINARY_DIR}/densecrf_build)
 TARGET_LINK_LIBRARIES(MVS PRIVATE Common Math IO CGAL::CGAL ${CERES_LIBRARIES} ${CUDA_CUDA_LIBRARY} densecrf)
 
 if(OpenMVS_USE_PYTHON)
