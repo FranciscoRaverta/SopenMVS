@@ -1378,10 +1378,7 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 // fuse all valid depth-maps in the same 3D point cloud;
 // join points very likely to represent the same 3D point and
 // filter out points blocking the view
-struct PointXYZRGB {
-    Eigen::Vector3f xyz; // 3D coordinates
-    Eigen::Vector3f rgb; // RGB color, optional
-};
+
 
 // Function to apply DenseCRF to 3D point cloud
 void DepthMapsData::ApplyDenseCRF3D(
