@@ -70,10 +70,7 @@ public:
 	void ApplyDenseCRF3D(const std::vector<PointXYZRGB>& points, const std::vector<std::vector<float>>& per_point_probabilities, std::vector<uint8_t>& out_labels, std::vector<float>& out_probs);
 
 	static DepthData ScaleDepthData(const DepthData& inputDeptData, float scale);
-	struct PointXYZRGB {
-		Eigen::Vector3f xyz; // 3D coordinates
-		Eigen::Vector3f rgb; // RGB color, optional
-	};
+
 
 protected:
 	static void* STCALL ScoreDepthMapTmp(void*);
