@@ -67,6 +67,7 @@ public:
 	bool FilterDepthMap(DepthData& depthData, const IIndexArr& idxNeighbors, bool bAdjust=true);
 	void MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, bool bEstimateNormal, bool bEstimateSegmentation);
 	void FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, bool bEstimateNormal, bool bEstimateSegmentation);
+	void ApplyDenseCRF3D(const std::vector<PointXYZRGB>& points, const std::vector<std::vector<float>>& per_point_probabilities, std::vector<uint8_t>& out_labels, std::vector<float>& out_probs);
 
 	static DepthData ScaleDepthData(const DepthData& inputDeptData, float scale);
 
