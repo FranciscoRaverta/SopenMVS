@@ -41,6 +41,11 @@
 // S T R U C T S ///////////////////////////////////////////////////
 
 namespace MVS {
+
+struct PointXYZRGB {
+	Eigen::Vector3f xyz; // 3D coordinates
+	Eigen::Vector3f rgb; // RGB color, optional
+};
 	
 // Forward declarations
 class MVS_API Scene;
