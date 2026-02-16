@@ -1724,10 +1724,10 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						//	Z += exp(v - maxLog);
 						//float prob = exp(bestVal - maxLog)/Z;
 						float prob = std::exp(bestVal);
-						const std::vector<float>& probs;
+						const std::vector<float> probabs;
 						for(int c=0;c<numLabels;c++)
-							probs[c] += std::exp(sumLogProbs);
-						per_point_probabilities.emplace_back(probs);
+							probabs[c] += std::exp(sumLogProbs);
+						per_point_probabilities.emplace_back(probabs);
 
 						//pointcloud.segmentations.emplace_back(modeColor);
 						pointcloud.segmentations.emplace_back(bestLabel);
