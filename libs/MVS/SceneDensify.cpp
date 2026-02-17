@@ -1780,8 +1780,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 			pointcloud.segmentationConfidencesExtended.Reserve(N);
 
 			for(size_t i=0;i<N;i++){
-				pointcloud.segmentations.Add(refined_labels[i]);
-				pointcloud.segmentationConfidencesExtended.Add(refined_probs[i]);
+				pointcloud.segmentations.emplace_back(refined_labels[i]);
+				pointcloud.segmentationConfidencesExtended.emplace_back(refined_probs[i]);
 			}
 		}
 
