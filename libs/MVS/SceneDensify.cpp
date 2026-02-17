@@ -1746,7 +1746,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				segmentationFrequency.clear();
 			}
 		}
-		bool applyDenseCRF = true;
+		bool applyDenseCRF = false;
 		std::cout << "Before if - FRAN" << std::endl;
 		if(applyDenseCRF) 
 		{
