@@ -1769,9 +1769,22 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 			ApplyDenseCRF3D(crf_points, crf_probs, refined_labels, refined_probs);
 			std::cout << "After DCRF - FRAN" << std::endl;
 
-			pointcloud.segmentations = refined_labels;
-			pointcloud.segmentationConfidencesExtended = refined_probs;
+			//pointcloud.segmentations = refined_labels;
+			//pointcloud.segmentationConfidencesExtended = refined_probs;
+			pointcloud.segmentations.Empty();
+			pointcloud.segmentationConfidencesExtended.Empty();
+
+			const size_t N = refined_labels.size();
+
+			pointcloud.segmentations.Reserve(N);
+			pointcloud.segmentationConfidencesExtended.Reserve(N);
+
+			for(size_t i=0;i<N;i++){
+				pointcloud.segmentations.Add(refined_labels[i]);
+				pointcloud.segmentationConfidencesExtended.Add(refined_probs[i]);
+			}
 		}
+
 		std::cout << "After if - FRAN" << std::endl;
 		ASSERT(pointcloud.points.size() == pointcloud.pointViews.size() && pointcloud.points.size() == pointcloud.pointWeights.size() && pointcloud.points.size() == projs.size());
 		DEBUG_ULTIMATE("Depths map for reference image %3u fused using %u depths maps: %u new points (%s)", idxImage, depthData.images.size()-1, pointcloud.points.size()-nNumPointsPrev, TD_TIMER_GET_FMT().c_str());
