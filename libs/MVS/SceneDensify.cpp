@@ -1746,29 +1746,24 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				segmentationFrequency.clear();
 			}
 		}
-		bool applyDenseCRF = true;
-		std::cout << "Before if - FRAN" << std::endl;
+		bool applyDenseCRF = false;
 		if(applyDenseCRF) 
 		{
 			std::vector<PointXYZRGB> crf_points(pointcloud.points.size());
 			std::vector<std::vector<float>> crf_probs(pointcloud.points.size());
-			std::cout << "Before for - FRAN" << std::endl;
-
+			
 			for(size_t i=0; i<pointcloud.points.size(); ++i){
 				crf_points[i].xyz = pointcloud.points[i]; // Point3 -> Eigen::Vector3f
 				const auto& col = pointcloud.colors[i];
 				crf_points[i].rgb = Eigen::Vector3f(col.r, col.g, col.b);
 				crf_probs[i] = per_point_probabilities[i]; // your fused probabilities
 			}
-			std::cout << "After for - FRAN" << std::endl;
-
+			
 			std::vector<uint8_t> refined_labels;
 			std::vector<float> refined_probs;
 
-			std::cout << "Before DCRF - FRAN" << std::endl;
 			ApplyDenseCRF3D(crf_points, crf_probs, refined_labels, refined_probs);
-			std::cout << "After DCRF - FRAN" << std::endl;
-
+			
 			//pointcloud.segmentations = refined_labels;
 			//pointcloud.segmentationConfidencesExtended = refined_probs;
 			pointcloud.segmentations.Empty();
@@ -1785,7 +1780,6 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 			}
 		}
 
-		std::cout << "After if - FRAN" << std::endl;
 		ASSERT(pointcloud.points.size() == pointcloud.pointViews.size() && pointcloud.points.size() == pointcloud.pointWeights.size() && pointcloud.points.size() == projs.size());
 		DEBUG_ULTIMATE("Depths map for reference image %3u fused using %u depths maps: %u new points (%s)", idxImage, depthData.images.size()-1, pointcloud.points.size()-nNumPointsPrev, TD_TIMER_GET_FMT().c_str());
 		progress.display(pConnection-connections.data());
