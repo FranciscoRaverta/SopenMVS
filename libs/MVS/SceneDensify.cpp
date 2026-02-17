@@ -1399,6 +1399,7 @@ void DepthMapsData::ApplyDenseCRF3D(
 
     // --- 1. Build pairwise features matrix (6 x N) ---
     Eigen::MatrixXf pairwise(6, N);
+	std::cout << "Before for dcrf - FRAN" << std::endl;
     for(unsigned int i = 0; i < N; ++i){
         // 3D coordinates scaled
         pairwise(0,i) = points[i].xyz(0) * dcrf_xyz_kernel;
@@ -1410,7 +1411,7 @@ void DepthMapsData::ApplyDenseCRF3D(
         pairwise(4,i) = points[i].rgb(1) * dcrf_rgb_kernel;
         pairwise(5,i) = points[i].rgb(2) * dcrf_rgb_kernel;
     }
-
+	std::cout << "Before for2 dcrf - FRAN" << std::endl;
     // --- 2. Build unary energy matrix (num_classes x N) ---
     Eigen::MatrixXf unaries(num_classes, N);
     for(unsigned int i = 0; i < N; ++i){
@@ -1419,7 +1420,7 @@ void DepthMapsData::ApplyDenseCRF3D(
             unaries(c,i) = -std::log(p);
         }
     }
-
+	std::cout << "Before crf - FRAN" << std::endl;
     // --- 3. Run DenseCRF ---
     DenseCRF crf(N, num_classes);
     crf.setUnaryEnergy(unaries);
@@ -1429,6 +1430,7 @@ void DepthMapsData::ApplyDenseCRF3D(
     // --- 4. Extract refined labels and probabilities ---
     out_labels.resize(N);
     out_probs.resize(N);
+	std::cout << "Before for3 dcrf - FRAN" << std::endl;
     for(unsigned int i = 0; i < N; ++i){
         float max_val = 0.0f;
         uint8_t max_label = 0;
@@ -1745,10 +1747,12 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 			}
 		}
 		bool applyDenseCRF = true;
+		std::cout << "Before if - FRAN" << std::endl;
 		if(applyDenseCRF) 
 		{
 			std::vector<PointXYZRGB> crf_points(pointcloud.points.size());
 			std::vector<std::vector<float>> crf_probs(pointcloud.points.size());
+			std::cout << "Before for - FRAN" << std::endl;
 
 			for(size_t i=0; i<pointcloud.points.size(); ++i){
 				crf_points[i].xyz = pointcloud.points[i]; // Point3 -> Eigen::Vector3f
@@ -1756,16 +1760,19 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				crf_points[i].rgb = Eigen::Vector3f(col.r, col.g, col.b);
 				crf_probs[i] = per_point_probabilities[i]; // your fused probabilities
 			}
+			std::cout << "After for - FRAN" << std::endl;
 
 			std::vector<uint8_t> refined_labels;
 			std::vector<float> refined_probs;
 
+			std::cout << "Before DCRF - FRAN" << std::endl;
 			ApplyDenseCRF3D(crf_points, crf_probs, refined_labels, refined_probs);
+			std::cout << "After DCRF - FRAN" << std::endl;
 
 			pointcloud.segmentations = refined_labels;
 			pointcloud.segmentationConfidencesExtended = refined_probs;
 		}
-
+		std::cout << "After if - FRAN" << std::endl;
 		ASSERT(pointcloud.points.size() == pointcloud.pointViews.size() && pointcloud.points.size() == pointcloud.pointWeights.size() && pointcloud.points.size() == projs.size());
 		DEBUG_ULTIMATE("Depths map for reference image %3u fused using %u depths maps: %u new points (%s)", idxImage, depthData.images.size()-1, pointcloud.points.size()-nNumPointsPrev, TD_TIMER_GET_FMT().c_str());
 		progress.display(pConnection-connections.data());
