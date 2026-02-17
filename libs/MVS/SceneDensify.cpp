@@ -1399,8 +1399,7 @@ void DepthMapsData::ApplyDenseCRF3D(
 
     // --- 1. Build pairwise features matrix (6 x N) ---
     Eigen::MatrixXf pairwise(6, N);
-	std::cout << "Before for dcrf - FRAN" << std::endl;
-    for(unsigned int i = 0; i < N; ++i){
+	for(unsigned int i = 0; i < N; ++i){
         // 3D coordinates scaled
         pairwise(0,i) = points[i].xyz(0) * dcrf_xyz_kernel;
         pairwise(1,i) = points[i].xyz(1) * dcrf_xyz_kernel;
@@ -1411,8 +1410,7 @@ void DepthMapsData::ApplyDenseCRF3D(
         pairwise(4,i) = points[i].rgb(1) * dcrf_rgb_kernel;
         pairwise(5,i) = points[i].rgb(2) * dcrf_rgb_kernel;
     }
-	std::cout << "Before for2 dcrf - FRAN" << std::endl;
-    // --- 2. Build unary energy matrix (num_classes x N) ---
+	// --- 2. Build unary energy matrix (num_classes x N) ---
     Eigen::MatrixXf unaries(num_classes, N);
     for(unsigned int i = 0; i < N; ++i){
         for(unsigned int c = 0; c < num_classes; ++c){
@@ -1420,8 +1418,7 @@ void DepthMapsData::ApplyDenseCRF3D(
             unaries(c,i) = -std::log(p);
         }
     }
-	std::cout << "Before crf - FRAN" << std::endl;
-    // --- 3. Run DenseCRF ---
+	// --- 3. Run DenseCRF ---
     DenseCRF crf(N, num_classes);
     crf.setUnaryEnergy(unaries);
     crf.addPairwiseEnergy(pairwise, new PottsCompatibility(dcrf_kernel_weight));
@@ -1430,8 +1427,7 @@ void DepthMapsData::ApplyDenseCRF3D(
     // --- 4. Extract refined labels and probabilities ---
     out_labels.resize(N);
     out_probs.resize(N);
-	std::cout << "Before for3 dcrf - FRAN" << std::endl;
-    for(unsigned int i = 0; i < N; ++i){
+	for(unsigned int i = 0; i < N; ++i){
         float max_val = 0.0f;
         uint8_t max_label = 0;
         for(unsigned int c = 0; c < num_classes; ++c){
@@ -1746,7 +1742,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				segmentationFrequency.clear();
 			}
 		}
-		bool applyDenseCRF = true;
+		bool applyDenseCRF = false;
 		if(applyDenseCRF) 
 		{
 			std::vector<PointXYZRGB> crf_points(pointcloud.points.size());
