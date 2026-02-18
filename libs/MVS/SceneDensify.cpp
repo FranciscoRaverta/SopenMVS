@@ -1729,7 +1729,9 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						for(int c=0; c<numLabels; c++) {
 							sumProbs += probabs[c];
 						}
-						probabs = probabs / sumProbs;
+						for(int c=0; c<numLabels; c++) {
+							probabs[c] = probabs[c] / sumProbs;
+						}
 						per_point_probabilities.emplace_back(probabs);
 
 						//pointcloud.segmentations.emplace_back(modeColor);
