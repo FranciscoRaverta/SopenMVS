@@ -1743,7 +1743,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						per_point_probabilities.emplace_back(probabs);
 
 						bestVal = probabs[0];
-						for(int c=1;c<C;c++){
+						for(int c=1;c<numLabels;c++){
 							if(probabs[c] > bestVal){
 								bestVal = probabs[c];
 								bestLabel = c;
