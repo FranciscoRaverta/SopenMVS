@@ -1429,11 +1429,18 @@ void DepthMapsData::ApplyDenseCRF3D(
     out_labels.resize(N);
     out_probs.resize(N);
 	for(unsigned int i = 0; i < N; ++i){
+		std::vector<float> probs(num_classes, 0.0f); 
+		float sum_probs = 0;
         float max_val = 1.0f / num_classes;
         uint8_t max_label = 0;
+		for(unsigned int c = 0; c < num_classes; ++c){
+			probs[c] = res(c,i);
+			sum_probs += probs[c] 
+		}
         for(unsigned int c = 0; c < num_classes; ++c){
-            if(res(c,i) > max_val){
-                max_val = res(c,i);
+			probs[c] = probs[c] / sum_probs;
+			if(probs[c] > max_val){
+                max_val = probs[c];
                 max_label = c;
             }
         }
