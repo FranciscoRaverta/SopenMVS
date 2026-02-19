@@ -1683,8 +1683,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					logNumber = maxCount;
 				}
 				if (bEstimateSegmentation) {
-					for(float& v : sumLogProbs)
-    					v /= numViewsUsed;
+					//for(float& v : sumLogProbs)
+    				//	v /= numViewsUsed;
 					bestLabel = 0;
 					bestVal = sumLogProbs[0];
 					for(int c=1;c<numLabels;c++)
@@ -1722,19 +1722,35 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						//for(float& v: sumLogProbs)
 						//	Z += exp(v - maxLog);
 						//float prob = exp(bestVal - maxLog)/Z;
-						float prob = std::exp(bestVal);
+						//float prob = std::exp(bestVal);
 						std::vector<float> probabs(numLabels, 0.0f); //FRAN
-						for(int c=0; c<numLabels; c++)
-							probabs[c] += std::exp(sumLogProbs[c]);
-						float sumProbs = 0;
-						for(int c=0; c<numLabels; c++) {
-							sumProbs += probabs[c];
+						// for(int c=0; c<numLabels; c++)
+						// 	probabs[c] += std::exp(sumLogProbs[c]);
+						// float sumProbs = 0;
+						// for(int c=0; c<numLabels; c++) {
+						// 	sumProbs += probabs[c];
+						// }
+						// for(int c=0; c<numLabels; c++) {
+						// 	probabs[c] = probabs[c] / sumProbs;
+						// }
+						for(int c=0;c<numLabels;c++){
+							probabs[c] = std::exp(sumLogProbs[c] - maxLog);
+							Z += probabs[c];
 						}
-						for(int c=0; c<numLabels; c++) {
-							probabs[c] = probabs[c] / sumProbs;
-						}
+
+						for(int c=0;c<numLabels;c++)
+							probabs[c] /= Z;
 						per_point_probabilities.emplace_back(probabs);
 
+						bestVal = probabs[0];
+						for(int c=1;c<C;c++){
+							if(probabs[c] > bestVal){
+								bestVal = probabs[c];
+								bestLabel = c;
+							}
+						}
+
+						float prob = probabs[bestLabel];
 						//pointcloud.segmentations.emplace_back(modeColor);
 						pointcloud.segmentations.emplace_back(bestLabel);
 						pointcloud.segmentationConfidences.emplace_back(segConfidence);
