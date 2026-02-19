@@ -1415,12 +1415,13 @@ void DepthMapsData::ApplyDenseCRF3D(
     for(unsigned int i = 0; i < N; ++i){
         for(unsigned int c = 0; c < num_classes; ++c){
             float p = std::max(per_point_probabilities[i][c], 1e-6f);
-            unaries(c,i) = -std::log(p);
+            //unaries(c,i) = -std::log(p);
+			unaries(c,i) = p;
         }
     }
 	// --- 3. Run DenseCRF ---
     DenseCRF crf(N, num_classes);
-    crf.setUnaryEnergy(unaries);
+    crf.setUnaryEnergy(-unaries);
     crf.addPairwiseEnergy(pairwise, new PottsCompatibility(dcrf_kernel_weight));
     Eigen::MatrixXf res = crf.inference(dcrf_iterations);
 
@@ -1428,7 +1429,7 @@ void DepthMapsData::ApplyDenseCRF3D(
     out_labels.resize(N);
     out_probs.resize(N);
 	for(unsigned int i = 0; i < N; ++i){
-        float max_val = 0.0f;
+        float max_val = 1.0f / num_classes;
         uint8_t max_label = 0;
         for(unsigned int c = 0; c < num_classes; ++c){
             if(res(c,i) > max_val){
