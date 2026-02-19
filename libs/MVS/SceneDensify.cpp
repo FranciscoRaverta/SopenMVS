@@ -1388,8 +1388,8 @@ void DepthMapsData::ApplyDenseCRF3D(
     std::vector<float>& out_probs
 )
 {
-	float dcrf_xyz_kernel = 0.5;
-	float dcrf_rgb_kernel = 4.0;
+	float dcrf_xyz_kernel = 1.0;//0.5;
+	float dcrf_rgb_kernel = 1.0;//4.0;
 	float dcrf_kernel_weight = 10.0;
 	unsigned int dcrf_iterations = 10;
 
@@ -1415,8 +1415,8 @@ void DepthMapsData::ApplyDenseCRF3D(
     for(unsigned int i = 0; i < N; ++i){
         for(unsigned int c = 0; c < num_classes; ++c){
             float p = std::max(per_point_probabilities[i][c], 1e-6f);
-            unaries(c,i) = -std::log(p);
-			//unaries(c,i) = -p;
+            //unaries(c,i) = -std::log(p);
+			unaries(c,i) = -p;
         }
     }
 	// --- 3. Run DenseCRF ---
