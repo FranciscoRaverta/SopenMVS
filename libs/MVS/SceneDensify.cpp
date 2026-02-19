@@ -1416,12 +1416,12 @@ void DepthMapsData::ApplyDenseCRF3D(
         for(unsigned int c = 0; c < num_classes; ++c){
             float p = std::max(per_point_probabilities[i][c], 1e-6f);
             //unaries(c,i) = -std::log(p);
-			unaries(c,i) = p;
+			unaries(c,i) = -p;
         }
     }
 	// --- 3. Run DenseCRF ---
     DenseCRF crf(N, num_classes);
-    crf.setUnaryEnergy(-unaries);
+    crf.setUnaryEnergy(unaries);
     crf.addPairwiseEnergy(pairwise, new PottsCompatibility(dcrf_kernel_weight));
     Eigen::MatrixXf res = crf.inference(dcrf_iterations);
 
@@ -1766,7 +1766,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				segmentationFrequency.clear();
 			}
 		}
-		bool applyDenseCRF = false;
+		bool applyDenseCRF = true;
 		if(applyDenseCRF) 
 		{
 			std::vector<PointXYZRGB> crf_points(pointcloud.points.size());
