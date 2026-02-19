@@ -1388,9 +1388,9 @@ void DepthMapsData::ApplyDenseCRF3D(
     std::vector<float>& out_probs
 )
 {
-	float dcrf_xyz_kernel = 1.0;//0.5;
-	float dcrf_rgb_kernel = 1.0;//4.0;
-	float dcrf_kernel_weight = 10.0;
+	float dcrf_xyz_kernel = 0.5;
+	float dcrf_rgb_kernel = 4.0;
+	float dcrf_kernel_weight = 1.0;
 	unsigned int dcrf_iterations = 10;
 
     const unsigned int N = points.size();
@@ -1406,9 +1406,9 @@ void DepthMapsData::ApplyDenseCRF3D(
         pairwise(2,i) = points[i].xyz(2) * dcrf_xyz_kernel;
 
         // RGB scaled (optional, can set to 0 if no color)
-        pairwise(3,i) = points[i].rgb(0) * dcrf_rgb_kernel;
-        pairwise(4,i) = points[i].rgb(1) * dcrf_rgb_kernel;
-        pairwise(5,i) = points[i].rgb(2) * dcrf_rgb_kernel;
+        pairwise(3,i) = points[i].rgb(0) * dcrf_rgb_kernel / 255.f;
+        pairwise(4,i) = points[i].rgb(1) * dcrf_rgb_kernel / 255.f;
+        pairwise(5,i) = points[i].rgb(2) * dcrf_rgb_kernel / 255.f;
     }
 	// --- 2. Build unary energy matrix (num_classes x N) ---
     Eigen::MatrixXf unaries(num_classes, N);
