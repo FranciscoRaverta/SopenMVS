@@ -1435,7 +1435,7 @@ void DepthMapsData::ApplyDenseCRF3D(
         uint8_t max_label = 0;
 		for(unsigned int c = 0; c < num_classes; ++c){
 			probs[c] = res(c,i);
-			sum_probs += probs[c] 
+			sum_probs += probs[c]; 
 		}
         for(unsigned int c = 0; c < num_classes; ++c){
 			probs[c] = probs[c] / sum_probs;
