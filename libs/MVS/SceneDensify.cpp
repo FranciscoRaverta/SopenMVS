@@ -1390,7 +1390,7 @@ void DepthMapsData::ApplyDenseCRF3D(
 {
 	float dcrf_xyz_kernel = 0.5;
 	float dcrf_rgb_kernel = 4.0;
-	float dcrf_kernel_weight = 1.0;
+	float dcrf_kernel_weight = 2.0;
 	unsigned int dcrf_iterations = 10;
 
     const unsigned int N = points.size();
