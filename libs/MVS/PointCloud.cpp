@@ -260,7 +260,7 @@ namespace BasicPLY {
 		PointCloud::Segmentation seg;
 		PointCloud::SegmentationConfidence segConf;
 		PointCloud::SegmentationConfidenceExtended segConfExtended;
-		PointCloud::segmentationUncertainty segUncertainty;
+		PointCloud::SegmentationUncertainty segUncertainty;
 		struct Views {
 			uint8_t num;
 			uint32_t* pIndices;
