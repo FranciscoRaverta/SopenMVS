@@ -78,6 +78,9 @@ public:
 
 	typedef float SegmentationConfidenceExtended;
 	typedef CLISTDEF0IDX(SegmentationConfidenceExtended,Index) SegmentationConfExtendedArr;
+	
+	typedef float SegmentationUncertainty;
+	typedef CLISTDEF0IDX(SegmentationConfidenceExtended,Index) SegmentationUncertaintyArr;
 
 	typedef AABB3f Box;
 
