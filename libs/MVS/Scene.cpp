@@ -2108,7 +2108,8 @@ void Scene::InitTowerScene(const int towerMode)
 			if (bHasSegmentations) {
 				pointcloud.segmentations.emplace_back(towerPC.segmentations[idxPoint]);
 				pointcloud.segmentationConfidences.emplace_back(towerPC.segmentationConfidences[idxPoint]);
-				pointcloud.segmentationConfidencesExtended.emplace_back(towerPC.segmentationConfidencesExtended[idxPoint]); }
+				pointcloud.segmentationConfidencesExtended.emplace_back(towerPC.segmentationConfidencesExtended[idxPoint]);
+				pointcloud.segmentationUncertainty.emplace_back(towerPC.segmentationUncertainty[idxPoint]); }
 			if (bHasWeights)
 				pointcloud.pointWeights.emplace_back(towerPC.pointWeights[idxPoint]);
 		}
@@ -2138,7 +2139,8 @@ void Scene::InitTowerScene(const int towerMode)
 			if (bHasSegmentations) {
 				pointcloud.segmentations.emplace_back(towerPC.segmentations[idxPoint]);
 				pointcloud.segmentationConfidences.emplace_back(towerPC.segmentationConfidences[idxPoint]);
-				pointcloud.segmentationConfidencesExtended.emplace_back(towerPC.segmentationConfidencesExtended[idxPoint]);}
+				pointcloud.segmentationConfidencesExtended.emplace_back(towerPC.segmentationConfidencesExtended[idxPoint]);
+				pointcloud.segmentationUncertainty.emplace_back(towerPC.segmentationUncertainty[idxPoint]);}
 			if (bHasWeights)
 				pointcloud.pointWeights.emplace_back(towerPC.pointWeights[idxPoint]);
 		}

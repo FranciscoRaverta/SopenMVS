@@ -92,6 +92,7 @@ public:
 	SegmentationArr segmentations;
 	SegmentationConfArr segmentationConfidences;
 	SegmentationConfExtendedArr segmentationConfidencesExtended;
+	SegmentationUncertaintyArr segmentationUncertainty;
 
 public:
 	PointCloud& Swap(PointCloud&);
@@ -132,6 +133,7 @@ public:
 		ar & segmentations;
 		ar & segmentationConfidences;
 		ar & segmentationConfidencesExtended;
+		ar & segmentationUncertainty;
 	}
 	#endif
 };

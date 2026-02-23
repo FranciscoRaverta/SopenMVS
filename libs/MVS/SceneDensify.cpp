@@ -1324,7 +1324,8 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 	if (bEstimateSegmentation) {
 		pointcloud.segmentations.reserve(nPointsEstimate);
 		pointcloud.segmentationConfidences.reserve(nPointsEstimate);
-		pointcloud.segmentationConfidencesExtended.reserve(nPointsEstimate); }
+		pointcloud.segmentationConfidencesExtended.reserve(nPointsEstimate);
+		pointcloud.segmentationUncertainty.reserve(nPointsEstimate); }
 	Util::Progress progress(_T("Merged depth-maps"), arrDepthData.size());
 	GET_LOGCONSOLE().Pause();
 	FOREACH(idxImage, arrDepthData) {
@@ -1354,7 +1355,8 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 				if (bEstimateSegmentation) {
 					pointcloud.segmentations.emplace_back(image.pSegmentedImageData->segmentedImage(x)); 
 					pointcloud.segmentationConfidences.emplace_back(1.f);
-					pointcloud.segmentationConfidencesExtended.emplace_back(1.f); }
+					pointcloud.segmentationConfidencesExtended.emplace_back(1.f);
+					pointcloud.segmentationUncertainty.emplace_back(0.f); }
 				if (bEstimateNormal)
 					depthData.GetNormal(x, pointcloud.normals.emplace_back());
 				++nDepths;
@@ -1385,7 +1387,8 @@ void DepthMapsData::ApplyDenseCRF3D(
     const std::vector<PointXYZRGB>& points,
     const std::vector<std::vector<float>>& per_point_probabilities, // [N][num_classes]
     std::vector<uint8_t>& out_labels,
-    std::vector<float>& out_probs
+    std::vector<float>& out_probs,
+	std::vector<float>& out_uncertainty
 )
 {
 	float dcrf_xyz_kernel = 0.5;
@@ -1428,11 +1431,13 @@ void DepthMapsData::ApplyDenseCRF3D(
     // --- 4. Extract refined labels and probabilities ---
     out_labels.resize(N);
     out_probs.resize(N);
+	out_uncertainty.resize(N);
 	for(unsigned int i = 0; i < N; ++i){
 		std::vector<float> probs(num_classes, 0.0f); 
 		float sum_probs = 0;
         float max_val = 1.0f / num_classes;
         uint8_t max_label = 0;
+		float uncertainty = 0;
 		for(unsigned int c = 0; c < num_classes; ++c){
 			probs[c] = res(c,i);
 			sum_probs += probs[c]; 
@@ -1444,8 +1449,12 @@ void DepthMapsData::ApplyDenseCRF3D(
                 max_label = c;
             }
         }
+		for(unsigned int c = 0; c < num_classes; ++c){
+			uncertainty -= probs[c] * std::log(probs[c]);
+		}
         out_labels[i] = max_label;
         out_probs[i] = max_val;
+		out_uncertainty[i] = uncertainty;
     }
 }
 
@@ -1514,7 +1523,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 	if (bEstimateSegmentation) {
 		pointcloud.segmentations.Reserve(nPointsEstimate);
 		pointcloud.segmentationConfidences.Reserve(nPointsEstimate);
-		pointcloud.segmentationConfidencesExtended.Reserve(nPointsEstimate); }
+		pointcloud.segmentationConfidencesExtended.Reserve(nPointsEstimate);
+		pointcloud.segmentationUncertainty.Reserve(nPointsEstimate); }
 	if (bEstimateNormal)
 		pointcloud.normals.Reserve(nPointsEstimate);
 	Util::Progress progress(_T("Fused depth-maps"), connections.GetSize());
@@ -1756,6 +1766,10 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								bestLabel = c;
 							}
 						}
+						float shannon_entropy = 0.f;
+						for(int c=1;c<numLabels;c++){
+							shannon_entropy -= probabs[c] * std::log(probabs[c]);
+						}
 
 						float prob = probabs[bestLabel];
 						//pointcloud.segmentations.emplace_back(modeColor);
@@ -1763,7 +1777,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						pointcloud.segmentationConfidences.emplace_back(segConfidence);
 						pixelConfidence = std::exp(sumLogsConfidence[modeColor] / logNumber);
 						//pointcloud.segmentationConfidencesExtended.emplace_back(segConfidence * pixelConfidence); }
-						pointcloud.segmentationConfidencesExtended.emplace_back(prob); }
+						pointcloud.segmentationConfidencesExtended.emplace_back(prob);
+						pointcloud.segmentationUncertainty.emplace_back(shannon_entropy); }
 					if (bEstimateNormal)
 						pointcloud.normals.emplace_back(normalized(N*(float)nrm));
 					// invalidate all neighbor depths that do not agree with it
@@ -1773,7 +1788,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				segmentationFrequency.clear();
 			}
 		}
-		bool applyDenseCRF = false;
+		bool applyDenseCRF = true;
 		if(applyDenseCRF) 
 		{
 			std::vector<PointXYZRGB> crf_points(pointcloud.points.size());
@@ -1788,22 +1803,25 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 			
 			std::vector<uint8_t> refined_labels;
 			std::vector<float> refined_probs;
+			std::vector<float> refined_uncertainty;
 
-			ApplyDenseCRF3D(crf_points, crf_probs, refined_labels, refined_probs);
+			ApplyDenseCRF3D(crf_points, crf_probs, refined_labels, refined_probs, refined_uncertainty);
 			
 			//pointcloud.segmentations = refined_labels;
 			//pointcloud.segmentationConfidencesExtended = refined_probs;
 			pointcloud.segmentations.Empty();
 			pointcloud.segmentationConfidencesExtended.Empty();
+			pointcloud.segmentationUncertainty.Empty();
 
 			const size_t N = refined_labels.size();
 
 			pointcloud.segmentations.Reserve(N);
-			pointcloud.segmentationConfidencesExtended.Reserve(N);
+			pointcloud.segmentationUncertainty.Reserve(N);
 
 			for(size_t i=0;i<N;i++){
 				pointcloud.segmentations.emplace_back(refined_labels[i]);
 				pointcloud.segmentationConfidencesExtended.emplace_back(refined_probs[i]);
+				pointcloud.segmentationUncertainty.emplace_back(refined_uncertainty[i]); 
 			}
 		}
 

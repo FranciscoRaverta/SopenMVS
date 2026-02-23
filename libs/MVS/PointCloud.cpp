@@ -51,6 +51,7 @@ PointCloud& MVS::PointCloud::Swap(PointCloud& rhs)
 	segmentations.Swap(rhs.segmentations);
 	segmentationConfidences.Swap(rhs.segmentationConfidences);
 	segmentationConfidencesExtended.Swap(rhs.segmentationConfidencesExtended);
+	segmentationUncertainty.Swap(rhs.segmentationUncertainty);
 	return *this;
 }
 /*----------------------------------------------------------------*/
@@ -65,6 +66,7 @@ void PointCloud::Release()
 	segmentations.Release();
 	segmentationConfidences.Release();
 	segmentationConfidencesExtended.Release();
+	segmentationUncertainty.Release();
 }
 /*----------------------------------------------------------------*/
 
@@ -92,6 +94,9 @@ void PointCloud::RemovePoint(IDX idx)
 	ASSERT(segmentationConfidencesExtended.IsEmpty() || segmentationConfidencesExtended.GetSize() == points.GetSize());
 	if (!segmentationConfidencesExtended.IsEmpty())
 		segmentationConfidencesExtended.RemoveAt(idx);
+	ASSERT(segmentationUncertainty.IsEmpty() || segmentationUncertainty.GetSize() == points.GetSize());
+	if (!segmentationUncertainty.IsEmpty())
+		segmentationUncertainty.RemoveAt(idx);
 	points.RemoveAt(idx);
 }
 void PointCloud::RemovePointsOutside(const OBB3f& obb) {
@@ -255,6 +260,7 @@ namespace BasicPLY {
 		PointCloud::Segmentation seg;
 		PointCloud::SegmentationConfidence segConf;
 		PointCloud::SegmentationConfidenceExtended segConfExtended;
+		PointCloud::segmentationUncertainty segUncertainty;
 		struct Views {
 			uint8_t num;
 			uint32_t* pIndices;
@@ -263,7 +269,7 @@ namespace BasicPLY {
 		float confidence;
 		float scale;
 		static void InitLoadProps(PLY& ply, int elem_count,
-			PointCloud::PointArr& points, PointCloud::ColorArr& colors, PointCloud::NormalArr& normals, PointCloud::SegmentationArr& segmentations, PointCloud::SegmentationConfArr& segmentationConfidences, PointCloud::SegmentationConfExtendedArr& segmentationConfidencesExtended, PointCloud::PointViewArr& views, PointCloud::PointWeightArr& weights)
+			PointCloud::PointArr& points, PointCloud::ColorArr& colors, PointCloud::NormalArr& normals, PointCloud::SegmentationArr& segmentations, PointCloud::SegmentationConfArr& segmentationConfidences, PointCloud::SegmentationConfExtendedArr& segmentationConfidencesExtended, PointCloud::SegmentationUncertaintyArr& segmentationUncertainty, PointCloud::PointViewArr& views, PointCloud::PointWeightArr& weights)
 		{
 			PLY::PlyElement* elm = ply.find_element(elem_names[0]);
 			const size_t nMaxProps(SizeOfArray(props));
@@ -279,8 +285,9 @@ namespace BasicPLY {
 				case 9: segmentations.resize((IDX)elem_count); break;
 				case 10: segmentationConfidences.resize((IDX)elem_count);break;
 				case 11: segmentationConfidencesExtended.resize((IDX)elem_count);break;
-				case 12: views.resize((IDX)elem_count); break;
-				case 13: weights.resize((IDX)elem_count); break;
+				case 12: segmentationUncertainty.resize((IDX)elem_count);break;
+				case 13: views.resize((IDX)elem_count); break;
+				case 14: weights.resize((IDX)elem_count); break;
 				}
 			}
 		}
@@ -301,13 +308,14 @@ namespace BasicPLY {
 			if (bSegmentation) {
 				ply.describe_property(elem_names[0],props[9]);
 				ply.describe_property(elem_names[0],props[10]);
-				ply.describe_property(elem_names[0],props[11]); }
+				ply.describe_property(elem_names[0],props[11]);
+				ply.describe_property(elem_names[0],props[12]); }
 			// if (bViews) // ODM: always output "views" in PLY
-			ply.describe_property(elem_names[0], props[12]);
+			ply.describe_property(elem_names[0], props[13]);
 			if (elem_count)
 				ply.element_count(elem_names[0], elem_count);
 		}
-		static const PLY::PlyProperty props[13];
+		static const PLY::PlyProperty props[14];
 	};
 	const PLY::PlyProperty Vertex::props[13] = {
 		{"x",             				    PLY::Float32, PLY::Float32, offsetof(Vertex,p.x), 0, 0, 0, 0},
@@ -322,6 +330,7 @@ namespace BasicPLY {
 		{"segmentation",  					PLY::Uint8,   PLY::Uint8,   offsetof(Vertex,seg), 0, 0, 0, 0},
 		{"segmentationConfidence",  	    PLY::Float32, PLY::Float32, offsetof(Vertex,segConf), 0, 0, 0, 0},
 		{"segmentationConfidenceExtended",  PLY::Float32, PLY::Float32, offsetof(Vertex,segConfExtended), 0, 0, 0, 0},
+		{"segmentationUncertainty",  		PLY::Float32, PLY::Float32, offsetof(Vertex,segUncertainty), 0, 0, 0, 0},
 		{"views",         					PLY::Uint8,   PLY::Uint8,   offsetof(Vertex,views.num), 0, 0, 0, 0}
 		//{"view_indices",  PLY::Uint32,  PLY::Uint32,  offsetof(Vertex,views.pIndices), 1, PLY::Uint8, PLY::Uint8, offsetof(Vertex,views.num)},
 		//{"view_weights",  PLY::Float32, PLY::Float32, offsetof(Vertex,views.pWeights), 1, PLY::Uint8, PLY::Uint8, offsetof(Vertex,views.num)},
@@ -356,7 +365,7 @@ bool PointCloud::Load(const String& fileName)
 		int elem_count;
 		LPCSTR elem_name = ply.setup_element_read(i, &elem_count);
 		if (PLY::equal_strings(BasicPLY::elem_names[0], elem_name)) {
-			BasicPLY::Vertex::InitLoadProps(ply, elem_count, points, colors, normals, segmentations, segmentationConfidences, segmentationConfidencesExtended, pointViews, pointWeights);
+			BasicPLY::Vertex::InitLoadProps(ply, elem_count, points, colors, normals, segmentations, segmentationConfidences, segmentationConfidencesExtended, segmentationUncertainty, pointViews, pointWeights);
 			BasicPLY::Vertex vertex;
 			for (int v=0; v<elem_count; ++v) {
 				ply.get_element(&vertex);
@@ -371,6 +380,8 @@ bool PointCloud::Load(const String& fileName)
 					segmentationConfidences[v] = vertex.segConf;
 				if (!segmentationConfidencesExtended.empty())
 					segmentationConfidencesExtended[v] = vertex.segConfExtended;
+				if (!segmentationUncertainty.empty())
+					segmentationUncertainty[v] = vertex.segUncertainty;
 				if (!pointViews.empty()) {
 					ViewArr pv(vertex.views.num, vertex.views.pIndices);
 					pointViews[v].CopyOfRemove(pv);
@@ -428,7 +439,8 @@ bool PointCloud::Save(const String& fileName, bool bViews, bool bLegacyTypes, bo
 		if (!segmentations.empty()) {
 			vertex.seg = segmentations[i];
 			vertex.segConf = segmentationConfidences[i];
-			vertex.segConfExtended = segmentationConfidencesExtended[i];}
+			vertex.segConfExtended = segmentationConfidencesExtended[i];
+			vertex.segUncertainty = segmentationUncertainty[i];}
 		if (!pointViews.empty()) {
 			vertex.views.num = pointViews[i].size();
 			vertex.views.pIndices = pointViews[i].data();
@@ -477,6 +489,7 @@ bool PointCloud::SaveNViews(const String& fileName, uint32_t minViews, bool bLeg
 			vertex.seg = segmentations[i];
 			vertex.segConf = segmentationConfidences[i];
 			vertex.segConfExtended = segmentationConfidencesExtended[i];
+			vertex.segUncertainty = segmentationUncertainty[i];
 			ply.put_element(&vertex);
 		}
 	} else {
@@ -494,6 +507,7 @@ bool PointCloud::SaveNViews(const String& fileName, uint32_t minViews, bool bLeg
 			vertex.seg = segmentations[i];
 			vertex.segConf = segmentationConfidences[i];
 			vertex.segConfExtended = segmentationConfidencesExtended[i];
+			vertex.segUncertainty = segmentationUncertainty[i];
 			vertex.views.num = pointViews[i].size();
 			ply.put_element(&vertex);
 		}
@@ -541,7 +555,8 @@ bool PointCloud::SaveWithScale(const String& fileName, const ImageArr& images, f
 		if (!segmentations.empty()) {
 			vertex.seg = segmentations[i];
 			vertex.segConf = segmentationConfidences[i];
-			vertex.segConfExtended = segmentationConfidencesExtended[i];}
+			vertex.segConfExtended = segmentationConfidencesExtended[i];
+			vertex.segUncertainty = segmentationUncertainty[i];}
 		#if 0
 		// one sample per view
 		vertex.confidence = 1;
