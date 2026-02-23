@@ -1594,6 +1594,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				const int numLabels = imageData.probabilitiesImage.channels();
 				//std::cout << "numLabels - FRAN " << numLabels << std::endl;
 				std::vector<float> sumLogProbs(numLabels, 0.0f);
+				std::vector<float> alpha(numLabels, 1.0f); // FRAN - Dirichlet
 				int numViewsUsed = 0;
 				uint8_t modeLabel = 255;
 				int bestLabel = 0;
@@ -1613,9 +1614,11 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				
 				if (bEstimateSegmentation) {
 					const float* probs = imageData.probabilitiesImage.ptr<float>(x.y, x.x);
-					for(int c=0;c<numLabels;c++)
+					for(int c=0;c<numLabels;c++) {
 						sumLogProbs[c] += std::log(std::max(probs[c],1e-6f));
-
+						const float k = 10.0f; // evidence strength (tuneable)
+						alpha[c] += k * probs[c];
+					}
 					numViewsUsed++;
 				}
 				PointCloud::Normal N(normal*confidence);
@@ -1668,8 +1671,11 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							} 
 							if (bEstimateSegmentation) {
 								const float* probsB = imageDataB.probabilitiesImage.ptr<float>(xB.y, xB.x);
-								for(int c=0;c<numLabels;c++)
+								for(int c=0;c<numLabels;c++) {
 									sumLogProbs[c] += std::log(std::max(probsB[c],1e-6f));
+									const float k = 10.0f; // evidence strength (tuneable)
+									alpha[c] += k * probsB[c];
+								}
 								numViewsUsed++;
 							}
 							if (bEstimateNormal)
@@ -1767,15 +1773,31 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							}
 						}
 						float shannon_entropy = 0.f;
-						for(int c=1;c<numLabels;c++){
+						for(int c=0;c<numLabels;c++){
 							shannon_entropy -= probabs[c] * std::log(probabs[c]);
 						}
 
 						float prob = probabs[bestLabel];
+
+						// Dirichlet approach
+						float Z_dirichlet = 0.f;
+						for(int c=0;c<numLabels;c++)
+							Z_dirichlet += alpha[c];
+
+						std::vector<float> probabs_dirichlet(numLabels);
+						for(int c=0;c<numLabels;c++)
+							probabs_dirichlet[c] = alpha[c] / Z_dirichlet;
+						bestLabel_dirichlet = 0;
+						bestVal_dirichlet = probabs_dirichlet[0];
+						for(int c=1;c<numLabels;c++)
+							if(probabs[c] > bestVal_dirichlet)
+								bestLabel_dirichlet = c;
+						float prob_dirichlet = probabs_dirichlet[bestLabel_dirichlet];
+
 						//pointcloud.segmentations.emplace_back(modeColor);
 						pointcloud.segmentations.emplace_back(bestLabel);
-						pointcloud.segmentationConfidences.emplace_back(segConfidence);
-						pixelConfidence = std::exp(sumLogsConfidence[modeColor] / logNumber);
+						pointcloud.segmentationConfidences.emplace_back(prob_dirichlet);
+						//pixelConfidence = std::exp(sumLogsConfidence[modeColor] / logNumber);
 						//pointcloud.segmentationConfidencesExtended.emplace_back(segConfidence * pixelConfidence); }
 						pointcloud.segmentationConfidencesExtended.emplace_back(prob);
 						pointcloud.segmentationUncertainty.emplace_back(shannon_entropy); }
@@ -1788,7 +1810,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				segmentationFrequency.clear();
 			}
 		}
-		bool applyDenseCRF = true;
+		bool applyDenseCRF = false;
 		if(applyDenseCRF) 
 		{
 			std::vector<PointXYZRGB> crf_points(pointcloud.points.size());
