@@ -1790,7 +1790,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						float bestLabel_dirichlet = 0;
 						float bestVal_dirichlet = probabs_dirichlet[0];
 						for(int c=1;c<numLabels;c++)
-							if(probabs[c] > bestVal_dirichlet)
+							if(probabs_dirichlet[c] > bestVal_dirichlet)
 								bestLabel_dirichlet = c;
 						float prob_dirichlet = probabs_dirichlet[bestLabel_dirichlet];
 
