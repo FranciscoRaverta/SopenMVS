@@ -317,7 +317,7 @@ namespace BasicPLY {
 		}
 		static const PLY::PlyProperty props[14];
 	};
-	const PLY::PlyProperty Vertex::props[13] = {
+	const PLY::PlyProperty Vertex::props[14] = {
 		{"x",             				    PLY::Float32, PLY::Float32, offsetof(Vertex,p.x), 0, 0, 0, 0},
 		{"y",             					PLY::Float32, PLY::Float32, offsetof(Vertex,p.y), 0, 0, 0, 0},
 		{"z",             					PLY::Float32, PLY::Float32, offsetof(Vertex,p.z), 0, 0, 0, 0},
