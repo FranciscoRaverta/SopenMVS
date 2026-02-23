@@ -1787,8 +1787,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						std::vector<float> probabs_dirichlet(numLabels);
 						for(int c=0;c<numLabels;c++)
 							probabs_dirichlet[c] = alpha[c] / Z_dirichlet;
-						bestLabel_dirichlet = 0;
-						bestVal_dirichlet = probabs_dirichlet[0];
+						float bestLabel_dirichlet = 0;
+						float bestVal_dirichlet = probabs_dirichlet[0];
 						for(int c=1;c<numLabels;c++)
 							if(probabs[c] > bestVal_dirichlet)
 								bestLabel_dirichlet = c;
