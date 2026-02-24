@@ -1763,7 +1763,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 
 						for(int c=0;c<numLabels;c++)
 							probabs[c] /= Z;
-						per_point_probabilities.emplace_back(probabs);
+						
 
 						bestVal = probabs[0];
 						for(int c=1;c<numLabels;c++){
@@ -1794,6 +1794,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								bestLabel_dirichlet = c;
 						float prob_dirichlet = probabs_dirichlet[bestLabel_dirichlet];
 
+						per_point_probabilities.emplace_back(probabs_dirichlet);
 						//pointcloud.segmentations.emplace_back(modeColor);
 						pointcloud.segmentations.emplace_back(bestLabel);
 						pointcloud.segmentationConfidences.emplace_back(prob_dirichlet);
@@ -1810,7 +1811,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				segmentationFrequency.clear();
 			}
 		}
-		bool applyDenseCRF = false;
+		bool applyDenseCRF = true;
 		if(applyDenseCRF) 
 		{
 			std::vector<PointXYZRGB> crf_points(pointcloud.points.size());
