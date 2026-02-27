@@ -391,9 +391,9 @@ namespace BasicPLY {
 			if (elem_count)
 				ply.element_count(elem_names[0], elem_count);
 		}
-		static const PLY::PlyProperty props[23];
+		static const PLY::PlyProperty props[24];
 	};
-	const PLY::PlyProperty Vertex::props[23] = {
+	const PLY::PlyProperty Vertex::props[24] = {
 		{"x",             				    			PLY::Float32, PLY::Float32, offsetof(Vertex,p.x), 0, 0, 0, 0},
 		{"y",             								PLY::Float32, PLY::Float32, offsetof(Vertex,p.y), 0, 0, 0, 0},
 		{"z",             								PLY::Float32, PLY::Float32, offsetof(Vertex,p.z), 0, 0, 0, 0},
