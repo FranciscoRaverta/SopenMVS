@@ -1645,7 +1645,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					const float* probs = imageData.probabilitiesImage.ptr<float>(x.y, x.x);
 					const float* unc = imageData.uncertaintyImage.ptr<float>(x.y, x.x);
 					//float unc = Cast<float>(imageData.uncertaintyImage(x));
-					float alpha_weighted = std::max(-std::log(unc + 1e-9f), 0.f);
+					float alpha_weighted = std::max(-std::log(unc), 0.f);
 
 					const float* max_it = std::max_element(probs, probs + numLabels);
 					int max_index = std::distance(probs, max_it);
@@ -1714,7 +1714,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							if (bEstimateSegmentation) {
 								const float* probsB = imageDataB.probabilitiesImage.ptr<float>(xB.y, xB.x);
 								const float* unc = imageDataB.uncertaintyImage.ptr<float>(xB.y, xB.x);
-								float alpha_weighted = std::max(-std::log(unc + 1e-9f), 0.f);
+								float alpha_weighted = std::max(-std::log(unc), 0.f);
 								const float* max_it = std::max_element(probsB, probsB + numLabels);
 								int max_index = std::distance(probsB, max_it);
 
