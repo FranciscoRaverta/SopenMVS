@@ -1920,6 +1920,9 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								std::vector<float> fused = obs_probs[0];
 								float fused_alpha = obs_alpha[0];
 
+								const float beta = 0.3f;
+								const float uniform = 1.0f / numLabels;
+
 								for(size_t k=1;k<obs_probs.size();k++)
 								{
 									const auto& obs = obs_probs[k];
@@ -1934,9 +1937,11 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 
 									for(int c=0;c<numLabels;c++)
 									{
-										fused[c] =
-											std::pow(fused[c], w_cur) *
-											std::pow(obs[c],   w_obs);
+										float obs_smoothed = (1-beta)*obs[c] + beta*uniform;
+
+										fused[c] = std::exp(w_cur * std::log(fused[c] + 1e-9f) + w_obs * std::log(obs_smoothed + 1e-9f) );
+											//std::pow(fused[c], w_cur) *
+											//std::pow(obs[c],   w_obs);
 
 										Z += fused[c];
 									}
@@ -1964,7 +1969,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						//} 
 						per_point_probabilities.emplace_back(probabs_weight_dirichlet);
 						//pointcloud.segmentations.emplace_back(modeColor);
-						pointcloud.segmentations.emplace_back(bestLabel_weight_dirichlet);
+						pointcloud.segmentations.emplace_back(bestLabel);
 						pointcloud.segmentationConfidences.emplace_back(segConfidence);
 						//pixelConfidence = std::exp(sumLogsConfidence[modeColor] / logNumber);
 						//pointcloud.segmentationConfidencesExtended.emplace_back(segConfidence * pixelConfidence); }
