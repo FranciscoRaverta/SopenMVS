@@ -1968,11 +1968,11 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						pointcloud.segmentationConfidences.emplace_back(segConfidence);
 						//pixelConfidence = std::exp(sumLogsConfidence[modeColor] / logNumber);
 						//pointcloud.segmentationConfidencesExtended.emplace_back(segConfidence * pixelConfidence); }
-						pointcloud.segmentationConfidencesRecursiveBayesian.emplace_back(bestVal_bayesian);
-						pointcloud.segmentationConfidencesGeometricMean.emplace_back(bestVal_geom);
-						pointcloud.segmentationConfidencesSumProbabilities.emplace_back(bestVal_sum);
-						pointcloud.segmentationConfidencesDirichlet.emplace_back(bestVal_dirichlet);
-						pointcloud.segmentationConfidencesWeightedDirichlet.emplace_back(bestVal_weight_dirichlet);
+						pointcloud.segmentationConfidencesRecursiveBayesian.emplace_back(bestLabel_bayesian);
+						pointcloud.segmentationConfidencesGeometricMean.emplace_back(bestLabel_geom);
+						pointcloud.segmentationConfidencesSumProbabilities.emplace_back(bestLabel_sum);
+						pointcloud.segmentationConfidencesDirichlet.emplace_back(bestLabel_dirichlet);
+						pointcloud.segmentationConfidencesWeightedDirichlet.emplace_back(bestLabel_weight_dirichlet);
 						pointcloud.segmentationUncertaintyRecursiveBayesian.emplace_back(shannon_entropy_bayesian); 
 						pointcloud.segmentationUncertaintyGeometricMean.emplace_back(shannon_entropy_geom); 
 						pointcloud.segmentationUncertaintySumProbabilities.emplace_back(shannon_entropy_sum); 
