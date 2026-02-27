@@ -62,13 +62,13 @@ public:
 	String name; // image file name (relative path)
 	String maskName; // segmentation file name (optional)
 	String segmentationName; // segmentation file name (optional)
-	String confidenceName;
+	String uncertaintyName;
 	String probabilitiesName;
 	Camera camera; // view's pose
 	uint32_t width, height; // image size
 	Image8U3 image; // image color pixels
 	Image8U segmentedImage; // image color pixels
-	Image32F confidenceImage; 
+	Image32F uncertaintyImage; 
 	cv::Mat probabilitiesImage;
 	ViewScoreArr neighbors; // scored neighbor images
 	float scale; // image scale relative to the original size
@@ -86,11 +86,11 @@ public:
 	static IMAGEPTR ReadImageHeader(const String& fileName);
 	static IMAGEPTR ReadImage(const String& fileName, Image8U3& image);
 	static IMAGEPTR ReadSegmentedImage(const String& fileName, Image8U& segmentedImage);
-	static IMAGEPTR ReadConfidenceImage(const String& fileName, Image32F& confidenceImage);
+	static IMAGEPTR ReadUncertaintyImage(const String& fileName, Image32F& uncertaintyImage);
 	static bool ReadProbabilityImage(const String& fileName, cv::Mat& probabilitiesImage);
 	static bool ReadImage(IMAGEPTR pImage, Image8U3& image);
 	static bool ReadSegmentedImage(IMAGEPTR pSegmentedImage, Image8U& segmentedImage);
-	static bool ReadConfidenceImage(IMAGEPTR pConfidenceImage, Image32F& confidenceImage);
+	static bool ReadUncertaintyImage(IMAGEPTR pUncertaintyImage, Image32F& uncertaintyImage);
 	//static bool ReadProbabilityImage(IMAGEPTR pProbabilitiesImage, Image32F& probabilitiesImage);
 	bool LoadImage(const String& fileName, unsigned nMaxResolution=0);
 	bool ReloadImage(unsigned nMaxResolution=0, bool bLoadPixels=true);

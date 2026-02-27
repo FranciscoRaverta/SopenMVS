@@ -1324,8 +1324,16 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 	if (bEstimateSegmentation) {
 		pointcloud.segmentations.reserve(nPointsEstimate);
 		pointcloud.segmentationConfidences.reserve(nPointsEstimate);
-		pointcloud.segmentationConfidencesExtended.reserve(nPointsEstimate);
-		pointcloud.segmentationUncertainty.reserve(nPointsEstimate); }
+		pointcloud.segmentationConfidencesRecursiveBayesian.reserve(nPointsEstimate);
+		pointcloud.segmentationConfidencesGeometricMean.reserve(nPointsEstimate);
+		pointcloud.segmentationConfidencesSumProbabilities.reserve(nPointsEstimate);
+		pointcloud.segmentationConfidencesDirichlet.reserve(nPointsEstimate);
+		pointcloud.segmentationConfidencesWeightedDirichlet.reserve(nPointsEstimate);
+		pointcloud.segmentationUncertaintyRecursiveBayesian.reserve(nPointsEstimate);
+		pointcloud.segmentationUncertaintyGeometricMean.reserve(nPointsEstimate);
+		pointcloud.segmentationUncertaintySumProbabilities.reserve(nPointsEstimate);
+		pointcloud.segmentationUncertaintyDirichlet.reserve(nPointsEstimate);
+		pointcloud.segmentationUncertaintyWeightedDirichlet.reserve(nPointsEstimate); }
 	Util::Progress progress(_T("Merged depth-maps"), arrDepthData.size());
 	GET_LOGCONSOLE().Pause();
 	FOREACH(idxImage, arrDepthData) {
@@ -1355,8 +1363,16 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 				if (bEstimateSegmentation) {
 					pointcloud.segmentations.emplace_back(image.pSegmentedImageData->segmentedImage(x)); 
 					pointcloud.segmentationConfidences.emplace_back(1.f);
-					pointcloud.segmentationConfidencesExtended.emplace_back(1.f);
-					pointcloud.segmentationUncertainty.emplace_back(0.f); }
+					pointcloud.segmentationConfidencesRecursiveBayesian.emplace_back(1.f);
+					pointcloud.segmentationConfidencesGeometricMean.emplace_back(1.f);
+					pointcloud.segmentationConfidencesSumProbabilities.emplace_back(1.f);
+					pointcloud.segmentationConfidencesDirichlet.emplace_back(1.f);
+					pointcloud.segmentationConfidencesWeightedDirichlet.emplace_back(1.f);
+					pointcloud.segmentationUncertaintyRecursiveBayesian.emplace_back(0.f);
+					pointcloud.segmentationUncertaintyGeometricMean.emplace_back(0.f);
+					pointcloud.segmentationUncertaintySumProbabilities.emplace_back(0.f);
+					pointcloud.segmentationUncertaintyDirichlet.emplace_back(0.f);
+					pointcloud.segmentationUncertaintyWeightedDirichlet.emplace_back(0.f); }
 				if (bEstimateNormal)
 					depthData.GetNormal(x, pointcloud.normals.emplace_back());
 				++nDepths;
@@ -1523,8 +1539,16 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 	if (bEstimateSegmentation) {
 		pointcloud.segmentations.Reserve(nPointsEstimate);
 		pointcloud.segmentationConfidences.Reserve(nPointsEstimate);
-		pointcloud.segmentationConfidencesExtended.Reserve(nPointsEstimate);
-		pointcloud.segmentationUncertainty.Reserve(nPointsEstimate); }
+		pointcloud.segmentationConfidencesRecursiveBayesian.Reserve(nPointsEstimate);
+		pointcloud.segmentationConfidencesGeometricMean.Reserve(nPointsEstimate);
+		pointcloud.segmentationConfidencesSumProbabilities.Reserve(nPointsEstimate);
+		pointcloud.segmentationConfidencesDirichlet.Reserve(nPointsEstimate);
+		pointcloud.segmentationConfidencesWeightedDirichlet.Reserve(nPointsEstimate);
+		pointcloud.segmentationUncertaintyRecursiveBayesian.Reserve(nPointsEstimate);
+		pointcloud.segmentationUncertaintyGeometricMean.Reserve(nPointsEstimate);
+		pointcloud.segmentationUncertaintySumProbabilities.Reserve(nPointsEstimate);
+		pointcloud.segmentationUncertaintyDirichlet.Reserve(nPointsEstimate);
+		pointcloud.segmentationUncertaintyWeightedDirichlet.Reserve(nPointsEstimate); }
 	if (bEstimateNormal)
 		pointcloud.normals.Reserve(nPointsEstimate);
 	Util::Progress progress(_T("Fused depth-maps"), connections.GetSize());
@@ -1587,18 +1611,21 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				uint8_t segmentationColor;
 				float segConfidence;
 				float pixelConfidence = 1.f;
-				std::unordered_map<uint8_t, float> sumLogsConfidence;
+				//std::unordered_map<uint8_t, float> sumLogsConfidence;
 				//float sumLogsConfidence = 0.f;
 				int logNumber = 0;
 				// New - FRAN
 				const int numLabels = imageData.probabilitiesImage.channels();
 				//std::cout << "numLabels - FRAN " << numLabels << std::endl;
 				std::vector<float> sumLogProbs(numLabels, 0.0f);
+				std::vector<float> sumOnes(numLabels, 1.0f);
+				std::vector<float> sumProbs(numLabels, 0.0f);
 				std::vector<float> alpha(numLabels, 1.0f); // FRAN - Dirichlet
+				std::vector<std::vector<float>> obs_probs;
+				std::vector<float> obs_alpha;
+
 				int numViewsUsed = 0;
 				uint8_t modeLabel = 255;
-				int bestLabel = 0;
-				float bestVal;
 
 				if (bEstimateSegmentation) {
 					segmentationColor = Cast<uint8_t>(imageData.segmentedImage(x)); // Convert to a 32-bit packed color
@@ -1608,17 +1635,29 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					//std::cout << "Pixel Confidence" << pixelConfidence << std::cout;
 					if (segmentationFrequency.find(segmentationColor) == segmentationFrequency.end()) {
 						segmentationFrequency[segmentationColor] = 0.0f;
-						sumLogsConfidence[segmentationColor] = 0.0f; }
-					sumLogsConfidence[segmentationColor] += std::log(std::max(Cast<float>(imageData.confidenceImage(x)),1e-4f)); 
+						//sumLogsConfidence[segmentationColor] = 0.0f; }
+					//sumLogsConfidence[segmentationColor] += std::log(std::max(Cast<float>(imageData.confidenceImage(x)),1e-4f)); 
 					segmentationFrequency[segmentationColor]++; }
 				
 				if (bEstimateSegmentation) {
 					const float* probs = imageData.probabilitiesImage.ptr<float>(x.y, x.x);
+					float unc = Cast<float>(imageData.uncertaintyImage(x));
+					float alpha_weighted = std::max(-std::log(unc + 1e-9f), 0.f);
+
+					const float* max_it = std::max_element(probs, probs + numLabels);
+					int max_index = std::distance(probs, max_it);
+
 					for(int c=0;c<numLabels;c++) {
 						sumLogProbs[c] += std::log(std::max(probs[c],1e-6f));
+						sumProbs[c] += std::max(probs[c],1e-6f);
 						const float k = 10.0f; // evidence strength (tuneable)
 						alpha[c] += k * probs[c];
+						if (c == max_index) {
+							sumOnes[c] += 1;
+						}
 					}
+					obs_probs.emplace_back(probs, probs + numLabels);
+    				obs_alpha.push_back(alpha_weighted);
 					numViewsUsed++;
 				}
 				PointCloud::Normal N(normal*confidence);
@@ -1662,8 +1701,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								segmentationColor = Cast<uint8_t>(imageDataB.segmentedImage(xB)); // Convert to a 32-bit packed color
 								if (segmentationFrequency.find(segmentationColor) == segmentationFrequency.end()) {
 									segmentationFrequency[segmentationColor] = 0.0f;
-									sumLogsConfidence[segmentationColor] = 0.0f; }
-								sumLogsConfidence[segmentationColor] += std::log(std::max(Cast<float>(imageData.confidenceImage(xB)),1e-4f)); 
+									//sumLogsConfidence[segmentationColor] = 0.0f; }
+								//sumLogsConfidence[segmentationColor] += std::log(std::max(Cast<float>(imageData.confidenceImage(xB)),1e-4f)); 
 								segmentationFrequency[segmentationColor]++;
 								//std::cout << Cast<float>(imageData.confidenceImage(xB)) << std::endl; // FRAN
 								//sumLogsConfidence += std::log(std::max(Cast<float>(imageData.confidenceImage(xB)),1e-4f));
@@ -1671,11 +1710,22 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							} 
 							if (bEstimateSegmentation) {
 								const float* probsB = imageDataB.probabilitiesImage.ptr<float>(xB.y, xB.x);
+								float unc = Cast<float>(imageData.uncertaintyImage(x));
+								float alpha_weighted = std::max(-std::log(unc + 1e-9f), 0.f);
+								const float* max_it = std::max_element(probsB, probsB + numLabels);
+								int max_index = std::distance(probsB, max_it);
+
 								for(int c=0;c<numLabels;c++) {
 									sumLogProbs[c] += std::log(std::max(probsB[c],1e-6f));
+									sumProbs[c] += std::max(probsB[c],1e-6f);
 									const float k = 10.0f; // evidence strength (tuneable)
 									alpha[c] += k * probsB[c];
+									if (c == max_index) {
+										sumOnes[c] += 1;
+									}
 								}
+								obs_probs.emplace_back(probs, probs + numLabels);
+    							obs_alpha.push_back(alpha_weighted);
 								numViewsUsed++;
 							}
 							if (bEstimateNormal)
@@ -1705,20 +1755,20 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					segConfidence = (totalCount > 0.f) ? (maxCount / totalCount) : -10.f;
 					logNumber = maxCount;
 				}
-				if (bEstimateSegmentation) {
-					//for(float& v : sumLogProbs)
-    				//	v /= numViewsUsed;
-					bestLabel = 0;
-					bestVal = sumLogProbs[0];
-					for(int c=1;c<numLabels;c++)
-					{
-						if(sumLogProbs[c] > bestVal)
-						{
-							bestVal = sumLogProbs[c];
-							bestLabel = c;
-						}
-					}
-				}
+				// if (bEstimateSegmentation) {
+				// 	//for(float& v : sumLogProbs)
+    			// 	//	v /= numViewsUsed;
+				// 	bestLabel = 0;
+				// 	bestVal = sumLogProbs[0];
+				// 	for(int c=1;c<numLabels;c++)
+				// 	{
+				// 		if(sumLogProbs[c] > bestVal)
+				// 		{
+				// 			bestVal = sumLogProbs[c];
+				// 			bestLabel = c;
+				// 		}
+				// 	}
+				// }
 				if (views.size() < nMinViewsFuse) {
 					// remove point
 					FOREACH(v, views) {
@@ -1740,68 +1790,190 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						pointcloud.colors.emplace_back((C*(float)nrm).cast<uint8_t>());
 					if (bEstimateSegmentation) {
 						//Normalized posterior:
-						float maxLog = *std::max_element(sumLogProbs.begin(), sumLogProbs.end());
-						float Z = 0.f;
-						//for(float& v: sumLogProbs)
-						//	Z += exp(v - maxLog);
-						//float prob = exp(bestVal - maxLog)/Z;
-						//float prob = std::exp(bestVal);
-						std::vector<float> probabs(numLabels, 0.0f); //FRAN
-						// for(int c=0; c<numLabels; c++)
-						// 	probabs[c] += std::exp(sumLogProbs[c]);
-						// float sumProbs = 0;
-						// for(int c=0; c<numLabels; c++) {
-						// 	sumProbs += probabs[c];
-						// }
-						// for(int c=0; c<numLabels; c++) {
-						// 	probabs[c] = probabs[c] / sumProbs;
-						// }
-						for(int c=0;c<numLabels;c++){
-							probabs[c] = std::exp(sumLogProbs[c] - maxLog);
-							Z += probabs[c];
+						std::vector<float> probabs_bayesian(numLabels, 0.0f); //FRAN
+						std::vector<float> probabs_geom(numLabels, 0.0f); //FRAN
+						std::vector<float> probabs_sum(numLabels, 0.0f); //FRAN
+						std::vector<float> probabs_dirichlet(numLabels, 0.0f); //FRAN
+						std::vector<float> probabs_weight_dirichlet(numLabels, 0.0f); //FRAN
+
+						int bestLabel_bayesian = 0;
+						int bestLabel_geom = 0;
+						int bestLabel_sum = 0;
+						int bestLabel_dirichlet = 0;
+						int bestLabel_weight_dirichlet = 0;
+
+						float bestVal_bayesian;
+						float bestVal_geom;
+						float bestVal_sum;
+						float bestVal_dirichlet;
+						float bestVal_weight_dirichlet;
+
+						float shannon_entropy_bayesian = 0.f;
+						float shannon_entropy_geom = 0.f;
+						float shannon_entropy_sum = 0.f;
+						float shannon_entropy_dirichlet = 0.f;
+						float shannon_entropy_weighted = 0.f;
+
+						//switch(fusion_method) {
+						//	case "recursive_bayesian":
+						{
+								float maxLog = *std::max_element(sumLogProbs.begin(), sumLogProbs.end());
+								float Z = 0.f;
+
+								for(int c=0;c<numLabels;c++){
+									probabs_bayesian[c] = std::exp(sumLogProbs[c] - maxLog);
+									Z += probabs_bayesian[c];
+								}
+								for(int c=0;c<numLabels;c++)
+									probabs_bayesian[c] /= Z;
+								bestVal_bayesian = probabs_bayesian[0];
+								for(int c=0;c<numLabels;c++){
+									if(probabs_bayesian[c] > bestVal_bayesian){
+										bestVal_bayesian = probabs_bayesian[c];
+										bestLabel_bayesian = c;
+									}
+								}
+								for(int c=0;c<numLabels;c++){
+									shannon_entropy_bayesian -= probabs_bayesian[c] * std::log(probabs_bayesian[c]);
+								}
+						}				
+						//		break;
+
+						//	case "geometric_mean":
+						{
+								for(int c=0;c<numLabels;c++)
+    								sumLogProbs[c] /= numViewsUsed; 
+								float maxLog_geom = *std::max_element(sumLogProbs.begin(), sumLogProbs.end());
+								float Z_geom = 0.f;
+
+								for(int c=0;c<numLabels;c++){
+									probabs_geom[c] = std::exp(sumLogProbs[c] - maxLog_geom);
+									Z_geom += probabs_geom[c];
+								}
+								for(int c=0;c<numLabels;c++)
+									probabs_geom[c] /= Z_geom;
+								bestVal_geom = probabs_geom[0];
+								for(int c=0;c<numLabels;c++){
+									if(probabs_geom[c] > bestVal_geom){
+										bestVal_geom = probabs_geom[c];
+										bestLabel_geom = c;
+									}
+								}
+								for(int c=0;c<numLabels;c++){
+									shannon_entropy_geom -= probabs_geom[c] * std::log(probabs_geom[c]);
+								}
+						//		break;
+						}
+						//	case "sum_probabilities":
+						{
+								float Z_sum = 0.f;
+
+								for(int c=0;c<numLabels;c++){
+									probabs_sum[c] = sumProbs[c] / numViewsUsed;
+									Z_sum += probabs_sum[c];
+								}
+
+								for(int c=0;c<numLabels;c++)
+									probabs_sum[c] /= Z_sum;
+								bestVal_sum = probabs_sum[0];
+								for(int c=0;c<numLabels;c++){
+									if(probabs_sum[c] > bestVal_sum){
+										bestVal_sum = probabs_sum[c];
+										bestLabel_sum = c;
+									}
+								}
+								for(int c=0;c<numLabels;c++){
+									shannon_entropy_sum -= probabs_sum[c] * std::log(probabs_sum[c]);
+								}
+						//		break;
 						}
 
-						for(int c=0;c<numLabels;c++)
-							probabs[c] /= Z;
-						
+						//	case "dirichlet":
+						{
+								float Z_dirichlet = 0.f;
+								for(int c=0;c<numLabels;c++)
+									//Z_dirichlet += alpha[c];
+									Z_dirichlet += sumOnes[c];
 
-						bestVal = probabs[0];
-						for(int c=1;c<numLabels;c++){
-							if(probabs[c] > bestVal){
-								bestVal = probabs[c];
-								bestLabel = c;
-							}
+								for(int c=0;c<numLabels;c++)
+									probabs_dirichlet[c] = sumOnes[c] / Z_dirichlet;
+								bestVal_dirichlet = probabs_dirichlet[0];
+								for(int c=0;c<numLabels;c++){
+									if(probabs_dirichlet[c] > bestVal_dirichlet){
+										bestVal_dirichlet = probabs_dirichlet[c];
+										bestLabel_dirichlet = c;
+									}
+								}
+								for(int c=0;c<numLabels;c++){
+									shannon_entropy_dirichlet -= probabs_dirichlet[c] * std::log(probabs_dirichlet[c]);
+								}
+						//		break;
 						}
-						float shannon_entropy = 0.f;
-						for(int c=0;c<numLabels;c++){
-							shannon_entropy -= probabs[c] * std::log(probabs[c]);
+
+						//	case "weighted_dirichlet":
+						{
+								std::vector<float> fused = obs_probs[0];
+								float fused_alpha = obs_alpha[0];
+
+								for(size_t k=1;k<obs_probs.size();k++)
+								{
+									const auto& obs = obs_probs[k];
+									float alpha_obs = obs_alpha[k];
+
+									float max_alpha = std::max(fused_alpha, alpha_obs);
+
+									float w_cur = fused_alpha / (max_alpha + 1e-9f);
+									float w_obs = alpha_obs  / (max_alpha + 1e-9f);
+
+									float Z = 0.f;
+
+									for(int c=0;c<numLabels;c++)
+									{
+										fused[c] =
+											std::pow(fused[c], w_cur) *
+											std::pow(obs[c],   w_obs);
+
+										Z += fused[c];
+									}
+
+									float invZ = 1.f/(Z+1e-9f);
+									for(int c=0;c<numLabels;c++)
+										fused[c] *= invZ;
+
+									fused_alpha = std::max(fused_alpha, alpha_obs);
+								}
+								probabs_weighted = fused;
+								bestVal_weight_dirichlet = probabs_weighted[0];
+								for(int c=0;c<numLabels;c++){
+									if(probabs_weighted[c] > bestVal_weight_dirichlet){
+										bestVal_weight_dirichlet = probabs_weighted[c];
+										bestLabel_weight_dirichlet = c;
+									}
+								}
+								
+								for(int c=0;c<numLabels;c++){
+									shannon_entropy_weighted -= probabs_weighted[c] * std::log(probabs_weighted[c]);
+								}
+						//		break;
 						}
-
-						float prob = probabs[bestLabel];
-
-						// Dirichlet approach
-						float Z_dirichlet = 0.f;
-						for(int c=0;c<numLabels;c++)
-							Z_dirichlet += alpha[c];
-
-						std::vector<float> probabs_dirichlet(numLabels);
-						for(int c=0;c<numLabels;c++)
-							probabs_dirichlet[c] = alpha[c] / Z_dirichlet;
-						float bestLabel_dirichlet = 0;
-						float bestVal_dirichlet = probabs_dirichlet[0];
-						for(int c=1;c<numLabels;c++)
-							if(probabs_dirichlet[c] > bestVal_dirichlet)
-								bestLabel_dirichlet = c;
-						float prob_dirichlet = probabs_dirichlet[bestLabel_dirichlet];
-
-						per_point_probabilities.emplace_back(probabs_dirichlet);
+						//} 
+						per_point_probabilities.emplace_back(probabs);
 						//pointcloud.segmentations.emplace_back(modeColor);
 						pointcloud.segmentations.emplace_back(bestLabel);
-						pointcloud.segmentationConfidences.emplace_back(prob_dirichlet);
+						pointcloud.segmentationConfidences.emplace_back(segConfidence);
 						//pixelConfidence = std::exp(sumLogsConfidence[modeColor] / logNumber);
 						//pointcloud.segmentationConfidencesExtended.emplace_back(segConfidence * pixelConfidence); }
-						pointcloud.segmentationConfidencesExtended.emplace_back(prob);
-						pointcloud.segmentationUncertainty.emplace_back(shannon_entropy); }
+						pointcloud.segmentationConfidencesRecursiveBayesian.emplace_back(bestVal_bayesian);
+						pointcloud.segmentationConfidencesGeometricMean.emplace_back(bestVal_geom);
+						pointcloud.segmentationConfidencesSumProbabilities.emplace_back(bestVal_sum);
+						pointcloud.segmentationConfidencesDirichlet.emplace_back(bestVal_dirichlet);
+						pointcloud.segmentationConfidencesWeightedDirichlet.emplace_back(bestVal_weight_dirichlet);
+						pointcloud.segmentationUncertaintyRecursiveBayesian.emplace_back(shannon_entropy_bayesian); 
+						pointcloud.segmentationUncertaintyGeometricMean.emplace_back(shannon_entropy_geom); 
+						pointcloud.segmentationUncertaintySumProbabilities.emplace_back(shannon_entropy_sum); 
+						pointcloud.segmentationUncertaintyDirichlet.emplace_back(shannon_entropy_dirichlet); 
+						pointcloud.segmentationUncertaintyWeightedDirichlet.emplace_back(shannon_entropy_weighted); }
+
 					if (bEstimateNormal)
 						pointcloud.normals.emplace_back(normalized(N*(float)nrm));
 					// invalidate all neighbor depths that do not agree with it
@@ -1811,7 +1983,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				segmentationFrequency.clear();
 			}
 		}
-		bool applyDenseCRF = true;
+		bool applyDenseCRF = false;
 		if(applyDenseCRF) 
 		{
 			std::vector<PointXYZRGB> crf_points(pointcloud.points.size());
@@ -1833,18 +2005,19 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 			//pointcloud.segmentations = refined_labels;
 			//pointcloud.segmentationConfidencesExtended = refined_probs;
 			pointcloud.segmentations.Empty();
-			pointcloud.segmentationConfidencesExtended.Empty();
-			pointcloud.segmentationUncertainty.Empty();
+			pointcloud.segmentationConfidencesWeightedDirichlet.Empty();
+			pointcloud.segmentationUncertaintyWeightedDirichlet.Empty();
 
 			const size_t N = refined_labels.size();
 
 			pointcloud.segmentations.Reserve(N);
-			pointcloud.segmentationUncertainty.Reserve(N);
+			pointcloud.segmentationConfidencesWeightedDirichlet.Reserve(N);
+			pointcloud.segmentationUncertaintyWeightedDirichlet.Reserve(N);
 
 			for(size_t i=0;i<N;i++){
 				pointcloud.segmentations.emplace_back(refined_labels[i]);
-				pointcloud.segmentationConfidencesExtended.emplace_back(refined_probs[i]);
-				pointcloud.segmentationUncertainty.emplace_back(refined_uncertainty[i]); 
+				pointcloud.segmentationConfidencesWeightedDirichlet.emplace_back(refined_probs[i]);
+				pointcloud.segmentationUncertaintyWeightedDirichlet.emplace_back(refined_uncertainty[i]); 
 			}
 		}
 
@@ -2592,7 +2765,16 @@ void Scene::PointCloudFilter(int thRemove)
 				if (!pointcloud.segmentations.IsEmpty()) {
 					pc.segmentations.push_back(pointcloud.segmentations[idxPoint]);
 					pc.segmentationConfidences.push_back(pointcloud.segmentationConfidences[idxPoint]);
-					pc.segmentationConfidencesExtended.push_back(pointcloud.segmentationConfidencesExtended[idxPoint]);}
+					pc.segmentationConfidencesRecursiveBayesian.push_back(pointcloud.segmentationConfidencesRecursiveBayesian[idxPoint]);
+					pc.segmentationConfidencesGeometricMean.push_back(pointcloud.segmentationConfidencesGeometricMean[idxPoint]);
+					pc.segmentationConfidencesSumProbabilities.push_back(pointcloud.segmentationConfidencesSumProbabilities[idxPoint]);
+					pc.segmentationConfidencesDirichlet.push_back(pointcloud.segmentationConfidencesDirichlet[idxPoint]);
+					pc.segmentationConfidencesWeightedDirichlet.push_back(pointcloud.segmentationConfidencesWeightedDirichlet[idxPoint]);
+					pc.segmentationUncertaintyRecursiveBayesian.push_back(pointcloud.segmentationUncertaintyRecursiveBayesian[idxPoint]);
+					pc.segmentationUncertaintyGeometricMean.push_back(pointcloud.segmentationUncertaintyGeometricMean[idxPoint]);
+					pc.segmentationUncertaintySumProbabilities.push_back(pointcloud.segmentationUncertaintySumProbabilities[idxPoint]);
+					pc.segmentationUncertaintyDirichlet.push_back(pointcloud.segmentationUncertaintyDirichlet[idxPoint]);
+					pc.segmentationUncertaintyWeightedDirichlet.push_back(pointcloud.segmentationUncertaintyWeightedDirichlet[idxPoint]);}
 			}
 		}
 		pc.Save(MAKE_PATH("scene_dense_outliers.ply"));

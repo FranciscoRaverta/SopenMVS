@@ -76,11 +76,35 @@ public:
 	typedef float SegmentationConfidence;
 	typedef CLISTDEF0IDX(SegmentationConfidence,Index) SegmentationConfArr;
 
-	typedef float SegmentationConfidenceExtended;
-	typedef CLISTDEF0IDX(SegmentationConfidenceExtended,Index) SegmentationConfExtendedArr;
+	typedef float SegmentationConfidenceRecursiveBayesian;
+	typedef CLISTDEF0IDX(SegmentationConfidenceRecursiveBayesian,Index) SegmentationConfRecursiveBayesianArr;
+
+	typedef float SegmentationConfidenceGeometricMean;
+	typedef CLISTDEF0IDX(SegmentationConfidenceGeometricMean,Index) SegmentationConfGeometricMeanArr;
+
+	typedef float SegmentationConfidenceSumProbabilities;
+	typedef CLISTDEF0IDX(SegmentationConfidenceSumProbabilities,Index) SegmentationConfSumProbabilitiesArr;
+
+	typedef float SegmentationConfidenceDirichlet;
+	typedef CLISTDEF0IDX(SegmentationConfidenceDirichlet,Index) SegmentationConfDirichletArr;
+
+	typedef float SegmentationConfidenceWeightedDirichlet;
+	typedef CLISTDEF0IDX(SegmentationConfidenceWeightedDirichlet,Index) SegmentationConfWeightedDirichletArr;
+
+	typedef float SegmentationUncertaintyRecursiveBayesian;
+	typedef CLISTDEF0IDX(SegmentationUncertaintyRecursiveBayesian,Index) SegmentationUncRecursiveBayesianArr;
+
+	typedef float SegmentationUncertaintyGeometricMean;
+	typedef CLISTDEF0IDX(SegmentationUncertaintyGeometricMean,Index) SegmentationUncGeometricMeanArr;
+
+	typedef float SegmentationUncertaintySumProbabilities;
+	typedef CLISTDEF0IDX(SegmentationUncertaintySumProbabilities,Index) SegmentationUncSumProbabilitiesArr;
+
+	typedef float SegmentationUncertaintyDirichlet;
+	typedef CLISTDEF0IDX(SegmentationUncertaintyDirichlet,Index) SegmentationUncDirichletArr;
 	
-	typedef float SegmentationUncertainty;
-	typedef CLISTDEF0IDX(SegmentationUncertainty,Index) SegmentationUncertaintyArr;
+	typedef float SegmentationUncertaintyWeightedDirichlet;
+	typedef CLISTDEF0IDX(SegmentationUncertaintyWeightedDirichlet,Index) SegmentationUncWeightedDirichletArr;
 
 	typedef AABB3f Box;
 
@@ -94,8 +118,16 @@ public:
 	ColorArr colors;
 	SegmentationArr segmentations;
 	SegmentationConfArr segmentationConfidences;
-	SegmentationConfExtendedArr segmentationConfidencesExtended;
-	SegmentationUncertaintyArr segmentationUncertainty;
+	SegmentationConfRecursiveBayesianArr segmentationConfidencesRecursiveBayesian;
+	SegmentationConfGeometricMeanArr segmentationConfidencesGeometricMean;
+	SegmentationConfSumProbabilitiesArr segmentationConfidencesSumProbabilities;
+	SegmentationConfDirichletArr segmentationConfidencesDirichlet;
+	SegmentationConfWeightedDirichletArr segmentationConfidencesWeightedDirichlet;
+	SegmentationUncRecursiveBayesianArr segmentationUncertaintyRecursiveBayesian;
+	SegmentationUncGeometricMeanArr segmentationUncertaintyGeometricMean;
+	SegmentationUncSumProbabilitiesArr segmentationUncertaintySumProbabilities;
+	SegmentationUncDirichletArr segmentationUncertaintyDirichlet;
+	SegmentationUncWeightedDirichletArr segmentationUncertaintyWeightedDirichlet;
 
 public:
 	PointCloud& Swap(PointCloud&);
@@ -135,8 +167,16 @@ public:
 		ar & colors;
 		ar & segmentations;
 		ar & segmentationConfidences;
-		ar & segmentationConfidencesExtended;
-		ar & segmentationUncertainty;
+		ar & segmentationConfidencesRecursiveBayesian;
+		ar & segmentationConfidencesGeometricMean;
+		ar & segmentationConfidencesSumProbabilities;
+		ar & segmentationConfidencesDirichlet;
+		ar & segmentationConfidencesWeightedDirichlet;
+		ar & segmentationUncertaintyRecursiveBayesian;
+		ar & segmentationUncertaintyGeometricMean;
+		ar & segmentationUncertaintySumProbabilities;
+		ar & segmentationUncertaintyDirichlet;
+		ar & segmentationUncertaintyWeightedDirichlet;
 	}
 	#endif
 };

@@ -112,31 +112,26 @@ bool Image::ReadSegmentedImage(IMAGEPTR pSegmentedImage, Image8U& image)
 } // ReadImage
 /*----------------------------------------------------------------*/
 
-IMAGEPTR Image::ReadConfidenceImage(const String& fileName, Image32F& image)
+IMAGEPTR Image::ReadUncertaintyImage(const String& fileName, Image32F& image)
 {
-	IMAGEPTR pConfidenceImage(OpenImage(fileName));
-	if (pConfidenceImage != NULL && !ReadConfidenceImage(pConfidenceImage, image))
-		pConfidenceImage.Release();
-	return pConfidenceImage;
+	IMAGEPTR pUncertaintyImage(OpenImage(fileName));
+	if (pUncertaintyImage != NULL && !ReadUncertaintyImage(pUncertaintyImage, image))
+		pUncertaintyImage.Release();
+	return pUncertaintyImage;
 } // ReadImage
 /*----------------------------------------------------------------*/
 
-bool Image::ReadConfidenceImage(IMAGEPTR pConfidenceImage, Image32F& image)
+bool Image::ReadUncertaintyImage(IMAGEPTR pUncertaintyImage, Image32F& image)
 {
-	if (FAILED(pConfidenceImage->ReadHeader())) {
+	if (FAILED(pUncertaintyImage->ReadHeader())) {
 		LOG("error: failed loading image header");
 		return false;
 	}
-	// image.create(pConfidenceImage->GetHeight(), pConfidenceImage->GetWidth());
-	// if (FAILED(pConfidenceImage->ReadData(image.data, PF_GRAYF32, 1, (CImage::Size)image.step))) {
-	// 	LOG("error: failed loading image data");
-	// 	return false;
-	// }
-
+	
     Image8U temp; //FRAN
-    temp.create(pConfidenceImage->GetHeight(), pConfidenceImage->GetWidth());
+    temp.create(pUncertaintyImage->GetHeight(), pUncertaintyImage->GetWidth());
 
-    if (FAILED(pConfidenceImage->ReadData(temp.data, PF_GRAY8, 1, (CImage::Size)temp.step))) {
+    if (FAILED(pUncertaintyImage->ReadData(temp.data, PF_GRAY8, 1, (CImage::Size)temp.step))) {
         LOG("error: failed loading image data");
         return false;
     }
@@ -234,8 +229,8 @@ bool Image::ReloadImage(unsigned nMaxResolution, bool bLoadPixels)
 	IMAGEPTR pImage(bLoadPixels ? ReadImage(name, image) : ReadImageHeader(name));
 	if (!segmentationName.empty())
 		IMAGEPTR pSegmentedImage(bLoadPixels ? ReadSegmentedImage(segmentationName, segmentedImage) : ReadImageHeader(segmentationName));
-	if (!confidenceName.empty())
-		IMAGEPTR pConfidenceImage(bLoadPixels ? ReadConfidenceImage(confidenceName, confidenceImage) : ReadImageHeader(confidenceName));
+	if (!uncertaintyName.empty())
+		IMAGEPTR pUncertaintyImage(bLoadPixels ? ReadUncertaintyImage(uncertaintyName, uncertaintyImage) : ReadImageHeader(uncertaintyName));
 	if (!probabilitiesName.empty())
 		ReadProbabilityImage(probabilitiesName, probabilitiesImage);
 	
@@ -279,8 +274,8 @@ float Image::ResizeImage(unsigned nMaxResolution)
 		cv::resize(image, image, scaledSize, 0, 0, cv::INTER_AREA);
 	if (!segmentedImage.empty())
 		cv::resize(segmentedImage, segmentedImage, scaledSize, 0, 0, cv::INTER_NEAREST); 
-	if (!confidenceImage.empty())
-		cv::resize(confidenceImage, confidenceImage, scaledSize, 0, 0, cv::INTER_NEAREST);
+	if (!uncertaintyImage.empty())
+		cv::resize(uncertaintyImage, uncertaintyImage, scaledSize, 0, 0, cv::INTER_NEAREST);
 	if (!probabilitiesImage.empty())
 		cv::resize(probabilitiesImage, probabilitiesImage, scaledSize, 0, 0, cv::INTER_NEAREST);
 	

@@ -2108,8 +2108,16 @@ void Scene::InitTowerScene(const int towerMode)
 			if (bHasSegmentations) {
 				pointcloud.segmentations.emplace_back(towerPC.segmentations[idxPoint]);
 				pointcloud.segmentationConfidences.emplace_back(towerPC.segmentationConfidences[idxPoint]);
-				pointcloud.segmentationConfidencesExtended.emplace_back(towerPC.segmentationConfidencesExtended[idxPoint]);
-				pointcloud.segmentationUncertainty.emplace_back(towerPC.segmentationUncertainty[idxPoint]); }
+				pointcloud.segmentationConfidencesRecursiveBayesian.emplace_back(towerPC.segmentationConfidencesRecursiveBayesian[idxPoint]);
+				pointcloud.segmentationConfidencesGeometricMean.emplace_back(towerPC.segmentationConfidencesGeometricMean[idxPoint]);
+				pointcloud.segmentationConfidencesSumProbabilities.emplace_back(towerPC.segmentationConfidencesSumProbabilities[idxPoint]);
+				pointcloud.segmentationConfidencesDirichlet.emplace_back(towerPC.segmentationConfidencesDirichlet[idxPoint]);
+				pointcloud.segmentationConfidencesWeightedDirichlet.emplace_back(towerPC.segmentationConfidencesWeightedDirichlet[idxPoint]);
+				pointcloud.segmentationUncertaintyRecursiveBayesian.emplace_back(towerPC.segmentationUncertaintyRecursiveBayesian[idxPoint]);
+				pointcloud.segmentationUncertaintyGeometricMean.emplace_back(towerPC.segmentationUncertaintyGeometricMean[idxPoint]);
+				pointcloud.segmentationUncertaintySumProbabilities.emplace_back(towerPC.segmentationUncertaintySumProbabilities[idxPoint]);
+				pointcloud.segmentationUncertaintyDirichlet.emplace_back(towerPC.segmentationUncertaintyDirichlet[idxPoint]);
+				pointcloud.segmentationUncertaintyWeightedDirichlet.emplace_back(towerPC.segmentationUncertaintyWeightedDirichlet[idxPoint]); }
 			if (bHasWeights)
 				pointcloud.pointWeights.emplace_back(towerPC.pointWeights[idxPoint]);
 		}
@@ -2139,8 +2147,16 @@ void Scene::InitTowerScene(const int towerMode)
 			if (bHasSegmentations) {
 				pointcloud.segmentations.emplace_back(towerPC.segmentations[idxPoint]);
 				pointcloud.segmentationConfidences.emplace_back(towerPC.segmentationConfidences[idxPoint]);
-				pointcloud.segmentationConfidencesExtended.emplace_back(towerPC.segmentationConfidencesExtended[idxPoint]);
-				pointcloud.segmentationUncertainty.emplace_back(towerPC.segmentationUncertainty[idxPoint]);}
+				pointcloud.segmentationConfidencesRecursiveBayesian.emplace_back(towerPC.segmentationConfidencesRecursiveBayesian[idxPoint]);
+				pointcloud.segmentationConfidencesGeometricMean.emplace_back(towerPC.segmentationConfidencesGeometricMean[idxPoint]);
+				pointcloud.segmentationConfidencesSumProbabilities.emplace_back(towerPC.segmentationConfidencesSumProbabilities[idxPoint]);
+				pointcloud.segmentationConfidencesDirichlet.emplace_back(towerPC.segmentationConfidencesDirichlet[idxPoint]);
+				pointcloud.segmentationConfidencesWeightedDirichlet.emplace_back(towerPC.segmentationConfidencesWeightedDirichlet[idxPoint]);
+				pointcloud.segmentationUncertaintyRecursiveBayesian.emplace_back(towerPC.segmentationUncertaintyRecursiveBayesian[idxPoint]);
+				pointcloud.segmentationUncertaintyGeometricMean.emplace_back(towerPC.segmentationUncertaintyGeometricMean[idxPoint]);
+				pointcloud.segmentationUncertaintySumProbabilities.emplace_back(towerPC.segmentationUncertaintySumProbabilities[idxPoint]);
+				pointcloud.segmentationUncertaintyDirichlet.emplace_back(towerPC.segmentationUncertaintyDirichlet[idxPoint]);
+				pointcloud.segmentationUncertaintyWeightedDirichlet.emplace_back(towerPC.segmentationUncertaintyWeightedDirichlet[idxPoint]);}
 			if (bHasWeights)
 				pointcloud.pointWeights.emplace_back(towerPC.pointWeights[idxPoint]);
 		}
