@@ -1611,6 +1611,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				uint8_t segmentationColor;
 				float segConfidence;
 				float pixelConfidence = 1.f;
+				float bestLabel = 0.f;
+				uint8_t bestVal;
 				//std::unordered_map<uint8_t, float> sumLogsConfidence;
 				//float sumLogsConfidence = 0.f;
 				int logNumber = 0;
