@@ -1724,7 +1724,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 										sumOnes[c] += 1;
 									}
 								}
-								obs_probs.emplace_back(probs, probs + numLabels);
+								obs_probs.emplace_back(probsB, probsB + numLabels);
     							obs_alpha.push_back(alpha_weighted);
 								numViewsUsed++;
 							}
@@ -1755,20 +1755,20 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					segConfidence = (totalCount > 0.f) ? (maxCount / totalCount) : -10.f;
 					logNumber = maxCount;
 				}
-				// if (bEstimateSegmentation) {
-				// 	//for(float& v : sumLogProbs)
-    			// 	//	v /= numViewsUsed;
-				// 	bestLabel = 0;
-				// 	bestVal = sumLogProbs[0];
-				// 	for(int c=1;c<numLabels;c++)
-				// 	{
-				// 		if(sumLogProbs[c] > bestVal)
-				// 		{
-				// 			bestVal = sumLogProbs[c];
-				// 			bestLabel = c;
-				// 		}
-				// 	}
-				// }
+				if (bEstimateSegmentation) {
+					//for(float& v : sumLogProbs)
+    				//	v /= numViewsUsed;
+					bestLabel = 0;
+					bestVal = sumLogProbs[0];
+					for(int c=1;c<numLabels;c++)
+					{
+						if(sumLogProbs[c] > bestVal)
+						{
+							bestVal = sumLogProbs[c];
+							bestLabel = c;
+						}
+					}
+				}
 				if (views.size() < nMinViewsFuse) {
 					// remove point
 					FOREACH(v, views) {
@@ -1942,24 +1942,24 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 
 									fused_alpha = std::max(fused_alpha, alpha_obs);
 								}
-								probabs_weighted = fused;
-								bestVal_weight_dirichlet = probabs_weighted[0];
+								probabs_weight_dirichlet = fused;
+								bestVal_weight_dirichlet = probabs_weight_dirichlet[0];
 								for(int c=0;c<numLabels;c++){
-									if(probabs_weighted[c] > bestVal_weight_dirichlet){
-										bestVal_weight_dirichlet = probabs_weighted[c];
+									if(probabs_weight_dirichlet[c] > bestVal_weight_dirichlet){
+										bestVal_weight_dirichlet = probabs_weight_dirichlet[c];
 										bestLabel_weight_dirichlet = c;
 									}
 								}
 								
 								for(int c=0;c<numLabels;c++){
-									shannon_entropy_weighted -= probabs_weighted[c] * std::log(probabs_weighted[c]);
+									shannon_entropy_weighted -= probabs_weight_dirichlet[c] * std::log(probabs_weight_dirichlet[c]);
 								}
 						//		break;
 						}
 						//} 
-						per_point_probabilities.emplace_back(probabs);
+						per_point_probabilities.emplace_back(probabs_weight_dirichlet);
 						//pointcloud.segmentations.emplace_back(modeColor);
-						pointcloud.segmentations.emplace_back(bestLabel);
+						pointcloud.segmentations.emplace_back(bestLabel_weight_dirichlet);
 						pointcloud.segmentationConfidences.emplace_back(segConfidence);
 						//pixelConfidence = std::exp(sumLogsConfidence[modeColor] / logNumber);
 						//pointcloud.segmentationConfidencesExtended.emplace_back(segConfidence * pixelConfidence); }
