@@ -360,7 +360,7 @@ int main(int argc, LPCTSTR* argv)
 				LOG("error: Image %s has non-empty segmentationName %s", image.name.c_str(), image.uncertaintyName.c_str());
 				return EXIT_FAILURE;
 			}
-			image.uncertaintyName = OPT::strUncertaintyPath + Util::getFileName(image.name) + ".png";
+			image.uncertaintyName = OPT::strUncertaintyPath + Util::getFileName(image.name) + ".npz";
 			if (!File::access(image.uncertaintyName)) {
 				LOG("error: Mask image %s not found", image.uncertaintyName.c_str());
 				return EXIT_FAILURE;
