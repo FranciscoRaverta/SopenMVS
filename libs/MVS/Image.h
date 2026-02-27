@@ -86,11 +86,12 @@ public:
 	static IMAGEPTR ReadImageHeader(const String& fileName);
 	static IMAGEPTR ReadImage(const String& fileName, Image8U3& image);
 	static IMAGEPTR ReadSegmentedImage(const String& fileName, Image8U& segmentedImage);
-	static IMAGEPTR ReadUncertaintyImage(const String& fileName, Image32F& uncertaintyImage);
+	//static IMAGEPTR ReadUncertaintyImage(const String& fileName, Image32F& uncertaintyImage);
 	static bool ReadProbabilityImage(const String& fileName, cv::Mat& probabilitiesImage);
+	static bool ReadUncertaintyImage(const String& fileName, cv::Mat& uncertaintyImage);
 	static bool ReadImage(IMAGEPTR pImage, Image8U3& image);
 	static bool ReadSegmentedImage(IMAGEPTR pSegmentedImage, Image8U& segmentedImage);
-	static bool ReadUncertaintyImage(IMAGEPTR pUncertaintyImage, Image32F& uncertaintyImage);
+	//static bool ReadUncertaintyImage(IMAGEPTR pUncertaintyImage, Image32F& uncertaintyImage);
 	//static bool ReadProbabilityImage(IMAGEPTR pProbabilitiesImage, Image32F& probabilitiesImage);
 	bool LoadImage(const String& fileName, unsigned nMaxResolution=0);
 	bool ReloadImage(unsigned nMaxResolution=0, bool bLoadPixels=true);

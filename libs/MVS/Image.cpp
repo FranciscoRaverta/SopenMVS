@@ -112,66 +112,80 @@ bool Image::ReadSegmentedImage(IMAGEPTR pSegmentedImage, Image8U& image)
 } // ReadImage
 /*----------------------------------------------------------------*/
 
-IMAGEPTR Image::ReadUncertaintyImage(const String& fileName, Image32F& image)
-{
-	IMAGEPTR pUncertaintyImage(OpenImage(fileName));
-	if (pUncertaintyImage != NULL && !ReadUncertaintyImage(pUncertaintyImage, image))
-		pUncertaintyImage.Release();
-	return pUncertaintyImage;
-} // ReadImage
-/*----------------------------------------------------------------*/
+// IMAGEPTR Image::ReadUncertaintyImage(const String& fileName, Image32F& image)
+// {
+// 	IMAGEPTR pUncertaintyImage(OpenImage(fileName));
+// 	if (pUncertaintyImage != NULL && !ReadUncertaintyImage(pUncertaintyImage, image))
+// 		pUncertaintyImage.Release();
+// 	return pUncertaintyImage;
+// } // ReadImage
+// /*----------------------------------------------------------------*/
 
-bool Image::ReadUncertaintyImage(IMAGEPTR pUncertaintyImage, Image32F& image)
-{
-	if (FAILED(pUncertaintyImage->ReadHeader())) {
-		LOG("error: failed loading image header");
-		return false;
-	}
+// bool Image::ReadUncertaintyImage(IMAGEPTR pUncertaintyImage, Image32F& image)
+// {
+// 	if (FAILED(pUncertaintyImage->ReadHeader())) {
+// 		LOG("error: failed loading image header");
+// 		return false;
+// 	}
 	
-    Image8U temp; //FRAN
-    temp.create(pUncertaintyImage->GetHeight(), pUncertaintyImage->GetWidth());
+//     Image8U temp; //FRAN
+//     temp.create(pUncertaintyImage->GetHeight(), pUncertaintyImage->GetWidth());
 
-    if (FAILED(pUncertaintyImage->ReadData(temp.data, PF_GRAY8, 1, (CImage::Size)temp.step))) {
-        LOG("error: failed loading image data");
-        return false;
-    }
+//     if (FAILED(pUncertaintyImage->ReadData(temp.data, PF_GRAY8, 1, (CImage::Size)temp.step))) {
+//         LOG("error: failed loading image data");
+//         return false;
+//     }
 
-	image.create(temp.rows, temp.cols);
+// 	image.create(temp.rows, temp.cols);
 
-	float* dst = reinterpret_cast<float*>(image.data);
-	uint8_t* src = temp.data;
+// 	float* dst = reinterpret_cast<float*>(image.data);
+// 	uint8_t* src = temp.data;
 
-	const int total = image.rows * image.cols;
+// 	const int total = image.rows * image.cols;
 
-	for (int i = 0; i < total; ++i) {
-		dst[i] = float(src[i]) / 100.0f;
-	}
-	//printf("dst[0] = %f\n", dst[0]);
-    return true;
-} // ReadImage
+// 	for (int i = 0; i < total; ++i) {
+// 		dst[i] = float(src[i]) / 100.0f;
+// 	}
+// 	//printf("dst[0] = %f\n", dst[0]);
+//     return true;
+// } // ReadImage
 /*----------------------------------------------------------------*/
 
 bool Image::ReadProbabilityImage(const String& fileName, cv::Mat& image)
 {
-// {
-// 	IMAGEPTR pProbabilityImage(OpenImage(fileName));
-// 	if (pProbabilityImage != NULL && !ReadProbabilityImage(pProbabilityImage, image))
-// 		pProbabilityImage.Release();
-// 	return pProbabilityImage;
-// } // ReadImage
-// /*----------------------------------------------------------------*/
-// bool Image::ReadProbabilityImage(IMAGEPTR pProbabilityImage, cv::Mat& image)
-// {
-	// if (FAILED(pProbabilityImage->ReadHeader())) {
-	// 	LOG("error: failed loading image header");
-	// 	return false;
-	// }
-	// image.create(pConfidenceImage->GetHeight(), pConfidenceImage->GetWidth());
-	// if (FAILED(pConfidenceImage->ReadData(image.data, PF_GRAYF32, 1, (CImage::Size)image.step))) {
-	// 	LOG("error: failed loading image data");
-	// 	return false;
-	// }
 
+    cnpy::npz_t archive;
+
+    try { archive = cnpy::npz_load(fileName.c_str()); }
+    catch (...) {
+        LOG("error: failed loading npz");
+        return false;
+    }
+
+    if (!archive.count("arr_0"))
+		return false;
+
+	
+    cnpy::NpyArray arr = archive["arr_0"];
+
+    if (arr.word_size != sizeof(float) || arr.shape.size()!=3)
+        return false;
+
+    int H = arr.shape[0];
+    int W = arr.shape[1];
+    int C = arr.shape[2];
+
+    image = cv::Mat(
+        H,W,CV_MAKETYPE(CV_32F,C),
+        arr.data<float>()
+    ).clone();
+    
+    return true;
+} // ReadImage
+/*----------------------------------------------------------------*/
+
+bool Image::ReadUncertaintyImage(const String& fileName, cv::Mat& image)
+{
     cnpy::npz_t archive;
 
     try { archive = cnpy::npz_load(fileName.c_str()); }
@@ -229,8 +243,10 @@ bool Image::ReloadImage(unsigned nMaxResolution, bool bLoadPixels)
 	IMAGEPTR pImage(bLoadPixels ? ReadImage(name, image) : ReadImageHeader(name));
 	if (!segmentationName.empty())
 		IMAGEPTR pSegmentedImage(bLoadPixels ? ReadSegmentedImage(segmentationName, segmentedImage) : ReadImageHeader(segmentationName));
+	//if (!uncertaintyName.empty())
+	//	IMAGEPTR pUncertaintyImage(bLoadPixels ? ReadUncertaintyImage(uncertaintyName, uncertaintyImage) : ReadImageHeader(uncertaintyName));
 	if (!uncertaintyName.empty())
-		IMAGEPTR pUncertaintyImage(bLoadPixels ? ReadUncertaintyImage(uncertaintyName, uncertaintyImage) : ReadImageHeader(uncertaintyName));
+		ReadUncertaintyImage(uncertaintyName, uncertaintyImage);
 	if (!probabilitiesName.empty())
 		ReadProbabilityImage(probabilitiesName, probabilitiesImage);
 	
