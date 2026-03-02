@@ -1664,7 +1664,14 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 
 					std::vector<float> alpha_vec(numLabels);
 					for(int c=0;c<numLabels;c++)
-						alpha_vec[c] = alpha_weighted * probs[c];
+					{
+						//float pc = std::max(probsB[c],1e-6f);
+						//float unc_c = unc * (1.0f - pc);   // class-wise uncertainty
+						//alpha_vec[c] = std::max(-std::log(unc_c + 1e-9f), 0.f);
+						alpha_vec[c] = std::max(-std::log(unc + 1e-9f), 0.f);
+					}
+					// for(int c=0;c<numLabels;c++)
+					// 	alpha_vec[c] = alpha_weighted * probsB[c];
 					obs_probs.emplace_back(probs, probs + numLabels);
 					obs_alpha.emplace_back(std::move(alpha_vec));
 					//obs_alpha.emplace_back(alpha_vec, alpha_vec + numLabels);
@@ -1739,9 +1746,10 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								std::vector<float> alpha_vec(numLabels);
 								for(int c=0;c<numLabels;c++)
 								{
-									float pc = std::max(probsB[c],1e-6f);
-									float unc_c = unc * (1.0f - pc);   // class-wise uncertainty
-									alpha_vec[c] = std::max(-std::log(unc_c + 1e-9f), 0.f);
+									//float pc = std::max(probsB[c],1e-6f);
+									//float unc_c = unc * (1.0f - pc);   // class-wise uncertainty
+									//alpha_vec[c] = std::max(-std::log(unc_c + 1e-9f), 0.f);
+									alpha_vec[c] = std::max(-std::log(unc + 1e-9f), 0.f);
 								}
 								// for(int c=0;c<numLabels;c++)
     							// 	alpha_vec[c] = alpha_weighted * probsB[c];
@@ -1968,45 +1976,66 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 
 								// 	fused_alpha = std::max(fused_alpha, alpha_obs);
 								// }
-								std::vector<float> fused = obs_probs[0];
-								std::vector<float> fused_alpha = obs_alpha[0];
+								std::vector<float> fused(numLabels, 1.0f/numLabels);//= obs_probs[0];
+								std::vector<float> fused_alpha(numLabels, 0.001f);//= obs_alpha[0];
+								std::vector<float> class_ps_weighted(numLabels, 0.0f);
+								std::vector<float> input_class_ps_weighted(numLabels, 0.0f);
+								std::vector<float> product_weighted(numLabels, 0.0f);
 
 								const float beta = 0.3f;
 								const float uniform = 1.f/numLabels;
 
-								for(size_t k=1;k<obs_probs.size();k++)
+								for(size_t k=0;k<obs_probs.size();k++)
 								{
+
 									const auto& obs = obs_probs[k];
 									const auto& alpha_obs = obs_alpha[k];
 
 									float Z=0;
 
+									std::vector<float> current_alpha(numLabels);
+									for(int c=0;c<numLabels;c++)
+										current_alpha[c] = std::max(fused_alpha[c], 0.f);
+
+									std::vector<float> input_alpha(numLabels);
+									for(int c=0;c<numLabels;c++)
+										input_alpha[c] = std::max(alpha_obs[c], 0.f);
+
 									std::vector<float> max_alpha(numLabels);
 									for(int c=0;c<numLabels;c++)
 										max_alpha[c] = std::max(fused_alpha[c], alpha_obs[c]);
-
-									for(int c=0;c<numLabels;c++)
-									{
-										//float max_alpha = std::max(fused_alpha[c], alpha_obs[c]);
-
-										float w_cur = fused_alpha[c]/(max_alpha[c]+1e-9f);
-										float w_obs = alpha_obs[c]/(max_alpha[c]+1e-9f);
-
-										float obs_smoothed = (1-beta)*obs[c] + beta*uniform;
-
-										//fused[c] = std::exp(w_cur*std::log(fused[c]+1e-9f) + w_obs*std::log(obs_smoothed+1e-9f));
-										fused[c] = pow(fused[c], w_cur) * pow(obs_smoothed, w_obs);
-
-										Z += fused[c];
+									
+									for(int c=0;c<numLabels;c++) {
+										class_ps_weighted[c] = std::pow(fused[c], current_alpha[c]/max_alpha[c]); 
+										input_class_ps_weighted[c] = std::pow((1-beta)*obs[c] + beta * uniform , input_alpha[c]/max_alpha[c]);
+										product_weighted[c] = class_ps_weighted[c] * input_class_ps_weighted[c];
+										Z += product_weighted[c];
 									}
+
+									// for(int c=0;c<numLabels;c++)
+									// {
+									// 	//float max_alpha = std::max(fused_alpha[c], alpha_obs[c]);
+
+									// 	float w_cur = fused_alpha[c]/(max_alpha[c]+1e-9f);
+									// 	float w_obs = alpha_obs[c]/(max_alpha[c]+1e-9f);
+
+									// 	float obs_smoothed = (1-beta)*obs[c] + beta*uniform;
+
+									// 	//fused[c] = std::exp(w_cur*std::log(fused[c]+1e-9f) + w_obs*std::log(obs_smoothed+1e-9f));
+									// 	fused[c] = pow(fused[c], w_cur) * pow(obs_smoothed, w_obs);
+
+									// 	Z += fused[c];
+									// }
 
 									float invZ = 1.f/(Z+1e-9f);
 									for(int c=0;c<numLabels;c++)
-										fused[c] *= invZ;
+										product_weighted[c] *= invZ;
+										fused[c] = product_weighted[c];
 
 									// update alpha vector
 									for(int c=0;c<numLabels;c++)
 										fused_alpha[c] = std::max(fused_alpha[c], alpha_obs[c]);
+
 								}
 								probabs_weight_dirichlet = fused;
 								bestVal_weight_dirichlet = probabs_weight_dirichlet[0];
