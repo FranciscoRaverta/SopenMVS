@@ -2028,10 +2028,10 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 									// }
 
 									float invZ = 1.f/(Z+1e-9f);
-									for(int c=0;c<numLabels;c++)
+									for(int c=0;c<numLabels;c++) {
 										product_weighted[c] *= invZ;
 										fused[c] = product_weighted[c];
-
+									}
 									// update alpha vector
 									for(int c=0;c<numLabels;c++)
 										fused_alpha[c] = std::max(fused_alpha[c], alpha_obs[c]);
