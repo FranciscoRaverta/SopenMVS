@@ -1648,7 +1648,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					float unc = unc_ptr[0];
 					//float unc = Cast<float>(imageData.uncertaintyImage(x));
 					float alpha_weighted = std::max(-std::log(unc + 1e-9f), 0.f);
-
+					std::vector<float> alpha_vec(numLabels);
+					
 					const float* max_it = std::max_element(probs, probs + numLabels);
 					int max_index = std::distance(probs, max_it);
 
@@ -1657,24 +1658,14 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						sumProbs[c] += std::max(probs[c],1e-6f);
 						const float k = 10.0f; // evidence strength (tuneable)
 						alpha[c] += k * probs[c];
+						alpha_vec[c] = std::max(-std::log(unc + 1e-9f), 0.f);
 						if (c == max_index) {
 							sumOnes[c] += 1;
 						}
 					}
 
-					std::vector<float> alpha_vec(numLabels);
-					for(int c=0;c<numLabels;c++)
-					{
-						//float pc = std::max(probsB[c],1e-6f);
-						//float unc_c = unc * (1.0f - pc);   // class-wise uncertainty
-						//alpha_vec[c] = std::max(-std::log(unc_c + 1e-9f), 0.f);
-						alpha_vec[c] = std::max(-std::log(unc + 1e-9f), 0.f);
-					}
-					// for(int c=0;c<numLabels;c++)
-					// 	alpha_vec[c] = alpha_weighted * probsB[c];
 					obs_probs.emplace_back(probs, probs + numLabels);
 					obs_alpha.emplace_back(std::move(alpha_vec));
-					//obs_alpha.emplace_back(alpha_vec, alpha_vec + numLabels);
 					numViewsUsed++;
 				}
 				PointCloud::Normal N(normal*confidence);
@@ -1732,27 +1723,18 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								float alpha_weighted = std::max(-std::log(unc + 1e-9f), 0.f);
 								const float* max_it = std::max_element(probsB, probsB + numLabels);
 								int max_index = std::distance(probsB, max_it);
+								std::vector<float> alpha_vec(numLabels);
 
 								for(int c=0;c<numLabels;c++) {
 									sumLogProbs[c] += std::log(std::max(probsB[c],1e-6f));
 									sumProbs[c] += std::max(probsB[c],1e-6f);
 									const float k = 10.0f; // evidence strength (tuneable)
 									alpha[c] += k * probsB[c];
+									alpha_vec[c] = std::max(-std::log(unc + 1e-9f), 0.f);
 									if (c == max_index) {
 										sumOnes[c] += 1;
 									}
 								}
-
-								std::vector<float> alpha_vec(numLabels);
-								for(int c=0;c<numLabels;c++)
-								{
-									//float pc = std::max(probsB[c],1e-6f);
-									//float unc_c = unc * (1.0f - pc);   // class-wise uncertainty
-									//alpha_vec[c] = std::max(-std::log(unc_c + 1e-9f), 0.f);
-									alpha_vec[c] = std::max(-std::log(unc + 1e-9f), 0.f);
-								}
-								// for(int c=0;c<numLabels;c++)
-    							// 	alpha_vec[c] = alpha_weighted * probsB[c];
 								obs_probs.emplace_back(probsB, probsB + numLabels);
     							obs_alpha.emplace_back(std::move(alpha_vec));
 								numViewsUsed++;
@@ -1941,41 +1923,6 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 
 						//	case "weighted_dirichlet":
 						{
-								// std::vector<float> fused = obs_probs[0];
-								// float fused_alpha = obs_alpha[0];
-
-								// const float beta = 0.3f;
-								// const float uniform = 1.0f / numLabels;
-
-								// for(size_t k=1;k<obs_probs.size();k++)
-								// {
-								// 	const auto& obs = obs_probs[k];
-								// 	float alpha_obs = obs_alpha[k];
-
-								// 	float max_alpha = std::max(fused_alpha, alpha_obs);
-
-								// 	float w_cur = fused_alpha / (max_alpha + 1e-9f);
-								// 	float w_obs = alpha_obs  / (max_alpha + 1e-9f);
-
-								// 	float Z = 0.f;
-
-								// 	for(int c=0;c<numLabels;c++)
-								// 	{
-								// 		float obs_smoothed = (1-beta)*obs[c] + beta*uniform;
-
-								// 		fused[c] = std::exp(w_cur * std::log(fused[c] + 1e-9f) + w_obs * std::log(obs_smoothed + 1e-9f) );
-								// 			//std::pow(fused[c], w_cur) *
-								// 			//std::pow(obs[c],   w_obs);
-
-								// 		Z += fused[c];
-								// 	}
-
-								// 	float invZ = 1.f/(Z+1e-9f);
-								// 	for(int c=0;c<numLabels;c++)
-								// 		fused[c] *= invZ;
-
-								// 	fused_alpha = std::max(fused_alpha, alpha_obs);
-								// }
 								std::vector<float> fused(numLabels, 1.0f/numLabels);//= obs_probs[0];
 								std::vector<float> fused_alpha(numLabels, 0.001f);//= obs_alpha[0];
 								std::vector<float> class_ps_weighted(numLabels, 0.0f);
@@ -2012,20 +1959,6 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 										Z += product_weighted[c];
 									}
 
-									// for(int c=0;c<numLabels;c++)
-									// {
-									// 	//float max_alpha = std::max(fused_alpha[c], alpha_obs[c]);
-
-									// 	float w_cur = fused_alpha[c]/(max_alpha[c]+1e-9f);
-									// 	float w_obs = alpha_obs[c]/(max_alpha[c]+1e-9f);
-
-									// 	float obs_smoothed = (1-beta)*obs[c] + beta*uniform;
-
-									// 	//fused[c] = std::exp(w_cur*std::log(fused[c]+1e-9f) + w_obs*std::log(obs_smoothed+1e-9f));
-									// 	fused[c] = pow(fused[c], w_cur) * pow(obs_smoothed, w_obs);
-
-									// 	Z += fused[c];
-									// }
 
 									float invZ = 1.f/(Z+1e-9f);
 									for(int c=0;c<numLabels;c++) {
