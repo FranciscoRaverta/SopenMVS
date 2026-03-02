@@ -1975,21 +1975,21 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 
 									float Z=0;
 
+									std::vector<float> max_alpha(numLabels);
+									for(int c=0;c<numLabels;c++)
+										max_alpha[c] = std::max(fused_alpha[c], alpha_obs[c]);
+
 									for(int c=0;c<numLabels;c++)
 									{
-										float max_alpha = std::max(fused_alpha[c], alpha_obs[c]);
+										//float max_alpha = std::max(fused_alpha[c], alpha_obs[c]);
 
-										float w_cur = fused_alpha[c]/(max_alpha+1e-9f);
-										float w_obs = alpha_obs[c]/(max_alpha+1e-9f);
+										float w_cur = fused_alpha[c]/(max_alpha[c]+1e-9f);
+										float w_obs = alpha_obs[c]/(max_alpha[c]+1e-9f);
 
-										float obs_smoothed =
-											(1-beta)*obs[c] + beta*uniform;
+										float obs_smoothed = (1-beta)*obs[c] + beta*uniform;
 
-										fused[c] =
-											std::exp(
-												w_cur*std::log(fused[c]+1e-9f)
-											+ w_obs*std::log(obs_smoothed+1e-9f)
-											);
+										//fused[c] = std::exp(w_cur*std::log(fused[c]+1e-9f) + w_obs*std::log(obs_smoothed+1e-9f));
+										fused[c] = pow(fused[c], w_cur) * pow(obs_smoothed, w_obs);
 
 										Z += fused[c];
 									}
@@ -2000,8 +2000,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 
 									// update alpha vector
 									for(int c=0;c<numLabels;c++)
-										fused_alpha[c] =
-											std::max(fused_alpha[c], alpha_obs[c]);
+										fused_alpha[c] = std::max(fused_alpha[c], alpha_obs[c]);
 								}
 								probabs_weight_dirichlet = fused;
 								bestVal_weight_dirichlet = probabs_weight_dirichlet[0];
