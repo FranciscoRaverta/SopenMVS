@@ -1740,7 +1740,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								for(int c=0;c<numLabels;c++)
     								alpha_vec[c] = alpha_weighted * probsB[c];
 								obs_probs.emplace_back(probsB, probsB + numLabels);
-    							obs_alpha.emplace_back(alpha_vec, alpha_vec + numLabels);
+    							obs_alpha.emplace_back(std::move(alpha_vec));
 								numViewsUsed++;
 							}
 							if (bEstimateNormal)
