@@ -1624,7 +1624,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				std::vector<float> sumProbs(numLabels, 0.0f);
 				std::vector<float> alpha(numLabels, 1.0f); // FRAN - Dirichlet
 				std::vector<std::vector<float>> obs_probs;
-				std::vector<float> obs_alpha;
+				//std::vector<float> obs_alpha;
+				std::vector<std::vector<float>> obs_alpha;
 
 				int numViewsUsed = 0;
 				uint8_t modeLabel = 255;
@@ -1729,8 +1730,12 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 										sumOnes[c] += 1;
 									}
 								}
+
+								std::vector<float> alpha_vec(numLabels);
+								for(int c=0;c<numLabels;c++)
+    								alpha_vec[c] = alpha_weighted * probsB[c];
 								obs_probs.emplace_back(probsB, probsB + numLabels);
-    							obs_alpha.push_back(alpha_weighted);
+    							obs_alpha.push_back(std::move(alpha_vec));
 								numViewsUsed++;
 							}
 							if (bEstimateNormal)
@@ -1917,31 +1922,69 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 
 						//	case "weighted_dirichlet":
 						{
+								// std::vector<float> fused = obs_probs[0];
+								// float fused_alpha = obs_alpha[0];
+
+								// const float beta = 0.3f;
+								// const float uniform = 1.0f / numLabels;
+
+								// for(size_t k=1;k<obs_probs.size();k++)
+								// {
+								// 	const auto& obs = obs_probs[k];
+								// 	float alpha_obs = obs_alpha[k];
+
+								// 	float max_alpha = std::max(fused_alpha, alpha_obs);
+
+								// 	float w_cur = fused_alpha / (max_alpha + 1e-9f);
+								// 	float w_obs = alpha_obs  / (max_alpha + 1e-9f);
+
+								// 	float Z = 0.f;
+
+								// 	for(int c=0;c<numLabels;c++)
+								// 	{
+								// 		float obs_smoothed = (1-beta)*obs[c] + beta*uniform;
+
+								// 		fused[c] = std::exp(w_cur * std::log(fused[c] + 1e-9f) + w_obs * std::log(obs_smoothed + 1e-9f) );
+								// 			//std::pow(fused[c], w_cur) *
+								// 			//std::pow(obs[c],   w_obs);
+
+								// 		Z += fused[c];
+								// 	}
+
+								// 	float invZ = 1.f/(Z+1e-9f);
+								// 	for(int c=0;c<numLabels;c++)
+								// 		fused[c] *= invZ;
+
+								// 	fused_alpha = std::max(fused_alpha, alpha_obs);
+								// }
 								std::vector<float> fused = obs_probs[0];
-								float fused_alpha = obs_alpha[0];
+								std::vector<float> fused_alpha = obs_alpha[0];
 
 								const float beta = 0.3f;
-								const float uniform = 1.0f / numLabels;
+								const float uniform = 1.f/numLabels;
 
 								for(size_t k=1;k<obs_probs.size();k++)
 								{
 									const auto& obs = obs_probs[k];
-									float alpha_obs = obs_alpha[k];
+									const auto& alpha_obs = obs_alpha_vec[k];
 
-									float max_alpha = std::max(fused_alpha, alpha_obs);
-
-									float w_cur = fused_alpha / (max_alpha + 1e-9f);
-									float w_obs = alpha_obs  / (max_alpha + 1e-9f);
-
-									float Z = 0.f;
+									float Z=0;
 
 									for(int c=0;c<numLabels;c++)
 									{
-										float obs_smoothed = (1-beta)*obs[c] + beta*uniform;
+										float max_alpha = std::max(fused_alpha[c], alpha_obs[c]);
 
-										fused[c] = std::exp(w_cur * std::log(fused[c] + 1e-9f) + w_obs * std::log(obs_smoothed + 1e-9f) );
-											//std::pow(fused[c], w_cur) *
-											//std::pow(obs[c],   w_obs);
+										float w_cur = fused_alpha[c]/(max_alpha+1e-9f);
+										float w_obs = alpha_obs[c]/(max_alpha+1e-9f);
+
+										float obs_smoothed =
+											(1-beta)*obs[c] + beta*uniform;
+
+										fused[c] =
+											std::exp(
+												w_cur*std::log(fused[c]+1e-9f)
+											+ w_obs*std::log(obs_smoothed+1e-9f)
+											);
 
 										Z += fused[c];
 									}
@@ -1950,7 +1993,10 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 									for(int c=0;c<numLabels;c++)
 										fused[c] *= invZ;
 
-									fused_alpha = std::max(fused_alpha, alpha_obs);
+									// update alpha vector
+									for(int c=0;c<numLabels;c++)
+										fused_alpha[c] =
+											std::max(fused_alpha[c], alpha_obs[c]);
 								}
 								probabs_weight_dirichlet = fused;
 								bestVal_weight_dirichlet = probabs_weight_dirichlet[0];
