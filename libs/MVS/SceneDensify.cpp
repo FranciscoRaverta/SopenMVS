@@ -1661,8 +1661,12 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							sumOnes[c] += 1;
 						}
 					}
+
+					std::vector<float> alpha_vec(numLabels);
+					for(int c=0;c<numLabels;c++)
+						alpha_vec[c] = alpha_weighted * probs[c];
 					obs_probs.emplace_back(probs, probs + numLabels);
-    				obs_alpha.push_back(alpha_weighted);
+					obs_alpha.emplace_back(alpha_vec, alpha_vec + numLabels);
 					numViewsUsed++;
 				}
 				PointCloud::Normal N(normal*confidence);
@@ -1735,7 +1739,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								for(int c=0;c<numLabels;c++)
     								alpha_vec[c] = alpha_weighted * probsB[c];
 								obs_probs.emplace_back(probsB, probsB + numLabels);
-    							obs_alpha.push_back(std::move(alpha_vec));
+    							obs_alpha.emplace_back(alpha_vec, alpha_vec + numLabels);
 								numViewsUsed++;
 							}
 							if (bEstimateNormal)
@@ -1966,7 +1970,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								for(size_t k=1;k<obs_probs.size();k++)
 								{
 									const auto& obs = obs_probs[k];
-									const auto& alpha_obs = obs_alpha_vec[k];
+									const auto& alpha_obs = obs_alpha[k];
 
 									float Z=0;
 
