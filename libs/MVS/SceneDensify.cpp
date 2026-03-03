@@ -1986,8 +1986,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						}
 						//} 
 						per_point_probabilities.emplace_back(probabs_weight_dirichlet);
-						//pointcloud.segmentations.emplace_back(modeColor);
-						pointcloud.segmentations.emplace_back(bestLabel);
+						pointcloud.segmentations.emplace_back(modeColor);
+						//pointcloud.segmentations.emplace_back(bestLabel);
 						pointcloud.segmentationConfidences.emplace_back(segConfidence);
 						//pixelConfidence = std::exp(sumLogsConfidence[modeColor] / logNumber);
 						//pointcloud.segmentationConfidencesExtended.emplace_back(segConfidence * pixelConfidence); }
