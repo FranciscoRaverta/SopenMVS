@@ -258,7 +258,7 @@ bool Scene::SaveInterface(const String & fileName, int version) const
 			p.R = pose.R;
 			p.C = pose.C;
 			p.Cov = pose.Cov;
-			std::cout << "Covariances2 - FRAN \n" << pose.Cov << std::endl;  
+			//std::cout << "Covariances2 - FRAN \n" << pose.Cov << std::endl;  
 			plat.poses.emplace_back(p);
 		}
 		obj.platforms.emplace_back(std::move(plat));
