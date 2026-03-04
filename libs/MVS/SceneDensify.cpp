@@ -1515,7 +1515,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 		connection.idx = i;
 		connection.score = (float)scene.images[i].neighbors.GetSize();
 		//nPointsEstimate += ROUND2INT(depthData.depthMap.area()*(0.5f/*valid*/*0.3f/*new*/));
-		nPointsEstimate += ROUND2INT(depthData.depthMap.area()*(0.5f/*valid*/*0.5f/*new*/));
+		nPointsEstimate += ROUND2INT(depthData.depthMap.area()*(1.0f/*valid*/*1.0f/*new*/));
 		if (depthData.normalMap.empty())
 			bNormalMap = false;
 	}
