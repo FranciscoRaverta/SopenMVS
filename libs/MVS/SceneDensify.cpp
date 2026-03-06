@@ -1777,8 +1777,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							idxPointB = idxPoint;
 
 							// CALL TO COVARIANCE FUNCTION - FRAN
-							const Platform& platformB = scene.platforms[imageDataB.platformID];
-							const Pose& poseB = platformB.poses[imageDataB.poseID];
+							const MVS::Platform& platformB = scene.platforms[imageDataB.platformID];
+							const MVS::Platform::Pose& poseB = platformB.poses[imageDataB.poseID];
 							CovMatrix C_poseB = poseB.Cov;
 							poseCovariance += PoseCovarianceEstimation(imageDataB.camera, depthB, Point2f(xB), C_poseB)*REAL(confidenceB)*REAL(confidenceB);
 
@@ -1879,7 +1879,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					point = X*nrm;
 
 					// FRAN
-					Eigen::Matrix3d X_covariance = poseCovariance * nrm * nrm;
+					SEACAVE::Matrix3x3d X_covariance = poseCovariance * nrm * nrm;
 					double X_trace = X_covariance.trace();
 					pointcloud.covarianceTraces.emplace_back(X_trace);
 					std::cout << "Trace: " << X_trace << std::endl;
