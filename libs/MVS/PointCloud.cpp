@@ -313,7 +313,8 @@ namespace BasicPLY {
 		PointCloud::SegmentationUncertaintyGeometricMean segUncGeometricMean;
 		PointCloud::SegmentationUncertaintySumProbabilities segUncSumProbabilities;
 		PointCloud::SegmentationUncertaintyDirichlet segUncDirichlet;
-		PointCloud::SegmentationUncertaintyWeightedDirichlet segUncWeightedDirichlet;
+		PointCloud::SegmentationUncertaintyWeightedDirichlet segUncWeightedDirichlet
+		PointCloud::CovarianceTraces segCovarianceTraces;
 		struct Views {
 			uint8_t num;
 			uint32_t* pIndices;

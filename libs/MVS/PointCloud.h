@@ -105,6 +105,9 @@ public:
 	
 	typedef float SegmentationUncertaintyWeightedDirichlet;
 	typedef CLISTDEF0IDX(SegmentationUncertaintyWeightedDirichlet,Index) SegmentationUncWeightedDirichletArr;
+	
+	typedef float CovarianceTraces;
+	typedef CLISTDEF0IDX(CovarianceTraces,Index) CovarianceTracesArr;
 
 	typedef AABB3f Box;
 
