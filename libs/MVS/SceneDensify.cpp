@@ -1476,7 +1476,7 @@ void DepthMapsData::ApplyDenseCRF3D(
     }
 }
 
-SEACAVE::Matrix3x3d PoseCovarianceEstimation(Camera& camera, double depth, SEACAVE::Point2f point2d, SEACAVE::CovMatrix C_pose)
+SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera camera, double depth, SEACAVE::Point2f point2d, SEACAVE::CovMatrix C_pose)
 {
 	KMatrix K = camera.K;
 	RMatrix R = camera.R;
