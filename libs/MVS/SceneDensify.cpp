@@ -1476,7 +1476,7 @@ void DepthMapsData::ApplyDenseCRF3D(
     }
 }
 
-Eigen::Matrix3x3d PoseCovarianceEstimation(Camera camera, Depth depth, TPoint2 x, CovMatrix C_pose)
+Eigen::Matrix<double,3,3> PoseCovarianceEstimation(Camera camera, Depth depth, TPoint2 x, CovMatrix C_pose)
 {
 	KMatrix K = camera.K;
 	RMatrix R = camera.R;
@@ -1489,11 +1489,11 @@ Eigen::Matrix3x3d PoseCovarianceEstimation(Camera camera, Depth depth, TPoint2 x
 
 	// J = [J_t J_R J_d J_u] with X = R^T d K^-1 u_h + t , where d is depth, u_h is the expanded (u,v,1) vector 
 	// Compute J_t = dX/dt = I_3x3
-	J.block<3,3>(0,0) = Eigen::Matrix3x3::Identity();
+	J.block<3,3>(0,0) = Eigen::Matrix<double,3,3>::Identity();
 
 	// Compute J_R = dX/dR = 
 	Eigen::Vector3d Y = R.t() * depth * K.inv() * u_h;
-	Eigen::Matrix3d skew;
+	Eigen::Matrix<double,3,3> skew;
 	skew <<  0,      Y.z(),  -Y.y(),
 		     -Y.z(), 0,      Y.x(),
 		     Y.y(),  -Y.x(), 0;
@@ -1665,7 +1665,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				// CALL TO COVARIANCE FUNCTION - FRAN
 				const MVS::Platform& platform = scene.platforms[imageData.platformID];
 				const MVS::Platform::Pose& pose = platform.poses[imageData.poseID];
-				Eigen::Matrix<double,6,6> C_pose = pose.Cov;
+				CovMatrix C_pose = pose.Cov;
 				Eigen::Matrix<double,3,3> poseCovariance = PoseCovarianceEstimation(imageData.camera, depth, Point2f(x), C_pose)*REAL(confidence)*REAL(confidence);
 				
 				// check the projection in the neighbor depth-maps
