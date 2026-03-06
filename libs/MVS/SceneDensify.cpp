@@ -1476,7 +1476,7 @@ void DepthMapsData::ApplyDenseCRF3D(
     }
 }
 
-Eigen::Matrix<double,3,3> PoseCovarianceEstimation(Camera camera, Depth depth, TPoint2 x, CovMatrix C_pose)
+SEACAVE::Matrix3x3d PoseCovarianceEstimation(Camera& camera, double depth, SEACAVE::TPoint2 x, SEACAVE::CovMatrix C_pose)
 {
 	KMatrix K = camera.K;
 	RMatrix R = camera.R;
@@ -1484,16 +1484,16 @@ Eigen::Matrix<double,3,3> PoseCovarianceEstimation(Camera camera, Depth depth, T
 
 	Point3 u_h(x.x, x.y, 1.0);
 
-	Eigen::Matrix<double,3,9> = J;
+	SEACAVE::JacobianMatrix = J;
 	J.setZero();
 
 	// J = [J_t J_R J_d J_u] with X = R^T d K^-1 u_h + t , where d is depth, u_h is the expanded (u,v,1) vector 
 	// Compute J_t = dX/dt = I_3x3
-	J.block<3,3>(0,0) = Eigen::Matrix<double,3,3>::Identity();
+	J.block<3,3>(0,0) = SEACAVE::Matrix3x3d::Identity();
 
 	// Compute J_R = dX/dR = 
-	Eigen::Vector3d Y = R.t() * depth * K.inv() * u_h;
-	Eigen::Matrix<double,3,3> skew;
+	SEACAVE::Vec3d Y = R.t() * depth * K.inv() * u_h;
+	SEACAVE::Matrix3x3d skew;
 	skew <<  0,      Y.z(),  -Y.y(),
 		     -Y.z(), 0,      Y.x(),
 		     Y.y(),  -Y.x(), 0;
@@ -1504,14 +1504,14 @@ Eigen::Matrix<double,3,3> PoseCovarianceEstimation(Camera camera, Depth depth, T
 	J.block<3,1>(0,6) = R.t() * K.inv() * u_h;
 
 	// Compute J_u = dX/du 
-	Eigen::Vector3d Ju = R.t() * depth * K.inv().col(0);
-	Eigen::Vector3d Jv = R.t() * depth * K.inv().col(1);
+	SEACAVE::Vec3d Ju = R.t() * depth * K.inv().col(0);
+	SEACAVE::Vec3d Jv = R.t() * depth * K.inv().col(1);
 
 	J.block<3,1>(0,7) = Ju;
 	J.block<3,1>(0,8) = Jv;
 
 	// Now we build the Full Covariance Matrix, C_theta, such that C_X = J C J^T 
-	Eigen::Matrix<double,9,9> C_theta;
+	SEACAVE::CovMatrixBig C_theta;
 	C_theta.setZero();
 
 	C_theta.block<6,6>(0,0) = C_pose;
@@ -1525,7 +1525,7 @@ Eigen::Matrix<double,3,3> PoseCovarianceEstimation(Camera camera, Depth depth, T
 	C_theta(8,8) = sigma_px * sigma_px;
 
 	// Compute C_pose
-	Eigen::Matrix<double,3,3> C_out = J * C_theta * J.t();
+	SEACAVE::Matrix3x3d C_out = J * C_theta * J.t();
 	return C_out;
 }
 
@@ -1666,7 +1666,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				const MVS::Platform& platform = scene.platforms[imageData.platformID];
 				const MVS::Platform::Pose& pose = platform.poses[imageData.poseID];
 				CovMatrix C_pose = pose.Cov;
-				Eigen::Matrix<double,3,3> poseCovariance = PoseCovarianceEstimation(imageData.camera, depth, Point2f(x), C_pose)*REAL(confidence)*REAL(confidence);
+				SEACAVE::Matrix3x3d poseCovariance = PoseCovarianceEstimation(imageData.camera, depth, Point2f(x), C_pose)*REAL(confidence)*REAL(confidence);
 				
 				// check the projection in the neighbor depth-maps
 				Point3 X(point*confidence);
@@ -1769,7 +1769,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							// CALL TO COVARIANCE FUNCTION - FRAN
 							const Platform& platformB = scene.platforms[imageDataB.platformID];
 							const Pose& poseB = platformB.poses[imageDataB.poseID];
-							Eigen::Matrix<double,6,6> C_poseB = poseB.Cov;
+							CovMatrix C_poseB = poseB.Cov;
 							poseCovariance += PoseCovarianceEstimation(imageDataB.camera, depthB, Point2f(xB), C_poseB)*REAL(confidenceB)*REAL(confidenceB);
 
 							X += imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB))*REAL(confidenceB);
