@@ -1476,7 +1476,7 @@ void DepthMapsData::ApplyDenseCRF3D(
     }
 }
 
-SEACAVE::Matrix3x3d PoseCovarianceEstimation(Camera& camera, double depth, SEACAVE::TPoint2 point2d, SEACAVE::CovMatrix C_pose)
+SEACAVE::Matrix3x3d PoseCovarianceEstimation(Camera& camera, double depth, SEACAVE::Point2f point2d, SEACAVE::CovMatrix C_pose)
 {
 	KMatrix K = camera.K;
 	RMatrix R = camera.R;
@@ -1489,7 +1489,7 @@ SEACAVE::Matrix3x3d PoseCovarianceEstimation(Camera& camera, double depth, SEACA
 
 	// J = [J_t J_R J_d J_u] with X = R^T d K^-1 u_h + t , where d is depth, u_h is the expanded (u,v,1) vector 
 	// Compute J_t = dX/dt = I_3x3
-	J.block<3,3>(0,0) = SEACAVE::Matrix3x3d::Identity();
+	J.block<3,3>(0,0) = SEACAVE::Matrix3x3d::IDENTITY;
 
 	// Compute J_R = dX/dR = 
 	SEACAVE::Vec3d Y = R.t() * depth * K.inv() * u_h;
