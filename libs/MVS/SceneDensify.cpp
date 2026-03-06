@@ -1535,10 +1535,10 @@ SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera camera, double de
 	C_theta(8,8) = sigma_px * sigma_px;
 
 	// Compute C_pose
-	std::cout << "Full Jacobian: \n" << J << std::endl;
-	std::cout << "Full Covariance: \n" << C_theta << std::endl;
+	//std::cout << "Full Jacobian: \n" << J << std::endl;
+	//std::cout << "Full Covariance: \n" << C_theta << std::endl;
 	SEACAVE::Matrix3x3d C_out = J * C_theta * J.t();
-	std::cout << "Point Covariance: \n" << C_out << std::endl;
+	//std::cout << "Point Covariance: \n" << C_out << std::endl;
 	return C_out;
 }
 
@@ -1885,7 +1885,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					SEACAVE::Matrix3x3d X_covariance = poseCovariance * nrm * nrm;
 					double X_trace = X_covariance(0,0) + X_covariance(1,1) + X_covariance(2,2);
 					pointcloud.covarianceTraces.emplace_back(X_trace);
-					std::cout << "Trace: " << X_trace << std::endl;
+					//std::cout << "Trace: " << X_trace << std::endl;
 
 					ASSERT(ISFINITE(point));
 					if (bEstimateColor)
