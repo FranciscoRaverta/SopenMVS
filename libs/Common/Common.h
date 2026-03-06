@@ -227,7 +227,7 @@ typedef TMatrix<double,3,4> Matrix3x4d;
 typedef TMatrix<double,4,4> Matrix4x4d;
 typedef TMatrix<double,6,6> Matrix6x6d;
 typedef TMatrix<double,3,9> Matrix3x9d;
-typedef TMatrix<double,9,9> Matrix3x9d;
+typedef TMatrix<double,9,9> Matrix9x9d;
 
 typedef TSphere<REAL, 2> Sphere2;
 typedef TSphere<REAL, 3> Sphere3;
