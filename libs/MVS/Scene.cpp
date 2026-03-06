@@ -2117,7 +2117,8 @@ void Scene::InitTowerScene(const int towerMode)
 				pointcloud.segmentationUncertaintyGeometricMean.emplace_back(towerPC.segmentationUncertaintyGeometricMean[idxPoint]);
 				pointcloud.segmentationUncertaintySumProbabilities.emplace_back(towerPC.segmentationUncertaintySumProbabilities[idxPoint]);
 				pointcloud.segmentationUncertaintyDirichlet.emplace_back(towerPC.segmentationUncertaintyDirichlet[idxPoint]);
-				pointcloud.segmentationUncertaintyWeightedDirichlet.emplace_back(towerPC.segmentationUncertaintyWeightedDirichlet[idxPoint]); }
+				pointcloud.segmentationUncertaintyWeightedDirichlet.emplace_back(towerPC.segmentationUncertaintyWeightedDirichlet[idxPoint]); 
+				pointcloud.covarianceTraces.emplace_back(towerPC.covarianceTraces[idxPoint]); }
 			if (bHasWeights)
 				pointcloud.pointWeights.emplace_back(towerPC.pointWeights[idxPoint]);
 		}
@@ -2156,7 +2157,8 @@ void Scene::InitTowerScene(const int towerMode)
 				pointcloud.segmentationUncertaintyGeometricMean.emplace_back(towerPC.segmentationUncertaintyGeometricMean[idxPoint]);
 				pointcloud.segmentationUncertaintySumProbabilities.emplace_back(towerPC.segmentationUncertaintySumProbabilities[idxPoint]);
 				pointcloud.segmentationUncertaintyDirichlet.emplace_back(towerPC.segmentationUncertaintyDirichlet[idxPoint]);
-				pointcloud.segmentationUncertaintyWeightedDirichlet.emplace_back(towerPC.segmentationUncertaintyWeightedDirichlet[idxPoint]);}
+				pointcloud.segmentationUncertaintyWeightedDirichlet.emplace_back(towerPC.segmentationUncertaintyWeightedDirichlet[idxPoint]);
+				pointcloud.covarianceTraces.emplace_back(towerPC.covarianceTraces[idxPoint]);}
 			if (bHasWeights)
 				pointcloud.pointWeights.emplace_back(towerPC.pointWeights[idxPoint]);
 		}

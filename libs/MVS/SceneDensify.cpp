@@ -1333,7 +1333,8 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 		pointcloud.segmentationUncertaintyGeometricMean.reserve(nPointsEstimate);
 		pointcloud.segmentationUncertaintySumProbabilities.reserve(nPointsEstimate);
 		pointcloud.segmentationUncertaintyDirichlet.reserve(nPointsEstimate);
-		pointcloud.segmentationUncertaintyWeightedDirichlet.reserve(nPointsEstimate); }
+		pointcloud.segmentationUncertaintyWeightedDirichlet.reserve(nPointsEstimate);
+		pointcloud.covarianceTraces.reserve(nPointsEstimate); }
 	Util::Progress progress(_T("Merged depth-maps"), arrDepthData.size());
 	GET_LOGCONSOLE().Pause();
 	FOREACH(idxImage, arrDepthData) {
@@ -1372,7 +1373,8 @@ void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, 
 					pointcloud.segmentationUncertaintyGeometricMean.emplace_back(0.f);
 					pointcloud.segmentationUncertaintySumProbabilities.emplace_back(0.f);
 					pointcloud.segmentationUncertaintyDirichlet.emplace_back(0.f);
-					pointcloud.segmentationUncertaintyWeightedDirichlet.emplace_back(0.f); }
+					pointcloud.segmentationUncertaintyWeightedDirichlet.emplace_back(0.f);
+					pointcloud.covarianceTraces.emplace_back(0.f); }
 				if (bEstimateNormal)
 					depthData.GetNormal(x, pointcloud.normals.emplace_back());
 				++nDepths;
@@ -1474,6 +1476,59 @@ void DepthMapsData::ApplyDenseCRF3D(
     }
 }
 
+Eigen::Matrix3x3d PoseCovarianceEstimation(Camera camera, Depth depth, TPoint2 x, CovMatrix C_pose)
+{
+	KMatrix K = camera.K;
+	RMatrix R = camera.R;
+	CMatrix C = camera.C;
+
+	Point3 u_h(x.x, x.y, 1.0);
+
+	Eigen::Matrix<double,3,9> = J;
+	J.setZero();
+
+	// J = [J_t J_R J_d J_u] with X = R^T d K^-1 u_h + t , where d is depth, u_h is the expanded (u,v,1) vector 
+	// Compute J_t = dX/dt = I_3x3
+	J.block<3,3>(0,0) = Eigen::Matrix3x3::Identity();
+
+	// Compute J_R = dX/dR = 
+	Eigen::Vector3d Y = R.t() * depth * K.inv() * u_h;
+	Eigen::Matrix3d skew;
+	skew <<  0,      Y.z(),  -Y.y(),
+		     -Y.z(), 0,      Y.x(),
+		     Y.y(),  -Y.x(), 0;
+
+	J.block<3,3>(0,3) = skew;
+
+	// Compute J_d = dX/dd = R^T K^-1 u_h
+	J.block<3,1>(0,6) = R.t() * K.inv() * u_h;
+
+	// Compute J_u = dX/du 
+	Eigen::Vector3d Ju = R.t() * depth * K.inv().col(0);
+	Eigen::Vector3d Jv = R.t() * depth * K.inv().col(1);
+
+	J.block<3,1>(0,7) = Ju;
+	J.block<3,1>(0,8) = Jv;
+
+	// Now we build the Full Covariance Matrix, C_theta, such that C_X = J C J^T 
+	Eigen::Matrix<double,9,9> C_theta;
+	C_theta.setZero();
+
+	C_theta.block<6,6>(0,0) = C_pose;
+
+	double sigma_d = 0.01 * depth;
+	C_theta(6,6) = sigma_d * sigma_d;
+
+	// Pixel variance (example 0.5 pixel)
+	double sigma_px = 0.5;
+	C_theta(7,7) = sigma_px * sigma_px;
+	C_theta(8,8) = sigma_px * sigma_px;
+
+	// Compute C_pose
+	Eigen::Matrix3x3d C_out = J * C_theta * J.t();
+	return C_out;
+}
+
 void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, bool bEstimateNormal, bool bEstimateSegmentation)
 {
 	TD_TIMER_STARTD();
@@ -1549,7 +1604,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 		pointcloud.segmentationUncertaintyGeometricMean.Reserve(nPointsEstimate);
 		pointcloud.segmentationUncertaintySumProbabilities.Reserve(nPointsEstimate);
 		pointcloud.segmentationUncertaintyDirichlet.Reserve(nPointsEstimate);
-		pointcloud.segmentationUncertaintyWeightedDirichlet.Reserve(nPointsEstimate); }
+		pointcloud.segmentationUncertaintyWeightedDirichlet.Reserve(nPointsEstimate); 
+		pointcloud.covarianceTraces.Reserve(nPointsEstimate); }
 	if (bEstimateNormal)
 		pointcloud.normals.Reserve(nPointsEstimate);
 	Util::Progress progress(_T("Fused depth-maps"), connections.GetSize());
@@ -1605,6 +1661,13 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				pointProjs.Insert(Proj(x));
 				const PointCloud::Normal normal(bNormalMap ? Cast<Normal::Type>(imageData.camera.R.t()*Cast<REAL>(depthData.normalMap(x))) : Normal(0,0,-1));
 				ASSERT(ISEQUAL(norm(normal), 1.f));
+				
+				// CALL TO COVARIANCE FUNCTION - FRAN
+				const Platform& platform = scene.platforms[imageData.platformID];
+				const Pose& pose = platform.poses[imageData.poseID];
+				Eigen::Matrix<double,6,6> C_pose = pose.Cov;
+				Eigen::Matrix3x3d poseCovariance = PoseCovarianceEstimation(imageData.camera, depth, Point2f(x), C_pose)*REAL(confidence)*REAL(confidence);
+				
 				// check the projection in the neighbor depth-maps
 				Point3 X(point*confidence);
 				Pixel32F C(Cast<float>(imageData.image(x))*confidence);
@@ -1702,6 +1765,13 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							weights.InsertAt(idx, confidenceB);
 							pointProjs.InsertAt(idx, Proj(xB));
 							idxPointB = idxPoint;
+
+							// CALL TO COVARIANCE FUNCTION - FRAN
+							const Platform& platformB = scene.platforms[imageDataB.platformID];
+							const Pose& poseB = platformB.poses[imageDataB.poseID];
+							Eigen::Matrix<double,6,6> C_poseB = poseB.Cov;
+							poseCovariance += PoseCovarianceEstimation(imageDataB.camera, depthB, Point2f(xB), C_poseB)*REAL(confidenceB)*REAL(confidenceB);
+
 							X += imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB))*REAL(confidenceB);
 							if (bEstimateColor)
 								C += Cast<float>(imageDataB.image(xB))*confidenceB;
@@ -1797,6 +1867,13 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					// this point is valid, store it
 					const REAL nrm(REAL(1)/confidence);
 					point = X*nrm;
+
+					// FRAN
+					Eigen::Matrix3d X_covariance = poseCovariance * nrm * nrm;
+					double X_trace = X_covariance.trace();
+					pointcloud.covarianceTraces.emplace_back(X_trace);
+					std::cout << "Trace: " << X_trace << std::endl;
+
 					ASSERT(ISFINITE(point));
 					if (bEstimateColor)
 						pointcloud.colors.emplace_back((C*(float)nrm).cast<uint8_t>());
@@ -2803,7 +2880,8 @@ void Scene::PointCloudFilter(int thRemove)
 					pc.segmentationUncertaintyGeometricMean.push_back(pointcloud.segmentationUncertaintyGeometricMean[idxPoint]);
 					pc.segmentationUncertaintySumProbabilities.push_back(pointcloud.segmentationUncertaintySumProbabilities[idxPoint]);
 					pc.segmentationUncertaintyDirichlet.push_back(pointcloud.segmentationUncertaintyDirichlet[idxPoint]);
-					pc.segmentationUncertaintyWeightedDirichlet.push_back(pointcloud.segmentationUncertaintyWeightedDirichlet[idxPoint]);}
+					pc.segmentationUncertaintyWeightedDirichlet.push_back(pointcloud.segmentationUncertaintyWeightedDirichlet[idxPoint]);
+					pc.covarianceTraces.push_back(pointcloud.covarianceTraces[idxPoint]);}
 			}
 		}
 		pc.Save(MAKE_PATH("scene_dense_outliers.ply"));

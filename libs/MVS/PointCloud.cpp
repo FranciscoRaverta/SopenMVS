@@ -60,6 +60,7 @@ PointCloud& MVS::PointCloud::Swap(PointCloud& rhs)
 	segmentationUncertaintySumProbabilities.Swap(rhs.segmentationUncertaintySumProbabilities);
 	segmentationUncertaintyDirichlet.Swap(rhs.segmentationUncertaintyDirichlet);
 	segmentationUncertaintyWeightedDirichlet.Swap(rhs.segmentationUncertaintyWeightedDirichlet);
+	covarianceTraces.Swap(rhs.covarianceTraces);
 	return *this;
 }
 /*----------------------------------------------------------------*/
@@ -83,6 +84,7 @@ void PointCloud::Release()
 	segmentationUncertaintySumProbabilities.Release();
 	segmentationUncertaintyDirichlet.Release();
 	segmentationUncertaintyWeightedDirichlet.Release();
+	covarianceTraces.Release();
 }
 /*----------------------------------------------------------------*/
 
@@ -137,6 +139,9 @@ void PointCloud::RemovePoint(IDX idx)
 	ASSERT(segmentationUncertaintyWeightedDirichlet.IsEmpty() || segmentationUncertaintyWeightedDirichlet.GetSize() == points.GetSize());
 	if (!segmentationUncertaintyWeightedDirichlet.IsEmpty())
 		segmentationUncertaintyWeightedDirichlet.RemoveAt(idx);
+	ASSERT(covarianceTraces.IsEmpty() || covarianceTraces.GetSize() == points.GetSize());
+	if (!covarianceTraces.IsEmpty())
+		covarianceTraces.RemoveAt(idx);
 	points.RemoveAt(idx);
 }
 void PointCloud::RemovePointsOutside(const OBB3f& obb) {
@@ -328,7 +333,8 @@ namespace BasicPLY {
 			PointCloud::SegmentationUncGeometricMeanArr& segmentationUncertaintyGeometricMean, 
 			PointCloud::SegmentationUncSumProbabilitiesArr& segmentationUncertaintySumProbabilities, 
 			PointCloud::SegmentationUncDirichletArr& segmentationUncertaintyDirichlet, 
-			PointCloud::SegmentationUncWeightedDirichletArr& segmentationUncertaintyWeightedDirichlet, 
+			PointCloud::SegmentationUncWeightedDirichletArr& segmentationUncertaintyWeightedDirichlet,
+			PointCloud::CovarianceTracesArr& covarianceTraces,
 			PointCloud::PointViewArr& views, PointCloud::PointWeightArr& weights)
 		{
 			PLY::PlyElement* elm = ply.find_element(elem_names[0]);
@@ -340,7 +346,7 @@ namespace BasicPLY {
 				switch (p) {
 				case 0: points.resize((IDX)elem_count); break;
 				//case 3: case 13: colors.resize((IDX)elem_count); break;
-				case 3: case 24: colors.resize((IDX)elem_count); break;
+				case 3: case 25: colors.resize((IDX)elem_count); break;
 				case 6: normals.resize((IDX)elem_count); break;
 				case 9: segmentations.resize((IDX)elem_count); break;
 				case 10: segmentationConfidences.resize((IDX)elem_count);break;
@@ -354,8 +360,9 @@ namespace BasicPLY {
 				case 19: segmentationUncertaintySumProbabilities.resize((IDX)elem_count);break;
 				case 20: segmentationUncertaintyDirichlet.resize((IDX)elem_count);break;
 				case 21: segmentationUncertaintyWeightedDirichlet.resize((IDX)elem_count);break;
-				case 22: views.resize((IDX)elem_count); break;
-				case 23: weights.resize((IDX)elem_count); break;
+				case 22: covarianceTraces.resize((IDX)elem_count);break;
+				case 23: views.resize((IDX)elem_count); break;
+				case 24: weights.resize((IDX)elem_count); break;
 				}
 			}
 		}
@@ -415,6 +422,7 @@ namespace BasicPLY {
 		{"segmentationUncertaintySumProbabilities",  	PLY::Float32, PLY::Float32, offsetof(Vertex,segUncSumProbabilities), 0, 0, 0, 0},
 		{"segmentationUncertaintyDirichlet",  			PLY::Float32, PLY::Float32, offsetof(Vertex,segUncDirichlet), 0, 0, 0, 0},
 		{"segmentationUncertaintyWeightedDirichlet",  	PLY::Float32, PLY::Float32, offsetof(Vertex,segUncWeightedDirichlet), 0, 0, 0, 0},
+		{"covarianceTraces",  							PLY::Float32, PLY::Float32, offsetof(Vertex,segCovarianceTraces), 0, 0, 0, 0},
 		{"views",         								PLY::Uint8,   PLY::Uint8,   offsetof(Vertex,views.num), 0, 0, 0, 0}
 		//{"view_indices",  PLY::Uint32,  PLY::Uint32,  offsetof(Vertex,views.pIndices), 1, PLY::Uint8, PLY::Uint8, offsetof(Vertex,views.num)},
 		//{"view_weights",  PLY::Float32, PLY::Float32, offsetof(Vertex,views.pWeights), 1, PLY::Uint8, PLY::Uint8, offsetof(Vertex,views.num)},
@@ -453,7 +461,7 @@ bool PointCloud::Load(const String& fileName)
 				segmentationConfidencesRecursiveBayesian, segmentationConfidencesGeometricMean, segmentationConfidencesSumProbabilities,
 				segmentationConfidencesDirichlet, segmentationConfidencesWeightedDirichlet, segmentationUncertaintyRecursiveBayesian,
 				segmentationUncertaintyGeometricMean, segmentationUncertaintySumProbabilities, segmentationUncertaintyDirichlet, 
-				segmentationUncertaintyWeightedDirichlet, pointViews, pointWeights);
+				segmentationUncertaintyWeightedDirichlet, covarianceTraces, pointViews, pointWeights);
 			BasicPLY::Vertex vertex;
 			for (int v=0; v<elem_count; ++v) {
 				ply.get_element(&vertex);
@@ -486,6 +494,8 @@ bool PointCloud::Load(const String& fileName)
 					segmentationUncertaintyDirichlet[v] = vertex.segUncDirichlet;
 				if (!segmentationUncertaintyWeightedDirichlet.empty())
 					segmentationUncertaintyWeightedDirichlet[v] = vertex.segUncWeightedDirichlet;
+				if (!covarianceTraces.empty())
+					covarianceTraces[v] = vertex.segCovarianceTraces;
 				if (!pointViews.empty()) {
 					ViewArr pv(vertex.views.num, vertex.views.pIndices);
 					pointViews[v].CopyOfRemove(pv);
@@ -552,7 +562,8 @@ bool PointCloud::Save(const String& fileName, bool bViews, bool bLegacyTypes, bo
 			vertex.segUncGeometricMean = segmentationUncertaintyGeometricMean[i];
 			vertex.segUncSumProbabilities = segmentationUncertaintySumProbabilities[i];
 			vertex.segUncDirichlet = segmentationUncertaintyDirichlet[i];
-			vertex.segUncWeightedDirichlet = segmentationUncertaintyWeightedDirichlet[i];}
+			vertex.segUncWeightedDirichlet = segmentationUncertaintyWeightedDirichlet[i];
+			vertex.segCovarianceTraces = covarianceTraces[i];}
 		if (!pointViews.empty()) {
 			vertex.views.num = pointViews[i].size();
 			vertex.views.pIndices = pointViews[i].data();
@@ -610,6 +621,7 @@ bool PointCloud::SaveNViews(const String& fileName, uint32_t minViews, bool bLeg
 			vertex.segUncSumProbabilities = segmentationUncertaintySumProbabilities[i];
 			vertex.segUncDirichlet = segmentationUncertaintyDirichlet[i];
 			vertex.segUncWeightedDirichlet = segmentationUncertaintyWeightedDirichlet[i];
+			vertex.segCovarianceTraces = covarianceTraces[i];
 			ply.put_element(&vertex);
 		}
 	} else {
@@ -636,6 +648,7 @@ bool PointCloud::SaveNViews(const String& fileName, uint32_t minViews, bool bLeg
 			vertex.segUncSumProbabilities = segmentationUncertaintySumProbabilities[i];
 			vertex.segUncDirichlet = segmentationUncertaintyDirichlet[i];
 			vertex.segUncWeightedDirichlet = segmentationUncertaintyWeightedDirichlet[i];
+			vertex.segCovarianceTraces = covarianceTraces[i];
 			vertex.views.num = pointViews[i].size();
 			ply.put_element(&vertex);
 		}
@@ -692,7 +705,8 @@ bool PointCloud::SaveWithScale(const String& fileName, const ImageArr& images, f
 			vertex.segUncGeometricMean = segmentationUncertaintyGeometricMean[i];
 			vertex.segUncSumProbabilities = segmentationUncertaintySumProbabilities[i];
 			vertex.segUncDirichlet = segmentationUncertaintyDirichlet[i];
-			vertex.segUncWeightedDirichlet = segmentationUncertaintyWeightedDirichlet[i];}
+			vertex.segUncWeightedDirichlet = segmentationUncertaintyWeightedDirichlet[i];
+			vertex.segCovarianceTraces = covarianceTraces[i];}
 		#if 0
 		// one sample per view
 		vertex.confidence = 1;

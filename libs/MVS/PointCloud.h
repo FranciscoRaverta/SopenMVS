@@ -128,6 +128,7 @@ public:
 	SegmentationUncSumProbabilitiesArr segmentationUncertaintySumProbabilities;
 	SegmentationUncDirichletArr segmentationUncertaintyDirichlet;
 	SegmentationUncWeightedDirichletArr segmentationUncertaintyWeightedDirichlet;
+	CovarianceTracesArr covarianceTraces;
 
 public:
 	PointCloud& Swap(PointCloud&);
@@ -177,6 +178,7 @@ public:
 		ar & segmentationUncertaintySumProbabilities;
 		ar & segmentationUncertaintyDirichlet;
 		ar & segmentationUncertaintyWeightedDirichlet;
+		ar & covarianceTraces;
 	}
 	#endif
 };
