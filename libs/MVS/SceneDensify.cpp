@@ -1484,8 +1484,8 @@ SEACAVE::Matrix3x3d PoseCovarianceEstimation(Camera& camera, double depth, SEACA
 
 	Point3 u_h(point2d.x, point2d.y, 1.0);
 
-	SEACAVE::JacobianMatrix J;
-	J.setZero();
+	SEACAVE::JacobianMatrix J = SEACAVE::JacobianMatrix::ZERO;
+	//J.setZero();
 
 	// J = [J_t J_R J_d J_u] with X = R^T d K^-1 u_h + t , where d is depth, u_h is the expanded (u,v,1) vector 
 	// Compute J_t = dX/dt = I_3x3
@@ -1494,9 +1494,9 @@ SEACAVE::Matrix3x3d PoseCovarianceEstimation(Camera& camera, double depth, SEACA
 	// Compute J_R = dX/dR = 
 	SEACAVE::Vec3d Y = R.t() * depth * K.inv() * u_h;
 	SEACAVE::Matrix3x3d skew;
-	skew <<  0,      Y.z(),  -Y.y(),
-		     -Y.z(), 0,      Y.x(),
-		     Y.y(),  -Y.x(), 0;
+	skew <<  0,      Y(1,1),  -Y(1,1),
+		     -Y(1,2), 0,      Y(1,0),
+		     Y(1,1),  -Y(1,0), 0;
 
 	J.block<3,3>(0,3) = skew;
 
@@ -1511,8 +1511,8 @@ SEACAVE::Matrix3x3d PoseCovarianceEstimation(Camera& camera, double depth, SEACA
 	J.block<3,1>(0,8) = Jv;
 
 	// Now we build the Full Covariance Matrix, C_theta, such that C_X = J C J^T 
-	SEACAVE::CovMatrixBig C_theta;
-	C_theta.setZero();
+	SEACAVE::CovMatrixBig C_theta = SEACAVE::CovMatrixBig::ZERO;
+	//C_theta.setZero();
 
 	C_theta.block<6,6>(0,0) = C_pose;
 
