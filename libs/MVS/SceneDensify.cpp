@@ -1535,7 +1535,10 @@ SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera camera, double de
 	C_theta(8,8) = sigma_px * sigma_px;
 
 	// Compute C_pose
+	std::cout << "Full Jacobian: \n" << J << std::endl;
+	std::cout << "Full Covariance: \n" << C_theta << std::endl;
 	SEACAVE::Matrix3x3d C_out = J * C_theta * J.t();
+	std::cout << "Point Covariance: \n" << C_out << std::endl;
 	return C_out;
 }
 
