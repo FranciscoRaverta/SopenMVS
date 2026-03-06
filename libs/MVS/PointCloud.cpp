@@ -393,9 +393,10 @@ namespace BasicPLY {
 				ply.describe_property(elem_names[0],props[17]);
 				ply.describe_property(elem_names[0],props[18]);
 				ply.describe_property(elem_names[0],props[19]);
-				ply.describe_property(elem_names[0],props[20]); }
+				ply.describe_property(elem_names[0],props[20]);
+				ply.describe_property(elem_names[0],props[21]); }
 			// if (bViews) // ODM: always output "views" in PLY
-			ply.describe_property(elem_names[0], props[21]);
+			ply.describe_property(elem_names[0], props[22]);
 			if (elem_count)
 				ply.element_count(elem_names[0], elem_count);
 		}
