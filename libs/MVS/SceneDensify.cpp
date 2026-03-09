@@ -1783,7 +1783,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							const MVS::Platform& platformB = scene.platforms[imageDataB.platformID];
 							const MVS::Platform::Pose& poseB = platformB.poses[imageDataB.poseID];
 							CovMatrix C_poseB = poseB.Cov;
-							poseCovariance += PoseCovarianceEstimation(imageDataB.camera, depthB, Point2f(xB), C_poseB).inv();*REAL(confidenceB)*REAL(confidenceB);
+							poseCovariance += PoseCovarianceEstimation(imageDataB.camera, depthB, Point2f(xB), C_poseB).inv();//*REAL(confidenceB)*REAL(confidenceB);
 
 							X += imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB))*REAL(confidenceB);
 							if (bEstimateColor)
