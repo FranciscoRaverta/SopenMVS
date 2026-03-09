@@ -1492,7 +1492,7 @@ SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera camera, double de
 	//J.block<3,3>(0,0) = SEACAVE::Matrix3x3d::IDENTITY;
 	for (int i=0; i<3; ++i) {
     	for (int j=0; j<3; ++j) {
-        	J(i,j) = (i==j ? 1.0 : 0.0); }}
+        	J(i,j+3) = (i==j ? 1.0 : 0.0); }}
 
 	// Compute J_R = dX/dR = 
 	SEACAVE::Vec3d Y = R.t() * depth * K.inv() * u_h;
@@ -1503,7 +1503,7 @@ SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera camera, double de
 
 	for (int r=0; r<3; ++r) {
     	for (int c=0; c<3; ++c) {
-        	J(r,c+3) = skew(r,c); }}
+        	J(r,c) = skew(r,c); }}
 
 	// Compute J_d = dX/dd = R^T K^-1 u_h
 	SEACAVE::Vec3d Jd = R.t() * K.inv() * u_h;
