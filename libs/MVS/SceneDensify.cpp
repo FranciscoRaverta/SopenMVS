@@ -1686,7 +1686,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				
 				// check the projection in the neighbor depth-maps
 				Point3 X(point*confidence);
-				Point3 X2(poseCovariance2 * point); // FRAN
+				Point3 X2(poseCovariance2 * SEACAVE::TPoint3<double>(point.x, point.y, point.z)); // FRAN
 				Pixel32F C(Cast<float>(imageData.image(x))*confidence);
 				std::unordered_map<uint8_t, float> segmentationFrequency;
 				uint8_t segmentationColor;
@@ -1791,7 +1791,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							poseCovariance2 += PoseCovarianceEstimation(imageDataB.camera, depthB, Point2f(xB), C_poseB).inv(); // FRAN
 
 							X += imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB))*REAL(confidenceB);
-							X2 += PoseCovarianceEstimation(imageDataB.camera, depthB, Point2f(xB), C_poseB).inv() * imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB)); // FRAN
+							Point3 pointB = imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB)); //FRAN
+							X2 += PoseCovarianceEstimation(imageDataB.camera, depthB, Point2f(xB), C_poseB).inv() * SEACAVE::TPoint3<double>(pointB.x, pointB.y, pointB.z); // FRAN
 							if (bEstimateColor)
 								C += Cast<float>(imageDataB.image(xB))*confidenceB;
 							if (bEstimateSegmentation) {
