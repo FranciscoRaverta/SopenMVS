@@ -1488,14 +1488,16 @@ SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera camera, double de
 	//J.setZero();
 
 	// J = [J_R J_t J_d J_u] with X = R^T d K^-1 u_h + t , where d is depth, u_h is the expanded (u,v,1) vector 
-	// Compute J_t = dX/dt = I_3x3
+	// Compute J_t = dX/dt = -R^T
 	//J.block<3,3>(0,0) = SEACAVE::Matrix3x3d::IDENTITY;
+	SEACAVE::RMatrix Rt_neg = -R.t();
 	for (int i=0; i<3; ++i) {
     	for (int j=0; j<3; ++j) {
-        	J(i,j+3) = (i==j ? 1.0 : 0.0); }}
+			J(i,j+3) = Rt_neg(i,j); }}
+        	//J(i,j+3) = (i==j ? 1.0 : 0.0); }}
 
 	// Compute J_R = dX/dR = 
-	SEACAVE::Vec3d Y = R.t() * depth * K.inv() * u_h;
+	SEACAVE::Vec3d Y = R.t() * depth * K.inv() * u_h + C;
 	SEACAVE::Matrix3x3d skew;
 	skew(0,0)=0;     skew(0,1)=-Y[2]; skew(0,2)=Y[1];
 	skew(1,0)=Y[2];  skew(1,1)=0;     skew(1,2)=-Y[0];
@@ -1503,7 +1505,7 @@ SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera camera, double de
 
 	for (int r=0; r<3; ++r) {
     	for (int c=0; c<3; ++c) {
-        	J(r,c) = -skew(r,c); }}
+        	J(r,c) = skew(r,c); }}
 
 	// Compute J_d = dX/dd = R^T K^-1 u_h
 	SEACAVE::Vec3d Jd = R.t() * K.inv() * u_h;
@@ -1680,9 +1682,11 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				const MVS::Platform::Pose& pose = platform.poses[imageData.poseID];
 				CovMatrix C_pose = pose.Cov;
 				SEACAVE::Matrix3x3d poseCovariance = (PoseCovarianceEstimation(imageData.camera, depth, Point2f(x), C_pose))*REAL(confidence)*REAL(confidence);
+				SEACAVE::Matrix3x3d poseCovariance2 = (PoseCovarianceEstimation(imageData.camera, depth, Point2f(x), C_pose)).inv();//*REAL(confidence)*REAL(confidence); FRAN
 				
 				// check the projection in the neighbor depth-maps
 				Point3 X(point*confidence);
+				Point3 X2(poseCovariance2 * point); // FRAN
 				Pixel32F C(Cast<float>(imageData.image(x))*confidence);
 				std::unordered_map<uint8_t, float> segmentationFrequency;
 				uint8_t segmentationColor;
@@ -1784,8 +1788,10 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							const MVS::Platform::Pose& poseB = platformB.poses[imageDataB.poseID];
 							CovMatrix C_poseB = poseB.Cov;
 							poseCovariance += (PoseCovarianceEstimation(imageDataB.camera, depthB, Point2f(xB), C_poseB))*REAL(confidenceB)*REAL(confidenceB);
+							poseCovariance2 += PoseCovarianceEstimation(imageDataB.camera, depthB, Point2f(xB), C_poseB).inv(); // FRAN
 
 							X += imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB))*REAL(confidenceB);
+							X2 += PoseCovarianceEstimation(imageDataB.camera, depthB, Point2f(xB), C_poseB).inv() * imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB)); // FRAN
 							if (bEstimateColor)
 								C += Cast<float>(imageDataB.image(xB))*confidenceB;
 							if (bEstimateSegmentation) {
@@ -1884,8 +1890,11 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					// FRAN
 					//SEACAVE::Matrix3x3d X_covariance = (poseCovariance.inv()) * (1/nrm) * (1/nrm);
 					SEACAVE::Matrix3x3d X_covariance = (poseCovariance) * nrm * nrm;
+					SEACAVE::Matrix3x3d X_covariance2 = poseCovariance2.inv(); // FRAN
 					double X_trace = X_covariance(0,0) + X_covariance(1,1) + X_covariance(2,2);
-					pointcloud.covarianceTraces.emplace_back(X_trace);
+					double X_trace2 = X_covariance2(0,0) + X_covariance2(1,1) + X_covariance2(2,2); // FRAN
+					point = X_covariance2 * X2; // FRAN
+					pointcloud.covarianceTraces.emplace_back(X_trace2);
 					//std::cout << "Trace: " << X_trace << std::endl;
 
 					ASSERT(ISFINITE(point));
