@@ -1528,7 +1528,7 @@ SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera camera, double de
 		for (int c=0; c<6; ++c) {
 			C_theta(r,c) = C_pose(r,c); }}
 
-	double sigma_d = 0.01 * depth * std::sqrt(MAXF(1.f-conf,0.03f));;
+	double sigma_d = 0.01 * depth * std::sqrt(MAXF(1.f-depth_confidence,0.03f));;
 	C_theta(6,6) = sigma_d * sigma_d;
 
 	// Pixel variance (example 0.5 pixel)
@@ -1792,7 +1792,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 
 							X += imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB))*REAL(confidenceB);
 							Point3 pointB = imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB)); //FRAN
-							X2 += PoseCovarianceEstimation(imageDataB.camera, depthB, Point2f(xB), C_poseB).inv() * SEACAVE::TPoint3<double>(pointB.x, pointB.y, pointB.z); // FRAN
+							X2 += PoseCovarianceEstimation(imageDataB.camera, depthB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB).inv() * SEACAVE::TPoint3<double>(pointB.x, pointB.y, pointB.z); // FRAN
 							if (bEstimateColor)
 								C += Cast<float>(imageDataB.image(xB))*confidenceB;
 							if (bEstimateSegmentation) {
