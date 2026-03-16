@@ -1479,8 +1479,8 @@ void DepthMapsData::ApplyDenseCRF3D(
 SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera camera, double depth, double depth_confidence, SEACAVE::Point2f point2d, SEACAVE::CovMatrix C_pose)
 {
 	KMatrix K = camera.K;
-	RMatrix R = camera.R;
-	CMatrix C = camera.C;
+	RMatrix R = camera.R; //This is equivalent to Rcw
+	CMatrix C = camera.C; //This is equivalent to tcw
 
 	Point3 u_h(point2d.x, point2d.y, 1.0);
 
@@ -1490,22 +1490,26 @@ SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera camera, double de
 	// J = [J_R J_t J_d J_u] with X = R^T d K^-1 u_h + t , where d is depth, u_h is the expanded (u,v,1) vector 
 	// Compute J_t = dX/dt = -R^T
 	//J.block<3,3>(0,0) = SEACAVE::Matrix3x3d::IDENTITY;
-	SEACAVE::RMatrix Rt_neg = -R.t();
+	SEACAVE::RMatrix Rt = R.t();
 	for (int i=0; i<3; ++i) {
     	for (int j=0; j<3; ++j) {
-			J(i,j+3) = Rt_neg(i,j); }}
+			//J(i,j+3) = Rt_neg(i,j); }}
+			J(i,j+3) = Rt(i,j); }}
         	//J(i,j+3) = (i==j ? 1.0 : 0.0); }}
 
 	// Compute J_R = dX/dR = 
-	SEACAVE::Vec3d Y = R.t() * depth * K.inv() * u_h + C;
+	//SEACAVE::Vec3d Y = R.t() * depth * K.inv() * u_h + C;
+	SEACAVE::Vec3d Y = depth * K.inv() * u_h;
 	SEACAVE::Matrix3x3d skew;
 	skew(0,0)=0;     skew(0,1)=-Y[2]; skew(0,2)=Y[1];
 	skew(1,0)=Y[2];  skew(1,1)=0;     skew(1,2)=-Y[0];
 	skew(2,0)=-Y[1]; skew(2,1)=Y[0];  skew(2,2)=0;
+	SEACAVE::Matrix3x3d R_skew = -R.t() * skew;
 
 	for (int r=0; r<3; ++r) {
     	for (int c=0; c<3; ++c) {
-        	J(r,c) = skew(r,c); }}
+        	//J(r,c) = skew(r,c); }}
+			J(r,c) = R_skew(r,c); }}
 
 	// Compute J_d = dX/dd = R^T K^-1 u_h
 	SEACAVE::Vec3d Jd = R.t() * K.inv() * u_h;
