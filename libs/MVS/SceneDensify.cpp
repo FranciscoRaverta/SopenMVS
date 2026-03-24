@@ -1482,9 +1482,7 @@ double sumBaselines(const MVS::Camera camera, SEACAVE::Point3 P, const ViewScore
 
 	for (const ViewScore& neighbor: neighbors) {
 		const IIndex idxImage(neighbor.ID);
-		DepthData& depthData = arrDepthData[idxImage];
-		if (depthData.IsEmpty())
-			continue;
+		
 		const Image& imageData = images[idxImage];
 
 		CMatrix Cn = imageData.camera.C;
