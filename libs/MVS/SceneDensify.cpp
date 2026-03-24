@@ -1560,7 +1560,7 @@ SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera camera, double de
 	//double sigma_d = 0.01 * depth * std::sqrt(MAXF(1.f-depth_confidence,0.03));
 	double sigma_px = 0.5;
 	double sigma_d = depth * depth * sigma_px * (1 / ((K(0,0)+K(1,1))*0.5)) * (1/sqrt(sum_baseline));
-	std::cout << "sigma_d: " << sigma_d << std::endl; 
+	//std::cout << "sigma_d: " << sigma_d << std::endl; 
 	C_theta(6,6) = sigma_d * sigma_d;
 
 	// Pixel variance (example 0.5 pixel)
