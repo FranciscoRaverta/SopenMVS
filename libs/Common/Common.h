@@ -228,6 +228,8 @@ typedef TMatrix<double,4,4> Matrix4x4d;
 typedef TMatrix<double,6,6> Matrix6x6d;
 typedef TMatrix<double,3,9> Matrix3x9d;
 typedef TMatrix<double,9,9> Matrix9x9d;
+typedef TMatrix<double,7,7> Matrix7x7d;
+typedef TMatrix<double,3,7> Matrix3x7d;
 
 typedef TSphere<REAL, 2> Sphere2;
 typedef TSphere<REAL, 3> Sphere3;
@@ -261,8 +263,8 @@ typedef RMatrixBase RMatrix;
 typedef Matrix3x3   KMatrix;
 typedef Matrix3x4   PMatrix;
 typedef Matrix6x6d  CovMatrix; 
-typedef Matrix3x9d  JacobianMatrix; 
-typedef Matrix9x9d  CovMatrixBig; 
+typedef Matrix3x7d  JacobianMatrix; 
+typedef Matrix7x7d  CovMatrixBig; 
 
 // reconstructed 3D point type
 typedef Vec3 X3D;
