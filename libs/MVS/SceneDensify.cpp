@@ -1476,7 +1476,7 @@ void DepthMapsData::ApplyDenseCRF3D(
     }
 }
 
-double sumBaselines(const MVS::Camera camera, SEACAVE::Point3 P, const ViewScoreArr neighbors) {
+double sumBaselines(const MVS::Camera camera, SEACAVE::Point3 P, const ViewScoreArr neighbors, const MVS::ImageArr images) {
 	Cmatrix C1 = camera.C;
 	double sum = 0;
 
@@ -1485,7 +1485,7 @@ double sumBaselines(const MVS::Camera camera, SEACAVE::Point3 P, const ViewScore
 		DepthData& depthData = arrDepthData[idxImage];
 		if (depthData.IsEmpty())
 			continue;
-		const Image& imageData = scene.images[idxImage];
+		const Image& imageData = images[idxImage];
 
 		CMatrix Cn = imageData.camera.C;
 		
@@ -1714,7 +1714,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				const MVS::Platform& platform = scene.platforms[imageData.platformID];
 				const MVS::Platform::Pose& pose = platform.poses[imageData.poseID];
 				CovMatrix C_pose = pose.Cov;
-				double sumBl = sumBaselines(imageData.camera, point, depthData.neighbors);
+				double sumBl = sumBaselines(imageData.camera, point, depthData.neighbors, scene.images);
 				SEACAVE::Matrix3x3d poseCovariance = (PoseCovarianceEstimation(imageData.camera, depth, sumBl, depthData.confMap.empty() ? 1.f : depthData.confMap(x), Point2f(x), C_pose))*REAL(confidence)*REAL(confidence);
 				SEACAVE::Matrix3x3d poseCovariance2 = (PoseCovarianceEstimation(imageData.camera, depth, sumBl, depthData.confMap.empty() ? 1.f : depthData.confMap(x), Point2f(x), C_pose)).inv();//*REAL(confidence)*REAL(confidence); FRAN
 				
@@ -1821,7 +1821,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							const MVS::Platform& platformB = scene.platforms[imageDataB.platformID];
 							const MVS::Platform::Pose& poseB = platformB.poses[imageDataB.poseID];
 							CovMatrix C_poseB = poseB.Cov;
-							double sumBlB = sumBaselines(imageDataB.camera, imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB)), depthDataB.neighbors);
+							double sumBlB = sumBaselines(imageDataB.camera, imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB)), depthDataB.neighbors, scene.images);
 							poseCovariance += (PoseCovarianceEstimation(imageDataB.camera, depthB, sum_BlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB))*REAL(confidenceB)*REAL(confidenceB);
 							poseCovariance2 += PoseCovarianceEstimation(imageDataB.camera, depthB, sum_BlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB).inv(); // FRAN
 
