@@ -1476,7 +1476,7 @@ void DepthMapsData::ApplyDenseCRF3D(
     }
 }
 
-double sumBaselines(const MVS::Camera camera, SEACAVE::Point3 P, ViewScoreArr& neighbors) {
+double sumBaselines(const MVS::Camera camera, SEACAVE::Point3 P, const ViewScoreArr neighbors) {
 	Cmatrix C1 = camera.C;
 	double sum = 0;
 
@@ -1498,7 +1498,7 @@ double sumBaselines(const MVS::Camera camera, SEACAVE::Point3 P, ViewScoreArr& n
 
         // Remove component along viewing direction
         Point3 b_perp = b_vec - v_hat * b_vec.dot(v_hat);
-        sum += (b_perp.dot(b_perp))^2;
+        sum += std::pow((b_perp.dot(b_perp)),2);
 	}
 	return sum;
 }
@@ -1561,7 +1561,7 @@ SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera camera, double de
 
 	//double sigma_d = 0.01 * depth * std::sqrt(MAXF(1.f-depth_confidence,0.03));
 	double sigma_px = 0.5;
-	double sigma_d = depth * depth * sigma_px * (1 / ((K(0,0)+K(1,1))*0.5)) * (1/sqrt(sum_bl));
+	double sigma_d = depth * depth * sigma_px * (1 / ((K(0,0)+K(1,1))*0.5)) * (1/sqrt(sum_baseline));
 	C_theta(6,6) = sigma_d * sigma_d;
 
 	// Pixel variance (example 0.5 pixel)
