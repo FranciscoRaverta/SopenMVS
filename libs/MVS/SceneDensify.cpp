@@ -1477,7 +1477,7 @@ void DepthMapsData::ApplyDenseCRF3D(
 }
 
 double sumBaselines(const MVS::Camera camera, SEACAVE::Point3 P, const ViewScoreArr neighbors, const MVS::ImageArr images) {
-	Cmatrix C1 = camera.C;
+	CMatrix C1 = camera.C;
 	double sum = 0;
 
 	for (const ViewScore& neighbor: neighbors) {
@@ -1822,12 +1822,12 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							const MVS::Platform::Pose& poseB = platformB.poses[imageDataB.poseID];
 							CovMatrix C_poseB = poseB.Cov;
 							double sumBlB = sumBaselines(imageDataB.camera, imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB)), depthDataB.neighbors, scene.images);
-							poseCovariance += (PoseCovarianceEstimation(imageDataB.camera, depthB, sum_BlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB))*REAL(confidenceB)*REAL(confidenceB);
-							poseCovariance2 += PoseCovarianceEstimation(imageDataB.camera, depthB, sum_BlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB).inv(); // FRAN
+							poseCovariance += (PoseCovarianceEstimation(imageDataB.camera, depthB, sumBlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB))*REAL(confidenceB)*REAL(confidenceB);
+							poseCovariance2 += PoseCovarianceEstimation(imageDataB.camera, depthB, sumBlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB).inv(); // FRAN
 
 							X += imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB))*REAL(confidenceB);
 							Point3 pointB = imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB)); //FRAN
-							X2 += PoseCovarianceEstimation(imageDataB.camera, depthB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB).inv() * SEACAVE::TPoint3<double>(pointB.x, pointB.y, pointB.z); // FRAN
+							X2 += PoseCovarianceEstimation(imageDataB.camera, depthB, sumBlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB).inv() * SEACAVE::TPoint3<double>(pointB.x, pointB.y, pointB.z); // FRAN
 							if (bEstimateColor)
 								C += Cast<float>(imageDataB.image(xB))*confidenceB;
 							if (bEstimateSegmentation) {
