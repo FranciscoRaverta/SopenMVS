@@ -1928,7 +1928,12 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					SEACAVE::Matrix3x3d X_covariance2 = poseCovariance2.inv(); // FRAN
 					double X_trace = X_covariance(0,0) + X_covariance(1,1) + X_covariance(2,2);
 					double X_trace2 = X_covariance2(0,0) + X_covariance2(1,1) + X_covariance2(2,2); // FRAN
-					double X_shannon = 0.5 * std::log(std::pow(2.0 * M_PI * std::exp(1.0), 3.0)*X_covariance2.det());
+
+					double detX_cov = 	X_covariance2(0,0) * (X_covariance2(1,1)*X_covariance2(2,2) - X_covariance2(1,2)*X_covariance2(2,1)) -
+        								X_covariance2(0,1) * (X_covariance2(1,0)*X_covariance2(2,2) - X_covariance2(1,2)*X_covariance2(2,0)) +
+        								X_covariance2(0,2) * (X_covariance2(1,0)*X_covariance2(2,1) - X_covariance2(1,1)*X_covariance2(2,0));
+
+					double X_shannon = 0.5 * std::log(std::pow(2.0 * M_PI * std::exp(1.0), 3.0)*detX_cov);
 					point = X_covariance2 * X2; // FRAN
 					pointcloud.covarianceTraces.emplace_back(X_shannon);
 					//std::cout << "Trace: " << X_trace << std::endl;
