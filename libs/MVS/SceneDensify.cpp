@@ -1765,6 +1765,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					std::cout << "Segmentation2? before unc - FRAN" << std::endl;
 					const float* unc_ptr = imageData.uncertaintyImage.ptr<float>(x.y, x.x);
 					std::cout << "Segmentation2? After unc - FRAN" << std::endl;
+					std::cout << "unc_ptr - FRAN: " << unc_ptr << std::endl;
 					float unc = unc_ptr[0];
 					std::cout << "Segmentation2? After unc 1- FRAN" << std::endl;
 					//float unc = Cast<float>(imageData.uncertaintyImage(x));
