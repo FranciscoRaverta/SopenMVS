@@ -1766,11 +1766,14 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					const float* unc_ptr = imageData.uncertaintyImage.ptr<float>(x.y, x.x);
 					std::cout << "Segmentation2? After unc - FRAN" << std::endl;
 					float unc = unc_ptr[0];
+					std::cout << "Segmentation2? After unc 1- FRAN" << std::endl;
 					//float unc = Cast<float>(imageData.uncertaintyImage(x));
 					float alpha_weighted = std::max(-std::log(unc + 1e-9f), 0.f);
+					std::cout << "Segmentation2? After unc 2- FRAN" << std::endl;
 					std::vector<float> alpha_vec(numLabels);
-					
+					std::cout << "Segmentation2? After unc 3- FRAN" << std::endl;
 					const float* max_it = std::max_element(probs, probs + numLabels);
+					std::cout << "Segmentation2? After unc 4- FRAN" << std::endl;
 					int max_index = std::distance(probs, max_it);
 					std::cout << "Segmentation2? Before for loop - FRAN" << std::endl;
 					for(int c=0;c<numLabels;c++) {
