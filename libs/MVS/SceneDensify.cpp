@@ -1767,6 +1767,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					std::cout << "Segmentation2? After unc - FRAN" << std::endl;
 					std::cout << "unc_ptr - FRAN: " << unc_ptr << std::endl;
 					float unc = unc_ptr[0];
+					std::cout << "unc - FRAN: " << unc << std::endl;
 					std::cout << "Segmentation2? After unc 1- FRAN" << std::endl;
 					//float unc = Cast<float>(imageData.uncertaintyImage(x));
 					float alpha_weighted = std::max(-std::log(unc + 1e-9f), 0.f);
