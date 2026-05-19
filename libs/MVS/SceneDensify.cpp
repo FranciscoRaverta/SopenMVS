@@ -1632,6 +1632,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 	typedef cList<DepthIndex> DepthIndexArr;
 	DepthIndexArr arrDepthIdx(scene.images.GetSize());
 	ProjsArr projs(0, nPointsEstimate);
+	std::cout << "Before fusing depth maps - FRAN" << std::endl;
 	if (bEstimateNormal && !bNormalMap)
 		bEstimateNormal = false;
 	pointcloud.points.Reserve(nPointsEstimate);
@@ -1685,6 +1686,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 			depthIdxs.memset((uint8_t)NO_ID);
 		}
 		const size_t nNumPointsPrev(pointcloud.points.GetSize());
+		std::cout << "Fusing depth maps " << idxImage << " - FRAN" << std::endl;
 		for (int i=0; i<sizeMap.height; ++i) {
 			for (int j=0; j<sizeMap.width; ++j) {
 				const ImageRef x(j,i);
