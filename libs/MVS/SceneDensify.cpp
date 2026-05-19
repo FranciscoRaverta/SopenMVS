@@ -1685,7 +1685,6 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 			depthIdxs.memset((uint8_t)NO_ID);
 		}
 		const size_t nNumPointsPrev(pointcloud.points.GetSize());
-		std::cout << "Fusing depth maps " << idxImage << " - FRAN" << std::endl;
 		for (int i=0; i<sizeMap.height; ++i) {
 			for (int j=0; j<sizeMap.width; ++j) {
 				const ImageRef x(j,i);
@@ -1711,7 +1710,6 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				ASSERT(ISEQUAL(norm(normal), 1.f));
 				
 				// CALL TO COVARIANCE FUNCTION - FRAN
-				std::cout << "Covariance checking - FRAN" << std::endl;
 				const MVS::Platform& platform = scene.platforms[imageData.platformID];
 				const MVS::Platform::Pose& pose = platform.poses[imageData.poseID];
 				CovMatrix C_pose = pose.Cov;
@@ -1720,7 +1718,6 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				SEACAVE::Matrix3x3d poseCovariance2 = (PoseCovarianceEstimation(imageData.camera, depth, sumBl, depthData.confMap.empty() ? 1.f : depthData.confMap(x), Point2f(x), C_pose)).inv();//*REAL(confidence)*REAL(confidence); FRAN
 				
 				// check the projection in the neighbor depth-maps
-				std::cout << "Projection - FRAN" << std::endl;
 				Point3 X(point*confidence);
 				Point3 X2(poseCovariance2 * SEACAVE::TPoint3<double>(point.x, point.y, point.z)); // FRAN
 				Pixel32F C(Cast<float>(imageData.image(x))*confidence);
@@ -1746,7 +1743,6 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 
 				int numViewsUsed = 0;
 				uint8_t modeLabel = 255;
-				std::cout << "Segmentation? - FRAN" << std::endl;
 				if (bEstimateSegmentation) {
 					segmentationColor = Cast<uint8_t>(imageData.segmentedImage(x)); // Convert to a 32-bit packed color
 					//std::cout << Cast<float>(imageData.confidenceImage(x)) << std::endl; // FRAN
@@ -1758,26 +1754,15 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						//sumLogsConfidence[segmentationColor] = 0.0f; }
 					//sumLogsConfidence[segmentationColor] += std::log(std::max(Cast<float>(imageData.confidenceImage(x)),1e-4f)); 
 					segmentationFrequency[segmentationColor]++; }
-				std::cout << "Segmentation2? - FRAN" << std::endl;
 				if (bEstimateSegmentation) {
-					std::cout << "Segmentation2? Before probs - FRAN" << std::endl;
 					const float* probs = imageData.probabilitiesImage.ptr<float>(x.y, x.x);
-					std::cout << "Segmentation2? before unc - FRAN" << std::endl;
 					const float* unc_ptr = imageData.uncertaintyImage.ptr<float>(x.y, x.x);
-					std::cout << "Segmentation2? After unc - FRAN" << std::endl;
-					std::cout << "unc_ptr - FRAN: " << unc_ptr << std::endl;
 					float unc = unc_ptr[0];
-					std::cout << "unc - FRAN: " << unc << std::endl;
-					std::cout << "Segmentation2? After unc 1- FRAN" << std::endl;
 					//float unc = Cast<float>(imageData.uncertaintyImage(x));
 					float alpha_weighted = std::max(-std::log(unc + 1e-9f), 0.f);
-					std::cout << "Segmentation2? After unc 2- FRAN" << std::endl;
 					std::vector<float> alpha_vec(numLabels);
-					std::cout << "Segmentation2? After unc 3- FRAN" << std::endl;
 					const float* max_it = std::max_element(probs, probs + numLabels);
-					std::cout << "Segmentation2? After unc 4- FRAN" << std::endl;
 					int max_index = std::distance(probs, max_it);
-					std::cout << "Segmentation2? Before for loop - FRAN" << std::endl;
 					for(int c=0;c<numLabels;c++) {
 						sumLogProbs[c] += std::log(std::max(probs[c],1e-6f));
 						sumProbs[c] += std::max(probs[c],1e-6f);
@@ -1788,13 +1773,10 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							sumOnes[c] += 1;
 						}
 					}
-					std::cout << "Segmentation2? Before emplacing- FRAN" << std::endl;
 					obs_probs.emplace_back(probs, probs + numLabels);
 					obs_alpha.emplace_back(std::move(alpha_vec));
-					std::cout << "Segmentation2? After emplacing- FRAN" << std::endl;
 					numViewsUsed++;
 				}
-				std::cout << "Normals - FRAN" << std::endl;
 				PointCloud::Normal N(normal*confidence);
 				invalidDepths.Empty();
 				for (const ViewScore& neighbor: depthData.neighbors) {
@@ -1830,7 +1812,6 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							idxPointB = idxPoint;
 
 							// CALL TO COVARIANCE FUNCTION - FRAN
-							std::cout << "Covariance calculation - FRAN" << std::endl;
 							const MVS::Platform& platformB = scene.platforms[imageDataB.platformID];
 							const MVS::Platform::Pose& poseB = platformB.poses[imageDataB.poseID];
 							CovMatrix C_poseB = poseB.Cov;
@@ -1855,7 +1836,6 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								//sumLogsConfidence += std::log(std::max(Cast<float>(imageData.confidenceImage(xB)),1e-4f));
 								//logNumber += 1;
 							} 
-							std::cout << "Uncertainties calculations - FRAN" << std::endl;
 							if (bEstimateSegmentation) {
 								const float* probsB = imageDataB.probabilitiesImage.ptr<float>(xB.y, xB.x);
 								const float* unc_ptr = imageDataB.uncertaintyImage.ptr<float>(xB.y, xB.x);
@@ -1890,7 +1870,6 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						invalidDepths.Insert(&depthB);
 					}
 				}
-				std::cout << "Frequencies - FRAN" << std::endl;
 				uint32_t modeColor = 10001;
 				if (bEstimateSegmentation) {
 					float maxCount = 0.f;
@@ -1921,7 +1900,6 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						}
 					}
 				}
-				std::cout << "Pre-export FRAN" << std::endl;
 				if (views.size() < nMinViewsFuse) {
 					// remove point
 					FOREACH(v, views) {
