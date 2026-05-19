@@ -1760,8 +1760,11 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					segmentationFrequency[segmentationColor]++; }
 				std::cout << "Segmentation2? - FRAN" << std::endl;
 				if (bEstimateSegmentation) {
+					std::cout << "Segmentation2? Before probs - FRAN" << std::endl;
 					const float* probs = imageData.probabilitiesImage.ptr<float>(x.y, x.x);
+					std::cout << "Segmentation2? before unc - FRAN" << std::endl;
 					const float* unc_ptr = imageData.uncertaintyImage.ptr<float>(x.y, x.x);
+					std::cout << "Segmentation2? After unc - FRAN" << std::endl;
 					float unc = unc_ptr[0];
 					//float unc = Cast<float>(imageData.uncertaintyImage(x));
 					float alpha_weighted = std::max(-std::log(unc + 1e-9f), 0.f);
@@ -1769,7 +1772,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					
 					const float* max_it = std::max_element(probs, probs + numLabels);
 					int max_index = std::distance(probs, max_it);
-
+					std::cout << "Segmentation2? Before for loop - FRAN" << std::endl;
 					for(int c=0;c<numLabels;c++) {
 						sumLogProbs[c] += std::log(std::max(probs[c],1e-6f));
 						sumProbs[c] += std::max(probs[c],1e-6f);
@@ -1780,9 +1783,10 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							sumOnes[c] += 1;
 						}
 					}
-
+					std::cout << "Segmentation2? Before emplacing- FRAN" << std::endl;
 					obs_probs.emplace_back(probs, probs + numLabels);
 					obs_alpha.emplace_back(std::move(alpha_vec));
+					std::cout << "Segmentation2? After emplacing- FRAN" << std::endl;
 					numViewsUsed++;
 				}
 				std::cout << "Normals - FRAN" << std::endl;
