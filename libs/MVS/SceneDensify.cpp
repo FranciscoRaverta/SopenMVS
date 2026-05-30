@@ -2586,6 +2586,7 @@ void Scene::DenseReconstructionEstimate(void* pData)
 		std::cout << "FRAN - " << evt->GetID() << std::endl;
 		switch (evt->GetID()) {
 		case EVT_PROCESSIMAGE: {
+			std::cout << "FRAN - EVT_PROCESSIMAGE" <<  std::endl;
 			const EVTProcessImage& evtImage = *((EVTProcessImage*)(Event*)evt);
 			if (evtImage.idxImage >= data.images.size()) {
 				if (nMaxThreads > 1) {
@@ -2596,12 +2597,15 @@ void Scene::DenseReconstructionEstimate(void* pData)
 			}
 			// select views to reconstruct the depth-map for this image
 			const IIndex idx = data.images[evtImage.idxImage];
+			std::cout << "FRAN - Before DepthData" <<  std::endl;
 			DepthData& depthData(data.depthMaps.arrDepthData[idx]);
+			std::cout << "FRAN - Before depthmapComputed" <<  std::endl;
 			const bool depthmapComputed(data.nFusionMode < 0 || (data.nFusionMode >= 0 && data.nEstimationGeometricIter < 0 && File::access(ComposeDepthFilePath(data.scene.images[idx].ID, "dmap"))));
 			// initialize images pair: reference image and the best neighbor view
 			ASSERT(data.neighborsMap.IsEmpty() || data.neighborsMap[evtImage.idxImage] != NO_ID);
 			if (!data.depthMaps.InitViews(depthData, data.neighborsMap.IsEmpty()?NO_ID:data.neighborsMap[evtImage.idxImage], OPTDENSE::nNumViews, !depthmapComputed, depthmapComputed ? -1 : (data.nEstimationGeometricIter >= 0 ? 1 : 0))) {
 				// process next image
+				std::cout << "FRAN - Before AddEvent EVTProcessImage" <<  std::endl;
 				data.events.AddEvent(new EVTProcessImage((IIndex)Thread::safeInc(data.idxImage)));
 				break;
 			}
@@ -2619,11 +2623,13 @@ void Scene::DenseReconstructionEstimate(void* pData)
 				data.events.AddEvent(new EVTProcessImage((uint32_t)Thread::safeInc(data.idxImage)));
 			} else {
 				// estimate depth-map
+				std::cout << "FRAN - Before AddEventFirst EVTEstimateDepthMap" <<  std::endl;
 				data.events.AddEventFirst(new EVTEstimateDepthMap(evtImage.idxImage));
 			}
 			break; }
 
 		case EVT_ESTIMATEDEPTHMAP: {
+			std::cout << "FRAN - Start event ESTIMATEDEPTHMAP" <<  std::endl;
 			const EVTEstimateDepthMap& evtImage = *((EVTEstimateDepthMap*)(Event*)evt);
 			// request next image initialization to be performed while computing this depth-map
 			data.events.AddEvent(new EVTProcessImage((uint32_t)Thread::safeInc(data.idxImage)));
@@ -2631,6 +2637,7 @@ void Scene::DenseReconstructionEstimate(void* pData)
 			data.sem.Wait();
 			if (data.nFusionMode >= 0) {
 				// extract depth-map using Patch-Match algorithm
+				std::cout << "FRAN - Before EStimate DepthMap" <<  std::endl;
 				data.depthMaps.EstimateDepthMap(data.images[evtImage.idxImage], data.nEstimationGeometricIter);
 			} else {
 				// extract disparity-maps using SGM algorithm
