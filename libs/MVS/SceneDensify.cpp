@@ -2480,8 +2480,8 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 		// multi-thread execution
 		cList<SEACAVE::Thread> threads(2);
 		FOREACHPTR(pThread, threads)
-			std::cout << "FRAN - Before DenseReconstructionEstimateTmp" << std::endl;
-			pThread->start(DenseReconstructionEstimateTmp, (void*)&data);
+			{std::cout << "FRAN - Before DenseReconstructionEstimateTmp" << std::endl;
+			pThread->start(DenseReconstructionEstimateTmp, (void*)&data);}
 		FOREACHPTR(pThread, threads)
 			pThread->join();
 	} else {
