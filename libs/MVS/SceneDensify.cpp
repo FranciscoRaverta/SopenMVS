@@ -469,8 +469,10 @@ bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex n
 		} else {
 			std::cout << "FRAN - InitViews6.96" <<  std::endl;
 			ASSERT(!depthData.points.empty());
+			std::cout << "FRAN - InitViews6.96b" <<  std::endl;
 			// compute rough estimates using the sparse point-cloud
 			InitDepthMap(depthData);
+			std::cout << "FRAN - InitViews6.96c" <<  std::endl;
 		}
 		std::cout << "FRAN - InitViews6.97" <<  std::endl;
 	}
@@ -484,22 +486,25 @@ bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex n
 bool DepthMapsData::InitDepthMap(DepthData& depthData)
 {
 	TD_TIMER_STARTD();
-
+	std::cout << "FRAN - InitDepth1" <<  std::endl;
 	ASSERT(depthData.images.GetSize() > 1 && !depthData.points.IsEmpty());
 	const DepthData::ViewData& image(depthData.GetView());
+	std::cout << "FRAN - InitDepth2" <<  std::endl;
 	TriangulatePoints2DepthMap(image, scene.pointcloud, depthData.points, depthData.depthMap, depthData.normalMap, depthData.dMin, depthData.dMax, OPTDENSE::bAddCorners, OPTDENSE::bInitSparse);
+	std::cout << "FRAN - InitDepth3" <<  std::endl;
 	depthData.dMin *= 0.9f;
 	depthData.dMax *= 1.1f;
-
+	std::cout << "FRAN - InitDepth4" <<  std::endl;
 	#if TD_VERBOSE != TD_VERBOSE_OFF
 	// save rough depth map as image
 	if (g_nVerbosityLevel > 4) {
+		std::cout << "FRAN - InitDepth5" <<  std::endl;
 		ExportDepthMap(ComposeDepthFilePath(image.GetID(), "init.png"), depthData.depthMap);
 		ExportNormalMap(ComposeDepthFilePath(image.GetID(), "init.normal.png"), depthData.normalMap);
 		ExportPointCloud(ComposeDepthFilePath(image.GetID(), "init.ply"), *depthData.images.First().pImageData, depthData.depthMap, depthData.normalMap);
 	}
 	#endif
-
+	std::cout << "FRAN - InitDepth6" <<  std::endl;
 	DEBUG_ULTIMATE("Depth-map %3u roughly estimated from %u sparse points: %dx%d (%s)", image.GetID(), depthData.points.size(), image.image.width(), image.image.height(), TD_TIMER_GET_FMT().c_str());
 	return true;
 } // InitDepthMap
