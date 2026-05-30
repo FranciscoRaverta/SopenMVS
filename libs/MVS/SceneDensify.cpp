@@ -398,6 +398,7 @@ bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex n
 	}
 	std::cout << "FRAN - InitViews6" <<  std::endl;
 	if (loadDepthMaps > 0) {
+		std::cout << "FRAN - InitViews6.1" <<  std::endl;
 		// load known depth-map and normal-map
 		String imageFileName;
 		IIndexArr IDs;
@@ -405,33 +406,43 @@ bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex n
 		Camera camera;
 		ConfidenceMap confMap;
 		ViewsMap viewsMap;
+		std::cout << "FRAN - InitViews6.2" <<  std::endl;
 		if (!ImportDepthDataRaw(ComposeDepthFilePath(viewRef.GetID(), "dmap"),
 				imageFileName, IDs, imageSize, camera.K, camera.R, camera.C, depthData.dMin, depthData.dMax,
 				depthData.depthMap, depthData.normalMap, confMap, viewsMap, 3))
 			return false;
+		std::cout << "FRAN - InitViews6.3" <<  std::endl;
 		ASSERT(viewRef.image.size() == depthData.depthMap.size());
 		ASSERT(depthData.normalMap.empty() || viewRef.image.size() == depthData.normalMap.size());
 		if (depthData.normalMap.empty()) {
 			// estimate normal map
 			EstimateNormalMap(viewRef.camera.K, depthData.depthMap, depthData.normalMap);
 		}
+		std::cout << "FRAN - InitViews6.4" <<  std::endl;
 	} else if (loadDepthMaps == 0) {
+		std::cout << "FRAN - InitViews6.5" <<  std::endl;
 		// initialize depth and normal maps
 		if (OPTDENSE::nMinViewsTrustPoint < 2 || depthData.points.empty()) {
+			std::cout << "FRAN - InitViews6.6" <<  std::endl;
 			// compute depth range and initialize known depths, else random
 			const Image8U::Size size(viewRef.image.size());
 			depthData.depthMap.create(size); depthData.depthMap.memset(0);
 			depthData.normalMap.create(size);
+			std::cout << "FRAN - InitViews6.7" <<  std::endl;
 			if (depthData.points.empty()) {
+				std::cout << "FRAN - InitViews6.8" <<  std::endl;
 				// all values will be initialized randomly
 				depthData.dMin = 1e-1f;
 				depthData.dMax = 1e+2f;
 			} else {
+				std::cout << "FRAN - InitViews6.9" <<  std::endl;
 				// initialize with the sparse point-cloud
 				const int nPixelArea(2); // half windows size around a pixel to be initialize with the known depth
 				depthData.dMin = FLT_MAX;
 				depthData.dMax = 0;
+				std::cout << "FRAN - InitViews6.91" <<  std::endl;
 				FOREACHPTR(pPoint, depthData.points) {
+					std::cout << "FRAN - InitViews6.92" <<  std::endl;
 					const PointCloud::Point& X = scene.pointcloud.points[*pPoint];
 					const Point3 camX(viewRef.camera.TransformPointW2C(Cast<REAL>(X)));
 					const ImageRef x(ROUND2INT(viewRef.camera.TransformPointC2I(camX)));
@@ -444,19 +455,24 @@ bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex n
 							depthData.normalMap(y,x) = Normal::ZERO;
 						}
 					}
+					std::cout << "FRAN - InitViews6.93" <<  std::endl;
 					if (depthData.dMin > d)
 						depthData.dMin = d;
 					if (depthData.dMax < d)
 						depthData.dMax = d;
 				}
+				std::cout << "FRAN - InitViews6.94" <<  std::endl;
 				depthData.dMin *= 0.9f;
 				depthData.dMax *= 1.1f;
 			}
+			std::cout << "FRAN - InitViews6.95" <<  std::endl;
 		} else {
+			std::cout << "FRAN - InitViews6.96" <<  std::endl;
 			ASSERT(!depthData.points.empty());
 			// compute rough estimates using the sparse point-cloud
 			InitDepthMap(depthData);
 		}
+		std::cout << "FRAN - InitViews6.97" <<  std::endl;
 	}
 	std::cout << "FRAN - InitViews7" <<  std::endl;
 	return true;
