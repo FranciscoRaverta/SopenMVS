@@ -306,6 +306,7 @@ bool DepthMapsData::SelectViews(DepthData& depthData)
 // returns false if there are no good neighbors to estimate the depth-map
 bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex numNeighbors, bool loadImages, int loadDepthMaps)
 {
+	std::cout << "FRAN - InitViews1" <<  std::endl;
 	const IIndex idxImage((IIndex)(&depthData-arrDepthData.Begin()));
 	ASSERT(!depthData.neighbors.IsEmpty());
 
@@ -313,7 +314,7 @@ bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex n
 	depthData.images.Empty();
 	depthData.images.Reserve(depthData.neighbors.GetSize()+1);
 	depthData.images.AddEmpty();
-
+	std::cout << "FRAN - InitViews2" <<  std::endl;
 	if (idxNeighbor != NO_ID) {
 		// set target image as the given neighbor
 		const ViewScore& neighbor = depthData.neighbors[idxNeighbor];
@@ -362,11 +363,12 @@ bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex n
 		DEBUG_EXTRA("Reference image %3u paired with %u views", idxImage, depthData.images.size()-1);
 		#endif
 	}
+	std::cout << "FRAN - InitViews3" <<  std::endl;
 	if (depthData.images.size() < 2) {
 		depthData.images.Release();
 		return false;
 	}
-
+	std::cout << "FRAN - InitViews4" <<  std::endl;
 	// initialize reference image as well
 	DepthData::ViewData& viewRef = depthData.images.front();
 	viewRef.scale = 1;
@@ -374,7 +376,7 @@ bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex n
 	viewRef.camera = viewRef.pImageData->camera;
 	if (loadImages)
 		viewRef.pImageData->image.toGray(viewRef.image, cv::COLOR_BGR2GRAY, true);
-
+	std::cout << "FRAN - InitViews5" <<  std::endl;
 	// initialize views
 	for (IIndex i=1; i<depthData.images.size(); ++i) {
 		DepthData::ViewData& view = depthData.images[i];
@@ -394,7 +396,7 @@ bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex n
 		}
 		view.Init(viewRef.camera);
 	}
-
+	std::cout << "FRAN - InitViews6" <<  std::endl;
 	if (loadDepthMaps > 0) {
 		// load known depth-map and normal-map
 		String imageFileName;
@@ -456,6 +458,7 @@ bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex n
 			InitDepthMap(depthData);
 		}
 	}
+	std::cout << "FRAN - InitViews7" <<  std::endl;
 	return true;
 } // InitViews
 /*----------------------------------------------------------------*/
