@@ -1909,23 +1909,23 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					// this point is valid, store it
 					const REAL nrm(REAL(1)/confidence);
 					point = X*nrm;
+					if (bEstimateSegmentation) {
+						// FRAN
+						//SEACAVE::Matrix3x3d X_covariance = (poseCovariance.inv()) * (1/nrm) * (1/nrm);
+						SEACAVE::Matrix3x3d X_covariance = (poseCovariance) * nrm * nrm;
+						SEACAVE::Matrix3x3d X_covariance2 = poseCovariance2.inv(); // FRAN
+						double X_trace = X_covariance(0,0) + X_covariance(1,1) + X_covariance(2,2);
+						double X_trace2 = X_covariance2(0,0) + X_covariance2(1,1) + X_covariance2(2,2); // FRAN
 
-					// FRAN
-					//SEACAVE::Matrix3x3d X_covariance = (poseCovariance.inv()) * (1/nrm) * (1/nrm);
-					SEACAVE::Matrix3x3d X_covariance = (poseCovariance) * nrm * nrm;
-					SEACAVE::Matrix3x3d X_covariance2 = poseCovariance2.inv(); // FRAN
-					double X_trace = X_covariance(0,0) + X_covariance(1,1) + X_covariance(2,2);
-					double X_trace2 = X_covariance2(0,0) + X_covariance2(1,1) + X_covariance2(2,2); // FRAN
+						double detX_cov = 	X_covariance2(0,0) * (X_covariance2(1,1)*X_covariance2(2,2) - X_covariance2(1,2)*X_covariance2(2,1)) -
+											X_covariance2(0,1) * (X_covariance2(1,0)*X_covariance2(2,2) - X_covariance2(1,2)*X_covariance2(2,0)) +
+											X_covariance2(0,2) * (X_covariance2(1,0)*X_covariance2(2,1) - X_covariance2(1,1)*X_covariance2(2,0));
 
-					double detX_cov = 	X_covariance2(0,0) * (X_covariance2(1,1)*X_covariance2(2,2) - X_covariance2(1,2)*X_covariance2(2,1)) -
-        								X_covariance2(0,1) * (X_covariance2(1,0)*X_covariance2(2,2) - X_covariance2(1,2)*X_covariance2(2,0)) +
-        								X_covariance2(0,2) * (X_covariance2(1,0)*X_covariance2(2,1) - X_covariance2(1,1)*X_covariance2(2,0));
-
-					double X_shannon = 0.5 * std::log(std::pow(2.0 * M_PI * std::exp(1.0), 3.0)*detX_cov);
-					point = X_covariance2 * X2; // FRAN
-					pointcloud.covarianceTraces.emplace_back(X_shannon);
-					//std::cout << "Trace: " << X_trace << std::endl;
-
+						double X_shannon = 0.5 * std::log(std::pow(2.0 * M_PI * std::exp(1.0), 3.0)*detX_cov);
+						point = X_covariance2 * X2; // FRAN
+						pointcloud.covarianceTraces.emplace_back(X_shannon);
+						//std::cout << "Trace: " << X_trace << std::endl;
+					}
 					ASSERT(ISFINITE(point));
 					if (bEstimateColor)
 						pointcloud.colors.emplace_back((C*(float)nrm).cast<uint8_t>());
