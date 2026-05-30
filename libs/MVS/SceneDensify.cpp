@@ -2464,7 +2464,7 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 			data.depthMaps.pmCUDA->Init(false);
 	}
 	#endif // _USE_CUDA
-
+	std::cout << "FRAN - Before queue of depth maps" << std::endl;
 	// initialize the queue of images to be processed
 	const int nOptimize(OPTDENSE::nOptimize);
 	if (OPTDENSE::nEstimationGeometricIters && data.nFusionMode >= 0)
@@ -2473,17 +2473,20 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 	ASSERT(data.events.IsEmpty());
 	data.events.AddEvent(new EVTProcessImage(0));
 	// start working threads
+	std::cout << "FRAN - Start working threads" << std::endl;
 	data.progress = new Util::Progress("Estimated depth-maps", data.images.GetSize());
 	GET_LOGCONSOLE().Pause();
 	if (nMaxThreads > 1) {
 		// multi-thread execution
 		cList<SEACAVE::Thread> threads(2);
 		FOREACHPTR(pThread, threads)
+			std::cout << "FRAN - Before DenseReconstructionEstimateTmp" << std::endl;
 			pThread->start(DenseReconstructionEstimateTmp, (void*)&data);
 		FOREACHPTR(pThread, threads)
 			pThread->join();
 	} else {
 		// single-thread execution
+		std::cout << "FRAN - Before DenseReconstructionEstimateTmp, single thread" << std::endl;
 		DenseReconstructionEstimate((void*)&data);
 	}
 	GET_LOGCONSOLE().Play();
@@ -2576,9 +2579,11 @@ void* DenseReconstructionEstimateTmp(void* arg) {
 // initialize the dense reconstruction with the sparse point cloud
 void Scene::DenseReconstructionEstimate(void* pData)
 {
+	std::cout << "FRAN - Start of DenseReconstructionEstimate" << std::endl;
 	DenseDepthMapData& data = *((DenseDepthMapData*)pData);
 	while (true) {
 		CAutoPtr<Event> evt(data.events.GetEvent());
+		std::cout << "FRAN - " << evt->GetID() << std::endl;
 		switch (evt->GetID()) {
 		case EVT_PROCESSIMAGE: {
 			const EVTProcessImage& evtImage = *((EVTProcessImage*)(Event*)evt);
