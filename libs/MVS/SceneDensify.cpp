@@ -306,7 +306,6 @@ bool DepthMapsData::SelectViews(DepthData& depthData)
 // returns false if there are no good neighbors to estimate the depth-map
 bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex numNeighbors, bool loadImages, int loadDepthMaps)
 {
-	std::cout << "FRAN - InitViews1" <<  std::endl;
 	const IIndex idxImage((IIndex)(&depthData-arrDepthData.Begin()));
 	ASSERT(!depthData.neighbors.IsEmpty());
 
@@ -314,7 +313,6 @@ bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex n
 	depthData.images.Empty();
 	depthData.images.Reserve(depthData.neighbors.GetSize()+1);
 	depthData.images.AddEmpty();
-	std::cout << "FRAN - InitViews2" <<  std::endl;
 	if (idxNeighbor != NO_ID) {
 		// set target image as the given neighbor
 		const ViewScore& neighbor = depthData.neighbors[idxNeighbor];
@@ -363,12 +361,10 @@ bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex n
 		DEBUG_EXTRA("Reference image %3u paired with %u views", idxImage, depthData.images.size()-1);
 		#endif
 	}
-	std::cout << "FRAN - InitViews3" <<  std::endl;
 	if (depthData.images.size() < 2) {
 		depthData.images.Release();
 		return false;
 	}
-	std::cout << "FRAN - InitViews4" <<  std::endl;
 	// initialize reference image as well
 	DepthData::ViewData& viewRef = depthData.images.front();
 	viewRef.scale = 1;
@@ -376,7 +372,6 @@ bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex n
 	viewRef.camera = viewRef.pImageData->camera;
 	if (loadImages)
 		viewRef.pImageData->image.toGray(viewRef.image, cv::COLOR_BGR2GRAY, true);
-	std::cout << "FRAN - InitViews5" <<  std::endl;
 	// initialize views
 	for (IIndex i=1; i<depthData.images.size(); ++i) {
 		DepthData::ViewData& view = depthData.images[i];
@@ -396,9 +391,7 @@ bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex n
 		}
 		view.Init(viewRef.camera);
 	}
-	std::cout << "FRAN - InitViews6" <<  std::endl;
 	if (loadDepthMaps > 0) {
-		std::cout << "FRAN - InitViews6.1" <<  std::endl;
 		// load known depth-map and normal-map
 		String imageFileName;
 		IIndexArr IDs;
@@ -406,43 +399,33 @@ bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex n
 		Camera camera;
 		ConfidenceMap confMap;
 		ViewsMap viewsMap;
-		std::cout << "FRAN - InitViews6.2" <<  std::endl;
 		if (!ImportDepthDataRaw(ComposeDepthFilePath(viewRef.GetID(), "dmap"),
 				imageFileName, IDs, imageSize, camera.K, camera.R, camera.C, depthData.dMin, depthData.dMax,
 				depthData.depthMap, depthData.normalMap, confMap, viewsMap, 3))
 			return false;
-		std::cout << "FRAN - InitViews6.3" <<  std::endl;
 		ASSERT(viewRef.image.size() == depthData.depthMap.size());
 		ASSERT(depthData.normalMap.empty() || viewRef.image.size() == depthData.normalMap.size());
 		if (depthData.normalMap.empty()) {
 			// estimate normal map
 			EstimateNormalMap(viewRef.camera.K, depthData.depthMap, depthData.normalMap);
 		}
-		std::cout << "FRAN - InitViews6.4" <<  std::endl;
 	} else if (loadDepthMaps == 0) {
-		std::cout << "FRAN - InitViews6.5" <<  std::endl;
 		// initialize depth and normal maps
 		if (OPTDENSE::nMinViewsTrustPoint < 2 || depthData.points.empty()) {
-			std::cout << "FRAN - InitViews6.6" <<  std::endl;
 			// compute depth range and initialize known depths, else random
 			const Image8U::Size size(viewRef.image.size());
 			depthData.depthMap.create(size); depthData.depthMap.memset(0);
 			depthData.normalMap.create(size);
-			std::cout << "FRAN - InitViews6.7" <<  std::endl;
 			if (depthData.points.empty()) {
-				std::cout << "FRAN - InitViews6.8" <<  std::endl;
 				// all values will be initialized randomly
 				depthData.dMin = 1e-1f;
 				depthData.dMax = 1e+2f;
 			} else {
-				std::cout << "FRAN - InitViews6.9" <<  std::endl;
 				// initialize with the sparse point-cloud
 				const int nPixelArea(2); // half windows size around a pixel to be initialize with the known depth
 				depthData.dMin = FLT_MAX;
 				depthData.dMax = 0;
-				std::cout << "FRAN - InitViews6.91" <<  std::endl;
 				FOREACHPTR(pPoint, depthData.points) {
-					std::cout << "FRAN - InitViews6.92" <<  std::endl;
 					const PointCloud::Point& X = scene.pointcloud.points[*pPoint];
 					const Point3 camX(viewRef.camera.TransformPointW2C(Cast<REAL>(X)));
 					const ImageRef x(ROUND2INT(viewRef.camera.TransformPointC2I(camX)));
@@ -455,28 +438,20 @@ bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex n
 							depthData.normalMap(y,x) = Normal::ZERO;
 						}
 					}
-					std::cout << "FRAN - InitViews6.93" <<  std::endl;
 					if (depthData.dMin > d)
 						depthData.dMin = d;
 					if (depthData.dMax < d)
 						depthData.dMax = d;
 				}
-				std::cout << "FRAN - InitViews6.94" <<  std::endl;
 				depthData.dMin *= 0.9f;
 				depthData.dMax *= 1.1f;
 			}
-			std::cout << "FRAN - InitViews6.95" <<  std::endl;
 		} else {
-			std::cout << "FRAN - InitViews6.96" <<  std::endl;
 			ASSERT(!depthData.points.empty());
-			std::cout << "FRAN - InitViews6.96b" <<  std::endl;
 			// compute rough estimates using the sparse point-cloud
 			InitDepthMap(depthData);
-			std::cout << "FRAN - InitViews6.96c" <<  std::endl;
 		}
-		std::cout << "FRAN - InitViews6.97" <<  std::endl;
 	}
-	std::cout << "FRAN - InitViews7" <<  std::endl;
 	return true;
 } // InitViews
 /*----------------------------------------------------------------*/
@@ -486,25 +461,19 @@ bool DepthMapsData::InitViews(DepthData& depthData, IIndex idxNeighbor, IIndex n
 bool DepthMapsData::InitDepthMap(DepthData& depthData)
 {
 	TD_TIMER_STARTD();
-	std::cout << "FRAN - InitDepth1" <<  std::endl;
 	ASSERT(depthData.images.GetSize() > 1 && !depthData.points.IsEmpty());
 	const DepthData::ViewData& image(depthData.GetView());
-	std::cout << "FRAN - InitDepth2" <<  std::endl;
 	TriangulatePoints2DepthMap(image, scene.pointcloud, depthData.points, depthData.depthMap, depthData.normalMap, depthData.dMin, depthData.dMax, OPTDENSE::bAddCorners, OPTDENSE::bInitSparse);
-	std::cout << "FRAN - InitDepth3" <<  std::endl;
 	depthData.dMin *= 0.9f;
 	depthData.dMax *= 1.1f;
-	std::cout << "FRAN - InitDepth4" <<  std::endl;
 	#if TD_VERBOSE != TD_VERBOSE_OFF
 	// save rough depth map as image
 	if (g_nVerbosityLevel > 4) {
-		std::cout << "FRAN - InitDepth5" <<  std::endl;
 		ExportDepthMap(ComposeDepthFilePath(image.GetID(), "init.png"), depthData.depthMap);
 		ExportNormalMap(ComposeDepthFilePath(image.GetID(), "init.normal.png"), depthData.normalMap);
 		ExportPointCloud(ComposeDepthFilePath(image.GetID(), "init.ply"), *depthData.images.First().pImageData, depthData.depthMap, depthData.normalMap);
 	}
 	#endif
-	std::cout << "FRAN - InitDepth6" <<  std::endl;
 	DEBUG_ULTIMATE("Depth-map %3u roughly estimated from %u sparse points: %dx%d (%s)", image.GetID(), depthData.points.size(), image.image.width(), image.image.height(), TD_TIMER_GET_FMT().c_str());
 	return true;
 } // InitDepthMap
@@ -2488,7 +2457,6 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 			data.depthMaps.pmCUDA->Init(false);
 	}
 	#endif // _USE_CUDA
-	std::cout << "FRAN - Before queue of depth maps" << std::endl;
 	// initialize the queue of images to be processed
 	const int nOptimize(OPTDENSE::nOptimize);
 	if (OPTDENSE::nEstimationGeometricIters && data.nFusionMode >= 0)
@@ -2497,20 +2465,17 @@ bool Scene::ComputeDepthMaps(DenseDepthMapData& data)
 	ASSERT(data.events.IsEmpty());
 	data.events.AddEvent(new EVTProcessImage(0));
 	// start working threads
-	std::cout << "FRAN - Start working threads" << std::endl;
 	data.progress = new Util::Progress("Estimated depth-maps", data.images.GetSize());
 	GET_LOGCONSOLE().Pause();
 	if (nMaxThreads > 1) {
 		// multi-thread execution
 		cList<SEACAVE::Thread> threads(2);
 		FOREACHPTR(pThread, threads)
-			{std::cout << "FRAN - Before DenseReconstructionEstimateTmp" << std::endl;
-			pThread->start(DenseReconstructionEstimateTmp, (void*)&data);}
+			pThread->start(DenseReconstructionEstimateTmp, (void*)&data);
 		FOREACHPTR(pThread, threads)
 			pThread->join();
 	} else {
 		// single-thread execution
-		std::cout << "FRAN - Before DenseReconstructionEstimateTmp, single thread" << std::endl;
 		DenseReconstructionEstimate((void*)&data);
 	}
 	GET_LOGCONSOLE().Play();
@@ -2603,14 +2568,11 @@ void* DenseReconstructionEstimateTmp(void* arg) {
 // initialize the dense reconstruction with the sparse point cloud
 void Scene::DenseReconstructionEstimate(void* pData)
 {
-	std::cout << "FRAN - Start of DenseReconstructionEstimate" << std::endl;
 	DenseDepthMapData& data = *((DenseDepthMapData*)pData);
 	while (true) {
 		CAutoPtr<Event> evt(data.events.GetEvent());
-		std::cout << "FRAN - " << evt->GetID() << std::endl;
 		switch (evt->GetID()) {
 		case EVT_PROCESSIMAGE: {
-			std::cout << "FRAN - EVT_PROCESSIMAGE" <<  std::endl;
 			const EVTProcessImage& evtImage = *((EVTProcessImage*)(Event*)evt);
 			if (evtImage.idxImage >= data.images.size()) {
 				if (nMaxThreads > 1) {
@@ -2621,17 +2583,12 @@ void Scene::DenseReconstructionEstimate(void* pData)
 			}
 			// select views to reconstruct the depth-map for this image
 			const IIndex idx = data.images[evtImage.idxImage];
-			std::cout << "FRAN - Before DepthData" <<  std::endl;
 			DepthData& depthData(data.depthMaps.arrDepthData[idx]);
-			std::cout << "FRAN - Before depthmapComputed" <<  std::endl;
 			const bool depthmapComputed(data.nFusionMode < 0 || (data.nFusionMode >= 0 && data.nEstimationGeometricIter < 0 && File::access(ComposeDepthFilePath(data.scene.images[idx].ID, "dmap"))));
 			// initialize images pair: reference image and the best neighbor view
-			std::cout << "FRAN - Before ASSERT" <<  std::endl;
 			ASSERT(data.neighborsMap.IsEmpty() || data.neighborsMap[evtImage.idxImage] != NO_ID);
-			std::cout << "FRAN - Before If" <<  std::endl;
 			if (!data.depthMaps.InitViews(depthData, data.neighborsMap.IsEmpty()?NO_ID:data.neighborsMap[evtImage.idxImage], OPTDENSE::nNumViews, !depthmapComputed, depthmapComputed ? -1 : (data.nEstimationGeometricIter >= 0 ? 1 : 0))) {
 				// process next image
-				std::cout << "FRAN - Before AddEvent EVTProcessImage" <<  std::endl;
 				data.events.AddEvent(new EVTProcessImage((IIndex)Thread::safeInc(data.idxImage)));
 				break;
 			}
@@ -2649,13 +2606,11 @@ void Scene::DenseReconstructionEstimate(void* pData)
 				data.events.AddEvent(new EVTProcessImage((uint32_t)Thread::safeInc(data.idxImage)));
 			} else {
 				// estimate depth-map
-				std::cout << "FRAN - Before AddEventFirst EVTEstimateDepthMap" <<  std::endl;
 				data.events.AddEventFirst(new EVTEstimateDepthMap(evtImage.idxImage));
 			}
 			break; }
 
 		case EVT_ESTIMATEDEPTHMAP: {
-			std::cout << "FRAN - Start event ESTIMATEDEPTHMAP" <<  std::endl;
 			const EVTEstimateDepthMap& evtImage = *((EVTEstimateDepthMap*)(Event*)evt);
 			// request next image initialization to be performed while computing this depth-map
 			data.events.AddEvent(new EVTProcessImage((uint32_t)Thread::safeInc(data.idxImage)));
@@ -2663,7 +2618,6 @@ void Scene::DenseReconstructionEstimate(void* pData)
 			data.sem.Wait();
 			if (data.nFusionMode >= 0) {
 				// extract depth-map using Patch-Match algorithm
-				std::cout << "FRAN - Before EStimate DepthMap" <<  std::endl;
 				data.depthMaps.EstimateDepthMap(data.images[evtImage.idxImage], data.nEstimationGeometricIter);
 			} else {
 				// extract disparity-maps using SGM algorithm
