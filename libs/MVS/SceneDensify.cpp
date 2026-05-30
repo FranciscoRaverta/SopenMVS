@@ -2602,7 +2602,9 @@ void Scene::DenseReconstructionEstimate(void* pData)
 			std::cout << "FRAN - Before depthmapComputed" <<  std::endl;
 			const bool depthmapComputed(data.nFusionMode < 0 || (data.nFusionMode >= 0 && data.nEstimationGeometricIter < 0 && File::access(ComposeDepthFilePath(data.scene.images[idx].ID, "dmap"))));
 			// initialize images pair: reference image and the best neighbor view
+			std::cout << "FRAN - Before ASSERT" <<  std::endl;
 			ASSERT(data.neighborsMap.IsEmpty() || data.neighborsMap[evtImage.idxImage] != NO_ID);
+			std::cout << "FRAN - Before If" <<  std::endl;
 			if (!data.depthMaps.InitViews(depthData, data.neighborsMap.IsEmpty()?NO_ID:data.neighborsMap[evtImage.idxImage], OPTDENSE::nNumViews, !depthmapComputed, depthmapComputed ? -1 : (data.nEstimationGeometricIter >= 0 ? 1 : 0))) {
 				// process next image
 				std::cout << "FRAN - Before AddEvent EVTProcessImage" <<  std::endl;
