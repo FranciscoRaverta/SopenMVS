@@ -201,7 +201,7 @@ bool Image::ReadUncertaintyImage(const String& fileName, cv::Mat& image)
 	
     cnpy::NpyArray arr = archive["arr_0"];
 
-    if (arr.word_size != sizeof(float) || arr.shape.size()!=3)
+    if (arr.word_size != sizeof(float) || arr.shape.size()!=2)
         return false;
 
     int H = arr.shape[0];
