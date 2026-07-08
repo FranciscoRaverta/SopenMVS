@@ -206,9 +206,9 @@ bool Image::ReadUncertaintyImage(const String& fileName, cv::Mat& image)
 
     int H = arr.shape[0];
     int W = arr.shape[1];
-    int C = arr.shape[2];
+    //int C = arr.shape[2];
 
-	std::cout << "FRAN - H,W,C " << H << " " << W << " " << C << std::endl;
+	std::cout << "FRAN - H,W,C " << H << " " << W << std::endl;
     image = cv::Mat(
         H,W,CV_MAKETYPE(CV_32F,C),
         arr.data<float>()
