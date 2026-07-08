@@ -1739,7 +1739,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				std::cout << "FRAN 1" << std::endl;
 				if (bEstimateSegmentation) {
 					segmentationColor = Cast<uint8_t>(imageData.segmentedImage(x)); // Convert to a 32-bit packed color
-					std::cout << "FRAN 2" << segmentationColor << std::endl;
+					std::cout << "FRAN 2" <<  std::endl;
 					//std::cout << Cast<float>(imageData.confidenceImage(x)) << std::endl; // FRAN
 					//sumLogsConfidence += std::log(std::max(Cast<float>(imageData.confidenceImage(x)),1e-4f)); 
 					//logNumber += 1;
@@ -1748,14 +1748,16 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						segmentationFrequency[segmentationColor] = 0.0f;}
 						//sumLogsConfidence[segmentationColor] = 0.0f; }
 					//sumLogsConfidence[segmentationColor] += std::log(std::max(Cast<float>(imageData.confidenceImage(x)),1e-4f)); 
-					segmentationFrequency[segmentationColor]++; }
+					segmentationFrequency[segmentationColor]++; 
+					std::cout << "FRAN 2.1 " << segmentationFrequency[segmentationColor] <<  std::endl;
+				}
 				if (bEstimateSegmentation) {
 					std::cout << "FRAN 3" << std::endl;
 					const float* probs = imageData.probabilitiesImage.ptr<float>(x.y, x.x);
 					std::cout << "FRAN 4" << probs << std::endl;
 					const float* unc_ptr = imageData.uncertaintyImage.ptr<float>(x.y, x.x);
-					std::cout << "FRAN 5" << unc_ptr[0] << std::endl;
 					float unc = unc_ptr[0];
+					std::cout << "FRAN 5" << unc << std::endl;
 					//float unc = Cast<float>(imageData.uncertaintyImage(x));
 					float alpha_weighted = std::max(-std::log(unc + 1e-9f), 0.f);
 					std::vector<float> alpha_vec(numLabels);
