@@ -187,6 +187,7 @@ bool Image::ReadProbabilityImage(const String& fileName, cv::Mat& image)
 bool Image::ReadUncertaintyImage(const String& fileName, cv::Mat& image)
 {
     cnpy::npz_t archive;
+	std::cout << "FRAN - uncertainty fileName " << fileName << std::endl;
 
     try { archive = cnpy::npz_load(fileName.c_str()); }
     catch (...) {
@@ -207,6 +208,7 @@ bool Image::ReadUncertaintyImage(const String& fileName, cv::Mat& image)
     int W = arr.shape[1];
     int C = arr.shape[2];
 
+	std::cout << "FRAN - H,W,C " << H << " " << W << " " << C << std::endl;
     image = cv::Mat(
         H,W,CV_MAKETYPE(CV_32F,C),
         arr.data<float>()
