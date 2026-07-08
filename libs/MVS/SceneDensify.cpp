@@ -1725,7 +1725,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				int logNumber = 0;
 				// New - FRAN
 				const int numLabels = imageData.probabilitiesImage.channels();
-				//std::cout << "numLabels - FRAN " << numLabels << std::endl;
+				std::cout << "numLabels - FRAN " << numLabels << std::endl;
 				std::vector<float> sumLogProbs(numLabels, 0.0f);
 				std::vector<float> sumOnes(numLabels, 1.0f);
 				std::vector<float> sumProbs(numLabels, 0.0f);
@@ -1739,7 +1739,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				std::cout << "FRAN 1" << std::endl;
 				if (bEstimateSegmentation) {
 					segmentationColor = Cast<uint8_t>(imageData.segmentedImage(x)); // Convert to a 32-bit packed color
-					std::cout << "FRAN 2" <<  std::endl;
+					std::cout << "FRAN 2 " << segmentationColor <<  std::endl;
 					//std::cout << Cast<float>(imageData.confidenceImage(x)) << std::endl; // FRAN
 					//sumLogsConfidence += std::log(std::max(Cast<float>(imageData.confidenceImage(x)),1e-4f)); 
 					//logNumber += 1;
@@ -1754,7 +1754,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				if (bEstimateSegmentation) {
 					std::cout << "FRAN 3" << std::endl;
 					const float* probs = imageData.probabilitiesImage.ptr<float>(x.y, x.x);
-					std::cout << "FRAN 4" << probs << std::endl;
+					std::cout << "FRAN 4 " << probs << std::endl;
 					const float* unc_ptr = imageData.uncertaintyImage.ptr<float>(x.y, x.x);
 					float unc = unc_ptr[0];
 					std::cout << "FRAN 5" << unc << std::endl;
