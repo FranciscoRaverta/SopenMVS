@@ -1753,6 +1753,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				}
 				if (bEstimateSegmentation) {
 					std::cout << "FRAN 3" << std::endl;
+					std::cout << imageData.probabilitiesImage.type() << std::endl;
+					std::cout << imageData.uncertaintyImage.type() << std::endl;
 					const float* probs = imageData.probabilitiesImage.ptr<float>(x.y, x.x);
 					std::cout << "FRAN 4 " << probs << std::endl;
 					const float* unc_ptr = imageData.uncertaintyImage.ptr<float>(x.y, x.x);
