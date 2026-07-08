@@ -1739,7 +1739,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				std::cout << "FRAN 1" << std::endl;
 				if (bEstimateSegmentation) {
 					segmentationColor = Cast<uint8_t>(imageData.segmentedImage(x)); // Convert to a 32-bit packed color
-					std::cout << "FRAN 2" << std::endl;
+					std::cout << "FRAN 2" << segmentationColor << std::endl;
 					//std::cout << Cast<float>(imageData.confidenceImage(x)) << std::endl; // FRAN
 					//sumLogsConfidence += std::log(std::max(Cast<float>(imageData.confidenceImage(x)),1e-4f)); 
 					//logNumber += 1;
@@ -1752,9 +1752,9 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				if (bEstimateSegmentation) {
 					std::cout << "FRAN 3" << std::endl;
 					const float* probs = imageData.probabilitiesImage.ptr<float>(x.y, x.x);
-					std::cout << "FRAN 4" << std::endl;
+					std::cout << "FRAN 4" << probs << std::endl;
 					const float* unc_ptr = imageData.uncertaintyImage.ptr<float>(x.y, x.x);
-					std::cout << "FRAN 5" << std::endl;
+					std::cout << "FRAN 5" << unc_ptr[0] << std::endl;
 					float unc = unc_ptr[0];
 					//float unc = Cast<float>(imageData.uncertaintyImage(x));
 					float alpha_weighted = std::max(-std::log(unc + 1e-9f), 0.f);
@@ -1823,6 +1823,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							if (bEstimateColor)
 								C += Cast<float>(imageDataB.image(xB))*confidenceB;
 							if (bEstimateSegmentation) {
+								std::cout << "FRAN 6" << std::endl;
 								//C += Cast<float>(imageDataB.image(xB))*confidenceB; 
 								segmentationColor = Cast<uint8_t>(imageDataB.segmentedImage(xB)); // Convert to a 32-bit packed color
 								if (segmentationFrequency.find(segmentationColor) == segmentationFrequency.end()) {
@@ -1835,6 +1836,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								//logNumber += 1;
 							} 
 							if (bEstimateSegmentation) {
+								std::cout << "FRAN 7" << std::endl;
 								const float* probsB = imageDataB.probabilitiesImage.ptr<float>(xB.y, xB.x);
 								const float* unc_ptr = imageDataB.uncertaintyImage.ptr<float>(xB.y, xB.x);
 								float unc = unc_ptr[0];
@@ -1856,6 +1858,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								obs_probs.emplace_back(probsB, probsB + numLabels);
     							obs_alpha.emplace_back(std::move(alpha_vec));
 								numViewsUsed++;
+								std::cout << "FRAN 8" << std::endl;
 							}
 							if (bEstimateNormal)
 								N += normalB*confidenceB;
@@ -1870,6 +1873,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				}
 				uint32_t modeColor = 10001;
 				if (bEstimateSegmentation) {
+					std::cout << "FRAN 9" << std::endl;
 					float maxCount = 0.f;
 					for (const auto& [color, count] : segmentationFrequency) {
 						if (count > maxCount) {
@@ -1883,6 +1887,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					}
 					segConfidence = (totalCount > 0.f) ? (maxCount / totalCount) : -10.f;
 					logNumber = maxCount;
+					std::cout << "FRAN 10" << std::endl;
 				}
 				if (bEstimateSegmentation) {
 					//for(float& v : sumLogProbs)
@@ -1915,6 +1920,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					const REAL nrm(REAL(1)/confidence);
 					point = X*nrm;
 					if (bEstimateSegmentation) {
+						std::cout << "FRAN 11" << std::endl;
 						// FRAN
 						//SEACAVE::Matrix3x3d X_covariance = (poseCovariance.inv()) * (1/nrm) * (1/nrm);
 						SEACAVE::Matrix3x3d X_covariance = (poseCovariance) * nrm * nrm;
@@ -1930,11 +1936,13 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						point = X_covariance2 * X2; // FRAN
 						pointcloud.covarianceTraces.emplace_back(X_shannon);
 						//std::cout << "Trace: " << X_trace << std::endl;
+						std::cout << "FRAN 12" << std::endl;
 					}
 					ASSERT(ISFINITE(point));
 					if (bEstimateColor)
 						pointcloud.colors.emplace_back((C*(float)nrm).cast<uint8_t>());
 					if (bEstimateSegmentation) {
+						std::cout << "FRAN 13" << std::endl;
 						//Normalized posterior:
 						std::vector<float> probabs_bayesian(numLabels, 0.0f); //FRAN
 						std::vector<float> probabs_geom(numLabels, 0.0f); //FRAN
