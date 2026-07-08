@@ -344,7 +344,7 @@ int main(int argc, LPCTSTR* argv)
 				LOG("error: Image %s has non-empty segmentationName %s", image.name.c_str(), image.segmentationName.c_str());
 				return EXIT_FAILURE;
 			}
-			image.segmentationName = OPT::strSegmentationPath + Util::getFileName(image.name) + ".png";
+			image.segmentationName = OPT::strSegmentationPath + Util::getFileName(image.name) + ".png.tif.png";
 			if (!File::access(image.segmentationName)) {
 				LOG("error: Mask image %s not found", image.segmentationName.c_str());
 				return EXIT_FAILURE;
@@ -360,7 +360,7 @@ int main(int argc, LPCTSTR* argv)
 				LOG("error: Image %s has non-empty segmentationName %s", image.name.c_str(), image.uncertaintyName.c_str());
 				return EXIT_FAILURE;
 			}
-			image.uncertaintyName = OPT::strUncertaintyPath + Util::getFileName(image.name) + ".npz";
+			image.uncertaintyName = OPT::strUncertaintyPath + Util::getFileName(image.name) + ".png.tif.npz";
 			if (!File::access(image.uncertaintyName)) {
 				LOG("error: Mask image %s not found", image.uncertaintyName.c_str());
 				return EXIT_FAILURE;
@@ -376,7 +376,7 @@ int main(int argc, LPCTSTR* argv)
 				LOG("error: Image %s has non-empty segmentationName %s", image.name.c_str(), image.probabilitiesName.c_str());
 				return EXIT_FAILURE;
 			}
-			image.probabilitiesName = OPT::strProbabilitiesPath + Util::getFileName(image.name) + ".npz";
+			image.probabilitiesName = OPT::strProbabilitiesPath + Util::getFileName(image.name) + ".png.tif.npz";
 			if (!File::access(image.probabilitiesName)) {
 				LOG("error: Probabilities numpy file %s not found", image.probabilitiesName.c_str());
 				return EXIT_FAILURE;
