@@ -1758,7 +1758,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					std::cout << "FRAN 4 " << probs << std::endl;
 					const float* unc_ptr = imageData.uncertaintyImage.ptr<float>(x.y, x.x);
 					float unc = unc_ptr[0];
-					std::cout << "FRAN 5" << unc << std::endl;
+					std::cout << "FRAN 5 " << unc << std::endl;
 					//float unc = Cast<float>(imageData.uncertaintyImage(x));
 					float alpha_weighted = std::max(-std::log(unc + 1e-9f), 0.f);
 					std::vector<float> alpha_vec(numLabels);
@@ -2154,9 +2154,11 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					for (Depth* pDepth: invalidDepths)
 						*pDepth = 0;
 				}
+				std::cout << "FRAN 14" << std::endl;
 				segmentationFrequency.clear();
 			}
 		}
+		std::cout << "FRAN 15" << std::endl;
 		bool applyDenseCRF = false;
 		if(applyDenseCRF) 
 		{
