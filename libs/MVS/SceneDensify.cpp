@@ -1713,6 +1713,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				// check the projection in the neighbor depth-maps
 				Point3 X(point*confidence);
 				Point3 X2(poseCovariance2 * SEACAVE::TPoint3<double>(point.x, point.y, point.z)); // FRAN
+				std::cout << "image name - FRAN " << imageData.name << std::endl;
 				Pixel32F C(Cast<float>(imageData.image(x))*confidence);
 				std::unordered_map<uint8_t, float> segmentationFrequency;
 				uint8_t segmentationColor;
@@ -1755,7 +1756,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					std::cout << "FRAN 3" << std::endl;
 					std::cout << "unc empty: " << imageData.uncertaintyImage.empty() << std::endl;
 					const float* probs = imageData.probabilitiesImage.ptr<float>(x.y, x.x);
-					std::cout << "FRAN 4 " << probs << std::endl;
+					float probs_cero = probs[0];
+					std::cout << "FRAN 4 " << probs_cero << std::endl;
 					const float* unc_ptr = imageData.uncertaintyImage.ptr<float>(x.y, x.x);
 					float unc = unc_ptr[0];
 					std::cout << "FRAN 5 " << unc << std::endl;
