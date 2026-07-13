@@ -37,6 +37,8 @@
 #include "../Math/TRWS/MRFEnergy.h"
 #include "../densecrf/include/densecrf.h"
 
+#include <cmath>
+
 using namespace MVS;
 
 
@@ -1942,7 +1944,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 
 						double X_shannon = 0.5 * std::log(std::pow(2.0 * M_PI * std::exp(1.0), 3.0)*detX_cov);
 						point = X_covariance2 * X2; // FRAN
-						pointcloud.covarianceTraces.emplace_back(X_shannon);
+						//pointcloud.covarianceTraces.emplace_back(X_shannon);
+						pointcloud.covarianceTraces.emplace_back(std::sqrt(X_trace2));
 						//std::cout << "Trace: " << X_trace << std::endl;
 						//std::cout << "FRAN 12" << std::endl;
 					}
