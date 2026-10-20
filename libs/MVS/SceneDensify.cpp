@@ -1798,7 +1798,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				}
 				PointCloud::Normal N(normal*confidence);
 				invalidDepths.Empty();
-				neighbor_count = 0;
+				int neighbor_count2 = 0;
 				for (const ViewScore& neighbor: depthData.neighbors) {
 					//std::cout << "FRAN 6.00" << std::endl;
 					const IIndex idxImageB(neighbor.ID);
@@ -1895,12 +1895,12 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						// discard depth
 						invalidDepths.Insert(&depthB);
 					}
-					neighbor_count += 1;
-					if (neighbor_count == max_neighbour_count) {
+					neighbor_count2 += 1;
+					if (neighbor_count2 == max_neighbour_count) {
 						break;
 					}
 				}
-				std::cout << "Neighbour count -- FRAN: " << neighbor_count << ", max: "  << max_neighbour_count << std::endl; 
+				std::cout << "Neighbour count -- FRAN: " << neighbor_count2 << ", max: "  << max_neighbour_count << std::endl; 
 				uint32_t modeColor = 10001;
 				if (bEstimateSegmentation) {
 					//std::cout << "FRAN 9" << std::endl;
