@@ -1471,10 +1471,11 @@ void DepthMapsData::ApplyDenseCRF3D(
     }
 }
 
-double sumBaselines(const MVS::Camera camera, SEACAVE::Point3 P, const ViewScoreArr neighbors, const MVS::ImageArr images) {
+double sumBaselines(const MVS::Camera& camera, SEACAVE::Point3& P, const ViewScoreArr& neighbors, const MVS::ImageArr& images) {
 	CMatrix C1 = camera.C;
 	double sum = 0;
-
+	int max_neighbour_count = 10;
+	int neighbor_count = 0;
 	for (const ViewScore& neighbor: neighbors) {
 		const IIndex idxImage(neighbor.ID);
 		
@@ -1492,15 +1493,20 @@ double sumBaselines(const MVS::Camera camera, SEACAVE::Point3 P, const ViewScore
         // Remove component along viewing direction
         Point3 b_perp = b_vec - v_hat * b_vec.dot(v_hat);
         sum += std::pow((b_perp.dot(b_perp)),2);
+		neighbor_count += 1;
+		if (neighbor_count == max_neighbour_count) {
+			break;
+		}
 	}
 	return sum;
 }
 
-SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera camera, double depth, double sum_baseline, double depth_confidence, SEACAVE::Point2f point2d, SEACAVE::CovMatrix C_pose)
+SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera& camera, double depth, double sum_baseline, double depth_confidence, SEACAVE::Point2f& point2d, SEACAVE::CovMatrix& C_pose)
 {
 	KMatrix K = camera.K;
 	RMatrix R = camera.R; //This is equivalent to Rcw
 	CMatrix C = camera.C; //This is equivalent to tcw
+	SEACAVE::Matrix3x3d K_inv = K.inv();
 
 	Point3 u_h(point2d.x, point2d.y, 1.0);
 
@@ -1519,7 +1525,7 @@ SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera camera, double de
 
 	// Compute J_R = dX/dR = 
 	//SEACAVE::Vec3d Y = R.t() * depth * K.inv() * u_h + C;
-	SEACAVE::Vec3d Y = depth * K.inv() * u_h;
+	SEACAVE::Vec3d Y = depth * K_inv * u_h;
 	SEACAVE::Matrix3x3d skew;
 	skew(0,0)=0;     skew(0,1)=-Y[2]; skew(0,2)=Y[1];
 	skew(1,0)=Y[2];  skew(1,1)=0;     skew(1,2)=-Y[0];
@@ -1532,7 +1538,7 @@ SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera camera, double de
 			J(r,c) = R_skew(r,c); }}
 
 	// Compute J_d = dX/dd = R^T K^-1 u_h
-	SEACAVE::Vec3d Jd = R.t() * K.inv() * u_h;
+	SEACAVE::Vec3d Jd = R.t() * K_inv * u_h;
 	for (int r=0; r<3; ++r) {
     	J(r,6) = Jd[r]; }
 
@@ -1710,7 +1716,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				const MVS::Platform::Pose& pose = platform.poses[imageData.poseID];
 				CovMatrix C_pose = pose.Cov;
 				double sumBl = sumBaselines(imageData.camera, point, depthData.neighbors, scene.images);
-				SEACAVE::Matrix3x3d poseCovariance = (PoseCovarianceEstimation(imageData.camera, depth, sumBl, depthData.confMap.empty() ? 1.f : depthData.confMap(x), Point2f(x), C_pose))*REAL(confidence)*REAL(confidence);
+				//SEACAVE::Matrix3x3d poseCovariance = (PoseCovarianceEstimation(imageData.camera, depth, sumBl, depthData.confMap.empty() ? 1.f : depthData.confMap(x), Point2f(x), C_pose))*REAL(confidence)*REAL(confidence);
 				SEACAVE::Matrix3x3d poseCovariance2 = (PoseCovarianceEstimation(imageData.camera, depth, sumBl, depthData.confMap.empty() ? 1.f : depthData.confMap(x), Point2f(x), C_pose)).inv();//*REAL(confidence)*REAL(confidence); FRAN
 				
 				// check the projection in the neighbor depth-maps
@@ -1823,7 +1829,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							const MVS::Platform::Pose& poseB = platformB.poses[imageDataB.poseID];
 							CovMatrix C_poseB = poseB.Cov;
 							double sumBlB = sumBaselines(imageDataB.camera, imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB)), depthDataB.neighbors, scene.images);
-							poseCovariance += (PoseCovarianceEstimation(imageDataB.camera, depthB, sumBlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB))*REAL(confidenceB)*REAL(confidenceB);
+							//poseCovariance += (PoseCovarianceEstimation(imageDataB.camera, depthB, sumBlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB))*REAL(confidenceB)*REAL(confidenceB);
 							poseCovariance2 += PoseCovarianceEstimation(imageDataB.camera, depthB, sumBlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB).inv(); // FRAN
 
 							X += imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB))*REAL(confidenceB);
@@ -1933,16 +1939,16 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						//std::cout << "FRAN 11" << std::endl;
 						// FRAN
 						//SEACAVE::Matrix3x3d X_covariance = (poseCovariance.inv()) * (1/nrm) * (1/nrm);
-						SEACAVE::Matrix3x3d X_covariance = (poseCovariance) * nrm * nrm;
+						//SEACAVE::Matrix3x3d X_covariance = (poseCovariance) * nrm * nrm;
 						SEACAVE::Matrix3x3d X_covariance2 = poseCovariance2.inv(); // FRAN
-						double X_trace = X_covariance(0,0) + X_covariance(1,1) + X_covariance(2,2);
+						//double X_trace = X_covariance(0,0) + X_covariance(1,1) + X_covariance(2,2);
 						double X_trace2 = X_covariance2(0,0) + X_covariance2(1,1) + X_covariance2(2,2); // FRAN
 
-						double detX_cov = 	X_covariance2(0,0) * (X_covariance2(1,1)*X_covariance2(2,2) - X_covariance2(1,2)*X_covariance2(2,1)) -
-											X_covariance2(0,1) * (X_covariance2(1,0)*X_covariance2(2,2) - X_covariance2(1,2)*X_covariance2(2,0)) +
-											X_covariance2(0,2) * (X_covariance2(1,0)*X_covariance2(2,1) - X_covariance2(1,1)*X_covariance2(2,0));
+						//double detX_cov = 	X_covariance2(0,0) * (X_covariance2(1,1)*X_covariance2(2,2) - X_covariance2(1,2)*X_covariance2(2,1)) -
+						//					X_covariance2(0,1) * (X_covariance2(1,0)*X_covariance2(2,2) - X_covariance2(1,2)*X_covariance2(2,0)) +
+						//					X_covariance2(0,2) * (X_covariance2(1,0)*X_covariance2(2,1) - X_covariance2(1,1)*X_covariance2(2,0));
 
-						double X_shannon = 0.5 * std::log(std::pow(2.0 * M_PI * std::exp(1.0), 3.0)*detX_cov);
+						//double X_shannon = 0.5 * std::log(std::pow(2.0 * M_PI * std::exp(1.0), 3.0)*detX_cov);
 						point = X_covariance2 * X2; // FRAN
 						//pointcloud.covarianceTraces.emplace_back(X_shannon);
 						pointcloud.covarianceTraces.emplace_back(std::sqrt(X_trace2));
