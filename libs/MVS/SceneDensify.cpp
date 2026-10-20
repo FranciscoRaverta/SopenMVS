@@ -1471,7 +1471,7 @@ void DepthMapsData::ApplyDenseCRF3D(
     }
 }
 
-double sumBaselines(const MVS::Camera& camera, SEACAVE::Point3& P, const ViewScoreArr& neighbors, const MVS::ImageArr& images) {
+double sumBaselines(const MVS::Camera& camera, const SEACAVE::Point3& P, const ViewScoreArr& neighbors, const MVS::ImageArr& images) {
 	CMatrix C1 = camera.C;
 	double sum = 0;
 	int max_neighbour_count = 10;
@@ -1501,7 +1501,7 @@ double sumBaselines(const MVS::Camera& camera, SEACAVE::Point3& P, const ViewSco
 	return sum;
 }
 
-SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera& camera, double depth, double sum_baseline, double depth_confidence, SEACAVE::Point2f& point2d, SEACAVE::CovMatrix& C_pose)
+SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera& camera, double depth, double sum_baseline, double depth_confidence, const SEACAVE::Point2f& point2d, const SEACAVE::CovMatrix& C_pose)
 {
 	KMatrix K = camera.K;
 	RMatrix R = camera.R; //This is equivalent to Rcw
