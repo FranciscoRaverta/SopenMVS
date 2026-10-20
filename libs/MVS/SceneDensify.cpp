@@ -1896,9 +1896,11 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						invalidDepths.Insert(&depthB);
 					}
 					neighbor_count2 += 1;
+					std::cout << "Neighbour count2 -- FRAN: " << neighbor_count2 << ", max: "  << max_neighbour_count << std::endl; 
 					if (neighbor_count2 == max_neighbour_count) {
 						break;
 					}
+					std::cout << "Neighbour count3 -- FRAN: " << neighbor_count2 << ", max: "  << max_neighbour_count << std::endl; 
 				}
 				std::cout << "Neighbour count -- FRAN: " << neighbor_count2 << ", max: "  << max_neighbour_count << std::endl; 
 				uint32_t modeColor = 10001;
