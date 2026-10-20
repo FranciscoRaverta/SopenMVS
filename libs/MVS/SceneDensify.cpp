@@ -1301,7 +1301,7 @@ bool DepthMapsData::FilterDepthMap(DepthData& depthDataRef, const IIndexArr& idx
 
 // fuse all depth-maps by simply projecting them in a 3D point cloud
 // in the world coordinate space
-void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, bool bEstimateNormal, bool bEstimateSegmentation)
+void DepthMapsData::MergeDepthMaps(PointCloud& pointcloud, bool bEstimateColor, bool bEstimateNormal, bool bEstimateSegmentation, int max_neighbour_count)
 {
 	TD_TIMER_STARTD();
 
@@ -1474,10 +1474,10 @@ void DepthMapsData::ApplyDenseCRF3D(
     }
 }
 
-double sumBaselines(const MVS::Camera& camera, const SEACAVE::Point3& P, const ViewScoreArr& neighbors, const MVS::ImageArr& images) {
+double sumBaselines(const MVS::Camera& camera, const SEACAVE::Point3& P, const ViewScoreArr& neighbors, const MVS::ImageArr& images, int max_neighbour_count) {
 	CMatrix C1 = camera.C;
 	double sum = 0;
-	int max_neighbour_count = 100;
+	//int max_neighbour_count = 100;
 	int neighbor_count = 0;
 	for (const ViewScore& neighbor: neighbors) {
 		const IIndex idxImage(neighbor.ID);
@@ -1580,7 +1580,7 @@ SEACAVE::Matrix3x3d PoseCovarianceEstimation(const MVS::Camera& camera, double d
 	return C_out;
 }
 
-void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, bool bEstimateNormal, bool bEstimateSegmentation)
+void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, bool bEstimateNormal, bool bEstimateSegmentation, int max_neighbour_count)
 {
 	TD_TIMER_STARTD();
 
@@ -1669,6 +1669,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 		const uint32_t idxImage(pConnection->idx);
 		const DepthData& depthData(arrDepthData[idxImage]);
 		ASSERT(!depthData.images.IsEmpty() && !depthData.neighbors.IsEmpty());
+		int neighbor_count = 0;
 		for (const ViewScore& neighbor: depthData.neighbors) {
 			DepthIndex& depthIdxs = arrDepthIdx[neighbor.ID];
 			if (!depthIdxs.empty())
@@ -1678,6 +1679,9 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				continue;
 			depthIdxs.create(depthDataB.depthMap.size());
 			depthIdxs.memset((uint8_t)NO_ID);
+			if (neighbor_count == max_neighbour_count) {
+				break;
+			}
 		}
 		ASSERT(!depthData.IsEmpty());
 		const Image8U::Size sizeMap(depthData.depthMap.size());
@@ -1718,7 +1722,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				const MVS::Platform& platform = scene.platforms[imageData.platformID];
 				const MVS::Platform::Pose& pose = platform.poses[imageData.poseID];
 				CovMatrix C_pose = pose.Cov;
-				double sumBl = sumBaselines(imageData.camera, point, depthData.neighbors, scene.images);
+				double sumBl = sumBaselines(imageData.camera, point, depthData.neighbors, scene.images, max_neighbour_count);
 				//SEACAVE::Matrix3x3d poseCovariance = (PoseCovarianceEstimation(imageData.camera, depth, sumBl, depthData.confMap.empty() ? 1.f : depthData.confMap(x), Point2f(x), C_pose))*REAL(confidence)*REAL(confidence);
 				SEACAVE::Matrix3x3d poseCovariance2 = (PoseCovarianceEstimation(imageData.camera, depth, sumBl, depthData.confMap.empty() ? 1.f : depthData.confMap(x), Point2f(x), C_pose)).inv();//*REAL(confidence)*REAL(confidence); FRAN
 				
@@ -1793,6 +1797,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				}
 				PointCloud::Normal N(normal*confidence);
 				invalidDepths.Empty();
+				neighbor_count = 0;
 				for (const ViewScore& neighbor: depthData.neighbors) {
 					//std::cout << "FRAN 6.00" << std::endl;
 					const IIndex idxImageB(neighbor.ID);
@@ -1831,7 +1836,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							const MVS::Platform& platformB = scene.platforms[imageDataB.platformID];
 							const MVS::Platform::Pose& poseB = platformB.poses[imageDataB.poseID];
 							CovMatrix C_poseB = poseB.Cov;
-							double sumBlB = sumBaselines(imageDataB.camera, imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB)), depthDataB.neighbors, scene.images);
+							double sumBlB = sumBaselines(imageDataB.camera, imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB)), depthDataB.neighbors, scene.images, max_neighbour_count);
 							//poseCovariance += (PoseCovarianceEstimation(imageDataB.camera, depthB, sumBlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB))*REAL(confidenceB)*REAL(confidenceB);
 							poseCovariance2 += PoseCovarianceEstimation(imageDataB.camera, depthB, sumBlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB).inv(); // FRAN
 
@@ -1888,6 +1893,9 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					if (pt.z < depthB) {
 						// discard depth
 						invalidDepths.Insert(&depthB);
+					}
+					if (neighbor_count == max_neighbour_count) {
+						break;
 					}
 				}
 				uint32_t modeColor = 10001;
