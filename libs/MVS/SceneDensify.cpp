@@ -1901,8 +1901,8 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					if (aleatory_color) {
 						std::mt19937 gen(std::random_device{}());
 						auto it = std::next(segmentationFrequency.begin(), std::uniform_int_distribution<size_t>(0, segmentationFrequency.size() - 1)(gen));
-						modeColor = it->second;
-						float count_color = it->first;
+						modeColor = it->first;
+						float count_color = it->second;
 						segConfidence = (totalCount > 0.f) ? (count_color / totalCount) : -10.f;
 						logNumber = count_color;
 
