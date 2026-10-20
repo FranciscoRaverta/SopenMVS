@@ -1474,7 +1474,7 @@ void DepthMapsData::ApplyDenseCRF3D(
 double sumBaselines(const MVS::Camera& camera, const SEACAVE::Point3& P, const ViewScoreArr& neighbors, const MVS::ImageArr& images) {
 	CMatrix C1 = camera.C;
 	double sum = 0;
-	int max_neighbour_count = 10;
+	int max_neighbour_count = 100;
 	int neighbor_count = 0;
 	for (const ViewScore& neighbor: neighbors) {
 		const IIndex idxImage(neighbor.ID);
@@ -1890,20 +1890,30 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				uint32_t modeColor = 10001;
 				if (bEstimateSegmentation) {
 					//std::cout << "FRAN 9" << std::endl;
-					float maxCount = 0.f;
-					for (const auto& [color, count] : segmentationFrequency) {
-						if (count > maxCount) {
-							maxCount = count;
-							modeColor = color;
-						}
-					}
+					bool aleatory_color = true; // FRAN - color aleatorio dentro de las opciones, o el de máxima cantidad de apariciones
 					float totalCount = 0.f;
 					for (const auto& [color, count] : segmentationFrequency) {
 						totalCount += count;
 					}
-					segConfidence = (totalCount > 0.f) ? (maxCount / totalCount) : -10.f;
-					logNumber = maxCount;
-					//std::cout << "FRAN 10" << std::endl;
+					if (aleatory_color) {
+						auto it = std::next(segmentationFrequency.begin(), std::uniform_int_distribution<size_t>(0, segmentationFrequency.size() - 1)(gen));
+						modeColor = it->second;
+						float count_color = it->first;
+						segConfidence = (totalCount > 0.f) ? (count_color / totalCount) : -10.f;
+						logNumber = count_color;
+
+					} else {
+						float maxCount = 0.f;
+						for (const auto& [color, count] : segmentationFrequency) {
+							if (count > maxCount) {
+								maxCount = count;
+								modeColor = color;
+							}
+						}
+						segConfidence = (totalCount > 0.f) ? (maxCount / totalCount) : -10.f;
+						logNumber = maxCount;
+						//std::cout << "FRAN 10" << std::endl;
+					}
 				}
 				if (bEstimateSegmentation) {
 					//for(float& v : sumLogProbs)
