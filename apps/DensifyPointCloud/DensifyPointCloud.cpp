@@ -131,6 +131,7 @@ bool Initialize(size_t argc, LPCTSTR* argv)
 	unsigned nEstimateSegmentations;
 	unsigned nOptimize;
 	int nIgnoreMaskLabel;
+	int maxNeighbourCount;
 	bool bRemoveDmaps;
 	boost::program_options::options_description config("Densify options");
 	config.add_options()
@@ -167,6 +168,7 @@ bool Initialize(size_t argc, LPCTSTR* argv)
         ("crop-to-roi", boost::program_options::value(&OPT::bCrop2ROI)->default_value(true), "crop scene using the region-of-interest")
         ("remove-dmaps", boost::program_options::value(&bRemoveDmaps)->default_value(false), "remove depth-maps after fusion")
 		("tower-mode", boost::program_options::value(&OPT::nTowerMode)->default_value(3), "add a cylinder of points in the center of ROI; scene assume to be Z-up oriented (0 - disabled, 1 - replace, 2 - append, 3 - select neighbors, <0 - force tower mode)")
+		("max-neighbour-count", boost::program_options::value(&maxNeighbourCount)->default_value(1000), "quantity of neighbours considered for densification process")
         ;
 
 	// hidden options, allowed both on command line and
@@ -251,6 +253,7 @@ bool Initialize(size_t argc, LPCTSTR* argv)
 	OPTDENSE::nEstimateColors = nEstimateColors;
 	OPTDENSE::nEstimateNormals = nEstimateNormals;
 	OPTDENSE::nEstimateSegmentations = nEstimateSegmentations;
+	OPTDENSE::maxNeighbourCount = maxNeighbourCount;
 	OPTDENSE::nOptimize = nOptimize;
 	OPTDENSE::nIgnoreMaskLabel = nIgnoreMaskLabel;
 	OPTDENSE::bRemoveDmaps = bRemoveDmaps;

@@ -2324,10 +2324,10 @@ bool Scene::DenseReconstruction(int nFusionMode, bool bCrop2ROI, float fBorderRO
 	pointcloud.Release();
 	if (OPTDENSE::nMinViewsFuse < 2) {
 		// merge depth-maps
-		data.depthMaps.MergeDepthMaps(pointcloud, OPTDENSE::nEstimateColors == 2, OPTDENSE::nEstimateNormals == 2, OPTDENSE::nEstimateSegmentations == 2);
+		data.depthMaps.MergeDepthMaps(pointcloud, OPTDENSE::nEstimateColors == 2, OPTDENSE::nEstimateNormals == 2, OPTDENSE::nEstimateSegmentations == 2, OPTDENSE::maxNeighbourCount);
 	} else {
 		// fuse depth-maps
-		data.depthMaps.FuseDepthMaps(pointcloud, OPTDENSE::nEstimateColors == 2, OPTDENSE::nEstimateNormals == 2, OPTDENSE::nEstimateSegmentations == 2);
+		data.depthMaps.FuseDepthMaps(pointcloud, OPTDENSE::nEstimateColors == 2, OPTDENSE::nEstimateNormals == 2, OPTDENSE::nEstimateSegmentations == 2, OPTDENSE::maxNeighbourCount);
 	}
 	#if TD_VERBOSE != TD_VERBOSE_OFF
 	if (g_nVerbosityLevel > 2) {

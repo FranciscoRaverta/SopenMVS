@@ -137,6 +137,7 @@ extern float fRandomAngle2Range;
 extern float fRandomSmoothDepth;
 extern float fRandomSmoothNormal;
 extern float fRandomSmoothBonus;
+extern int maxNeighbourCount;
 } // namespace OPTDENSE
 /*----------------------------------------------------------------*/
 
