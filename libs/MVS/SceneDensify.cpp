@@ -41,6 +41,9 @@
 
 using namespace MVS;
 
+#include <random>
+#include <iterator>
+
 
 // D E F I N E S ///////////////////////////////////////////////////
 
@@ -1896,6 +1899,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						totalCount += count;
 					}
 					if (aleatory_color) {
+						std::mt19937 gen(std::random_device{}());
 						auto it = std::next(segmentationFrequency.begin(), std::uniform_int_distribution<size_t>(0, segmentationFrequency.size() - 1)(gen));
 						modeColor = it->second;
 						float count_color = it->first;
