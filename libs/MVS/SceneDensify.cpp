@@ -1800,7 +1800,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				}
 				PointCloud::Normal N(normal*confidence);
 				invalidDepths.Empty();
-				//int neighbor_count2 = 0;
+				int neighbor_count2 = 0;
 				for (const ViewScore& neighbor: depthData.neighbors) {
 					//std::cout << "FRAN 6.00" << std::endl;
 					
