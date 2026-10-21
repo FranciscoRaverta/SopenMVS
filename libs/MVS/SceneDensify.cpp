@@ -1478,12 +1478,12 @@ double sumBaselines(const MVS::Camera& camera, const SEACAVE::Point3& P, const V
 	CMatrix C1 = camera.C;
 	double sum = 0;
 	//int max_neighbour_count = 100;
-	int neighbor_count = 0;
+	//int neighbor_count = 0;
 	for (const ViewScore& neighbor: neighbors) {
-		neighbor_count += 1;
-		if (neighbor_count > max_neighbour_count) {
-			break;
-		}
+		//neighbor_count += 1;
+		//if (neighbor_count > max_neighbour_count) {
+		//	break;
+		//}
 		const IIndex idxImage(neighbor.ID);
 		
 		const Image& imageData = images[idxImage];
