@@ -1915,7 +1915,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 					std::cout << "Post-second sumBl6 - FRAN" << std::endl;
 					
 				}
-				std::cout << "Neighbour count -- FRAN: " << neighbor_count2 << ", max: "  << max_neighbour_count << std::endl; 
+				//std::cout << "Neighbour count -- FRAN: " << neighbor_count2 << ", max: "  << max_neighbour_count << std::endl; 
 				uint32_t modeColor = 10001;
 				if (bEstimateSegmentation) {
 					//std::cout << "FRAN 9" << std::endl;
