@@ -1896,11 +1896,14 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							confidence += confidenceB;
 							continue;
 						}
+						std::cout << "Post-second sumBl4 - FRAN" << std::endl;
 					}
+					std::cout << "Post-second sumBl5 - FRAN" << std::endl;
 					if (pt.z < depthB) {
 						// discard depth
 						invalidDepths.Insert(&depthB);
 					}
+					std::cout << "Post-second sumBl6 - FRAN" << std::endl;
 					neighbor_count2 += 1;
 					std::cout << "Neighbour count2 -- FRAN: " << neighbor_count2 << ", max: "  << max_neighbour_count << std::endl; 
 					if (neighbor_count2 == max_neighbour_count) {
