@@ -1474,7 +1474,7 @@ void DepthMapsData::ApplyDenseCRF3D(
     }
 }
 
-double sumBaselines(const MVS::Camera& camera, const SEACAVE::Point3& P, const ViewScoreArr& neighbors, const MVS::ImageArr& images) { //}, int max_neighbour_count) {
+double sumBaselines(const MVS::Camera& camera, const SEACAVE::Point3& P, const ViewScoreArr& neighbors, const MVS::ImageArr& images, int max_neighbour_count) {
 	CMatrix C1 = camera.C;
 	double sum = 0;
 	//int max_neighbour_count = 100;
@@ -1724,7 +1724,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				const MVS::Platform::Pose& pose = platform.poses[imageData.poseID];
 				CovMatrix C_pose = pose.Cov;
 				std::cout << "Pre-first sumBl - FRAN" << std::endl;
-				double sumBl = sumBaselines(imageData.camera, point, depthData.neighbors, scene.images);//, max_neighbour_count);
+				double sumBl = sumBaselines(imageData.camera, point, depthData.neighbors, scene.images, max_neighbour_count);
 				std::cout << "Post-first sumBl - FRAN" << std::endl;
 				//SEACAVE::Matrix3x3d poseCovariance = (PoseCovarianceEstimation(imageData.camera, depth, sumBl, depthData.confMap.empty() ? 1.f : depthData.confMap(x), Point2f(x), C_pose))*REAL(confidence)*REAL(confidence);
 				SEACAVE::Matrix3x3d poseCovariance2 = (PoseCovarianceEstimation(imageData.camera, depth, sumBl, depthData.confMap.empty() ? 1.f : depthData.confMap(x), Point2f(x), C_pose)).inv();//*REAL(confidence)*REAL(confidence); FRAN
@@ -1847,7 +1847,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							const MVS::Platform::Pose& poseB = platformB.poses[imageDataB.poseID];
 							CovMatrix C_poseB = poseB.Cov;
 							std::cout << "Pre-second sumBl - FRAN" << std::endl;
-							double sumBlB = sumBaselines(imageDataB.camera, imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB)), depthDataB.neighbors, scene.images);//, max_neighbour_count);
+							double sumBlB = sumBaselines(imageDataB.camera, imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB)), depthDataB.neighbors, scene.images, max_neighbour_count);
 							std::cout << "Post-second sumBl - FRAN" << std::endl;
 							//poseCovariance += (PoseCovarianceEstimation(imageDataB.camera, depthB, sumBlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB))*REAL(confidenceB)*REAL(confidenceB);
 							poseCovariance2 += PoseCovarianceEstimation(imageDataB.camera, depthB, sumBlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB).inv(); // FRAN
