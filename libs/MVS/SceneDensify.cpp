@@ -1894,6 +1894,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							if (bEstimateNormal)
 								N += normalB*confidenceB;
 							confidence += confidenceB;
+							std::cout << "Post-second sumBl3.5 - FRAN" << std::endl;
 							continue;
 						}
 						std::cout << "Post-second sumBl4 - FRAN" << std::endl;
