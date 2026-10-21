@@ -1693,7 +1693,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 			depthIdxs.create(Image8U::Size(imageData.width, imageData.height));
 			depthIdxs.memset((uint8_t)NO_ID);
 		}
-		std::cout << "image name - FRAN " << imageData.name << std::endl;
+		//std::cout << "image name - FRAN " << imageData.name << std::endl;
 		const size_t nNumPointsPrev(pointcloud.points.GetSize());
 		for (int i=0; i<sizeMap.height; ++i) {
 			for (int j=0; j<sizeMap.width; ++j) {
@@ -1723,9 +1723,9 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				const MVS::Platform& platform = scene.platforms[imageData.platformID];
 				const MVS::Platform::Pose& pose = platform.poses[imageData.poseID];
 				CovMatrix C_pose = pose.Cov;
-				std::cout << "Pre-first sumBl - FRAN" << std::endl;
+				//std::cout << "Pre-first sumBl - FRAN" << std::endl;
 				double sumBl = sumBaselines(imageData.camera, point, depthData.neighbors, scene.images, max_neighbour_count);
-				std::cout << "Post-first sumBl - FRAN" << std::endl;
+				//std::cout << "Post-first sumBl - FRAN" << std::endl;
 				//SEACAVE::Matrix3x3d poseCovariance = (PoseCovarianceEstimation(imageData.camera, depth, sumBl, depthData.confMap.empty() ? 1.f : depthData.confMap(x), Point2f(x), C_pose))*REAL(confidence)*REAL(confidence);
 				SEACAVE::Matrix3x3d poseCovariance2 = (PoseCovarianceEstimation(imageData.camera, depth, sumBl, depthData.confMap.empty() ? 1.f : depthData.confMap(x), Point2f(x), C_pose)).inv();//*REAL(confidence)*REAL(confidence); FRAN
 				
@@ -1804,7 +1804,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				for (const ViewScore& neighbor: depthData.neighbors) {
 					//std::cout << "FRAN 6.00" << std::endl;
 					
-					std::cout << "Neighbour count2 -- FRAN: " << neighbor_count2 << ", max: "  << max_neighbour_count << std::endl; 
+					//std::cout << "Neighbour count2 -- FRAN: " << neighbor_count2 << ", max: "  << max_neighbour_count << std::endl; 
 					if (neighbor_count2 >= max_neighbour_count) {
 						break;
 					}
@@ -1846,12 +1846,12 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							const MVS::Platform& platformB = scene.platforms[imageDataB.platformID];
 							const MVS::Platform::Pose& poseB = platformB.poses[imageDataB.poseID];
 							CovMatrix C_poseB = poseB.Cov;
-							std::cout << "Pre-second sumBl - FRAN" << std::endl;
+							//std::cout << "Pre-second sumBl - FRAN" << std::endl;
 							double sumBlB = sumBaselines(imageDataB.camera, imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB)), depthDataB.neighbors, scene.images, max_neighbour_count);
-							std::cout << "Post-second sumBl - FRAN" << std::endl;
+							//std::cout << "Post-second sumBl - FRAN" << std::endl;
 							//poseCovariance += (PoseCovarianceEstimation(imageDataB.camera, depthB, sumBlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB))*REAL(confidenceB)*REAL(confidenceB);
 							poseCovariance2 += PoseCovarianceEstimation(imageDataB.camera, depthB, sumBlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB).inv(); // FRAN
-							std::cout << "Post-second sumBl0 - FRAN" << std::endl;
+							//std::cout << "Post-second sumBl0 - FRAN" << std::endl;
 							X += imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB))*REAL(confidenceB);
 							Point3 pointB = imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB)); //FRAN
 							X2 += PoseCovarianceEstimation(imageDataB.camera, depthB, sumBlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB).inv() * SEACAVE::TPoint3<double>(pointB.x, pointB.y, pointB.z); // FRAN
@@ -1897,22 +1897,22 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								numViewsUsed++;
 								//std::cout << "FRAN 8" << std::endl;
 							}
-							std::cout << "Post-second sumBl3 - FRAN" << std::endl;
+							//std::cout << "Post-second sumBl3 - FRAN" << std::endl;
 							if (bEstimateNormal)
 								N += normalB*confidenceB;
 							confidence += confidenceB;
-							std::cout << "Post-second sumBl3.5 - FRAN" << std::endl;
+							//std::cout << "Post-second sumBl3.5 - FRAN" << std::endl;
 							neighbor_count2 += 1;
 							continue;
 						}
-						std::cout << "Post-second sumBl4 - FRAN" << std::endl;
+						//std::cout << "Post-second sumBl4 - FRAN" << std::endl;
 					}
-					std::cout << "Post-second sumBl5 - FRAN" << std::endl;
+					//std::cout << "Post-second sumBl5 - FRAN" << std::endl;
 					if (pt.z < depthB) {
 						// discard depth
 						invalidDepths.Insert(&depthB);
 					}
-					std::cout << "Post-second sumBl6 - FRAN" << std::endl;
+					//std::cout << "Post-second sumBl6 - FRAN" << std::endl;
 					
 				}
 				//std::cout << "Neighbour count -- FRAN: " << neighbor_count2 << ", max: "  << max_neighbour_count << std::endl; 
