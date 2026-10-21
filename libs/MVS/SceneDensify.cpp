@@ -1871,7 +1871,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								//logNumber += 1;
 								//std::cout << "FRAN 6.5" << std::endl;
 							} 
-							std::cout << "Post-second sumBl2 - FRAN" << std::endl;
+							//std::cout << "Post-second sumBl2 - FRAN" << std::endl;
 							if (bEstimateSegmentation) {
 								//std::cout << "FRAN 7" << std::endl;
 								const float* probsB = imageDataB.probabilitiesImage.ptr<float>(xB.y, xB.x);
