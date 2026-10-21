@@ -1804,10 +1804,10 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				for (const ViewScore& neighbor: depthData.neighbors) {
 					//std::cout << "FRAN 6.00" << std::endl;
 					
-					//std::cout << "Neighbour count2 -- FRAN: " << neighbor_count2 << ", max: "  << max_neighbour_count << std::endl; 
-					//if (neighbor_count2 >= max_neighbour_count) {
-					//	break;
-					//}
+					std::cout << "Neighbour count2 -- FRAN: " << neighbor_count2 << ", max: "  << max_neighbour_count << std::endl; 
+					if (neighbor_count2 >= max_neighbour_count) {
+						break;
+					}
 					//std::cout << "Neighbour count3 -- FRAN: " << neighbor_count2 << ", max: "  << max_neighbour_count << std::endl; 
 				
 					const IIndex idxImageB(neighbor.ID);
@@ -1902,7 +1902,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								N += normalB*confidenceB;
 							confidence += confidenceB;
 							std::cout << "Post-second sumBl3.5 - FRAN" << std::endl;
-							//neighbor_count2 += 1;
+							neighbor_count2 += 1;
 							continue;
 						}
 						std::cout << "Post-second sumBl4 - FRAN" << std::endl;
