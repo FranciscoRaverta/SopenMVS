@@ -1723,7 +1723,9 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				const MVS::Platform& platform = scene.platforms[imageData.platformID];
 				const MVS::Platform::Pose& pose = platform.poses[imageData.poseID];
 				CovMatrix C_pose = pose.Cov;
+				std::cout << "Pre-first sumBl" << std::endl;
 				double sumBl = sumBaselines(imageData.camera, point, depthData.neighbors, scene.images, max_neighbour_count);
+				std::cout << "Post-first sumBl" << std::endl;
 				//SEACAVE::Matrix3x3d poseCovariance = (PoseCovarianceEstimation(imageData.camera, depth, sumBl, depthData.confMap.empty() ? 1.f : depthData.confMap(x), Point2f(x), C_pose))*REAL(confidence)*REAL(confidence);
 				SEACAVE::Matrix3x3d poseCovariance2 = (PoseCovarianceEstimation(imageData.camera, depth, sumBl, depthData.confMap.empty() ? 1.f : depthData.confMap(x), Point2f(x), C_pose)).inv();//*REAL(confidence)*REAL(confidence); FRAN
 				
@@ -1837,7 +1839,9 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 							const MVS::Platform& platformB = scene.platforms[imageDataB.platformID];
 							const MVS::Platform::Pose& poseB = platformB.poses[imageDataB.poseID];
 							CovMatrix C_poseB = poseB.Cov;
+							std::cout << "Pre-second sumBl" << std::endl;
 							double sumBlB = sumBaselines(imageDataB.camera, imageDataB.camera.TransformPointI2W(Point3(Point2f(xB),depthB)), depthDataB.neighbors, scene.images, max_neighbour_count);
+							std::cout << "Post-second sumBl" << std::endl;
 							//poseCovariance += (PoseCovarianceEstimation(imageDataB.camera, depthB, sumBlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB))*REAL(confidenceB)*REAL(confidenceB);
 							poseCovariance2 += PoseCovarianceEstimation(imageDataB.camera, depthB, sumBlB, depthDataB.confMap.empty() ? 1.f : depthDataB.confMap(xB), Point2f(xB), C_poseB).inv(); // FRAN
 
