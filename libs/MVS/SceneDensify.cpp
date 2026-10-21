@@ -1480,6 +1480,10 @@ double sumBaselines(const MVS::Camera& camera, const SEACAVE::Point3& P, const V
 	//int max_neighbour_count = 100;
 	int neighbor_count = 0;
 	for (const ViewScore& neighbor: neighbors) {
+		neighbor_count += 1;
+		if (neighbor_count > max_neighbour_count) {
+			break;
+		}
 		const IIndex idxImage(neighbor.ID);
 		
 		const Image& imageData = images[idxImage];
@@ -1496,10 +1500,6 @@ double sumBaselines(const MVS::Camera& camera, const SEACAVE::Point3& P, const V
         // Remove component along viewing direction
         Point3 b_perp = b_vec - v_hat * b_vec.dot(v_hat);
         sum += std::pow((b_perp.dot(b_perp)),2);
-		neighbor_count += 1;
-		if (neighbor_count == max_neighbour_count) {
-			break;
-		}
 	}
 	return sum;
 }
@@ -1671,6 +1671,9 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 		ASSERT(!depthData.images.IsEmpty() && !depthData.neighbors.IsEmpty());
 		int neighbor_count = 0;
 		for (const ViewScore& neighbor: depthData.neighbors) {
+			if (neighbor_count == max_neighbour_count) {
+				break;
+			}
 			DepthIndex& depthIdxs = arrDepthIdx[neighbor.ID];
 			if (!depthIdxs.empty())
 				continue;
@@ -1680,9 +1683,6 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 			depthIdxs.create(depthDataB.depthMap.size());
 			depthIdxs.memset((uint8_t)NO_ID);
 			neighbor_count += 1;
-			if (neighbor_count == max_neighbour_count) {
-				break;
-			}
 		}
 		ASSERT(!depthData.IsEmpty());
 		const Image8U::Size sizeMap(depthData.depthMap.size());
@@ -1803,6 +1803,13 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 				int neighbor_count2 = 0;
 				for (const ViewScore& neighbor: depthData.neighbors) {
 					//std::cout << "FRAN 6.00" << std::endl;
+					
+					std::cout << "Neighbour count2 -- FRAN: " << neighbor_count2 << ", max: "  << max_neighbour_count << std::endl; 
+					if (neighbor_count2 >= max_neighbour_count) {
+						break;
+					}
+					std::cout << "Neighbour count3 -- FRAN: " << neighbor_count2 << ", max: "  << max_neighbour_count << std::endl; 
+				
 					const IIndex idxImageB(neighbor.ID);
 					DepthData& depthDataB = arrDepthData[idxImageB];
 					if (depthDataB.IsEmpty())
@@ -1895,6 +1902,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 								N += normalB*confidenceB;
 							confidence += confidenceB;
 							std::cout << "Post-second sumBl3.5 - FRAN" << std::endl;
+							neighbor_count2 += 1;
 							continue;
 						}
 						std::cout << "Post-second sumBl4 - FRAN" << std::endl;
@@ -1905,12 +1913,7 @@ void DepthMapsData::FuseDepthMaps(PointCloud& pointcloud, bool bEstimateColor, b
 						invalidDepths.Insert(&depthB);
 					}
 					std::cout << "Post-second sumBl6 - FRAN" << std::endl;
-					neighbor_count2 += 1;
-					std::cout << "Neighbour count2 -- FRAN: " << neighbor_count2 << ", max: "  << max_neighbour_count << std::endl; 
-					if (neighbor_count2 == max_neighbour_count) {
-						break;
-					}
-					std::cout << "Neighbour count3 -- FRAN: " << neighbor_count2 << ", max: "  << max_neighbour_count << std::endl; 
+					
 				}
 				std::cout << "Neighbour count -- FRAN: " << neighbor_count2 << ", max: "  << max_neighbour_count << std::endl; 
 				uint32_t modeColor = 10001;
